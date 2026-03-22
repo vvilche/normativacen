@@ -1,24 +1,46 @@
+@tailwind base;
+@tailwind components;
 @import "tailwindcss";
 
 :root {
-  --background: #0B1221; /* Azul medianoche oscuro */
+  --background: #0B1221;
   --foreground: #E9EEF5;
+  --card: #1E293B;
+  --card-foreground: #F8FAFC;
+  --popover: #0B1221;
+  --popover-foreground: #E9EEF5;
+  --primary: #2D6CDF;
+  --primary-foreground: #FFFFFF;
+  --secondary: #1E293B;
+  --secondary-foreground: #F8FAFC;
+  --muted: #0F172A;
+  --muted-foreground: #94A3B8;
+  --accent: #2D6CDF;
+  --accent-foreground: #FFFFFF;
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
+  --border: #1E293B;
+  --input: #1E293B;
+  --ring: #2D6CDF;
+  --success: #16A34A;
+  --success-foreground: #FFFFFF;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-primary: #0B1F3B;
-  --color-primary-hover: #12315E;
-  --color-primary-foreground: #FFFFFF;
-  --color-secondary: #1E293B; /* Ajustado para dark theme */
-  --color-secondary-foreground: #F8FAFC;
-  --color-muted: #0F172A;
-  --color-muted-foreground: #94A3B8;
-  --color-accent: #2D6CDF;
-  --color-accent-foreground: #FFFFFF;
-  --color-destructive: #DC2626;
-  --color-success: #16A34A;
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
   
   --font-heading: var(--font-space-grotesk);
   --font-body: var(--font-source-sans);
@@ -32,4 +54,21 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-body), sans-serif;
+}
+
+/* Glassmorphism Evolution (Wheel Style) */
+.glass-card {
+  background: rgba(30, 41, 59, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-panel {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-primary {
+  @apply bg-primary text-white font-bold py-3 px-6 rounded-lg hover:shadow-[0_0_20px_rgba(45,108,223,0.4)] transition-all;
 }

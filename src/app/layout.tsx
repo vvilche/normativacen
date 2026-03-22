@@ -5,13 +5,13 @@ import "./globals.css";
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["400", "600", "700"],
 });
 
 const sourceSans = Source_Sans_3({
   variable: "--font-source-sans",
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
+  weight: ["400", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -25,8 +25,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${spaceGrotesk.variable} ${sourceSans.variable} dark antialiased`}>
-      <body className="min-h-screen bg-background font-body text-foreground flex flex-col">
+    <html lang="es" className={`${spaceGrotesk.variable} ${sourceSans.variable} dark antialiased`} suppressHydrationWarning>
+      <body className="min-h-screen bg-background font-body text-foreground flex flex-col" suppressHydrationWarning>
         {children}
       </body>
     </html>

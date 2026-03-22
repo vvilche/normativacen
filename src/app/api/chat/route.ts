@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { buildOrchestratorGraph } from '../../../lib/agents/orchestratorGraph';
+import { HumanMessage, AIMessage } from '@langchain/core/messages';
 
 /**
  * ==========================================
@@ -22,6 +24,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Mensajes inválidos' }, { status: 400 });
     }
 
+    // Convertir mensajes de frontend a LangChain Messages
+    const lcMessages = messages.map((m: any) => 
+      m.role === 'user' ? new HumanMessage(m.content) : new AIMessage(m.content)
+    );
+
+    // 1. Initializar el Grafo Multi-Agente
+    const app = buildOrchestratorGraph();
+
     /**
      * AQUÍ SE INICIALIZARÁ LANGGRAPH:
      * 1. StateGraph: Recibe el historial.
@@ -33,30 +43,19 @@ export async function POST(req: Request) {
      *    - Pilar de Harness Engineering: Entropy Management (verificará vigencia temporal).
      */
 
-    const lastMessage = messages[messages.length - 1]?.content || "";
-    
-    // MOCK RESPONSE PARA EL PROTOTIPO (Hasta conectar Pinecone/LLM real)
-    let agentResponse = "Estoy consultando la base de datos oficial del CEN...";
-    let sources: string[] = [];
-    let isClosedLoop = false;
+    // 2. Invocar LangGraph con el Estado Inicial (Context Engineering)
+    const initialState = {
+      messages: lcMessages,
+      userProfile: userProfile || {}
+    };
 
-    // Lógica determinista simulada (Mock Router)
-    const query = lastMessage.toLowerCase();
+    const finalState = await app.invoke(initialState);
     
-    if (query.includes("sitr") || query.includes("telemetría") || query.includes("telemetria")) {
-      agentResponse = `Entiendo tu requerimiento sobre la telemetría, ${userProfile?.name?.split(' ')[0] || 'coordinado'}. Según el Anexo de Comunicaciones de la NTSyCS vigente para instalaciones de ${userProfile?.coordinadoType}, tu ancho de banda debe ser mínimo 128 kbps con latencias inferiores a 500ms hacia el CEN.`;
-      sources = ["NTSyCS Anexo de Comunicaciones", "Estándar Técnico SITR v2025"];
-      isClosedLoop = true;
-    } else if (query.includes("edac") || query.includes("edag") || query.includes("relé") || query.includes("rele") || query.includes("desconexión")) {
-      agentResponse = "Respecto a tus tiempos de desconexión EDAC: debes asegurar que toda la cadena (desde la detección de baja frecuencia hasta la apertura del interruptor) opere en un máximo de 200 milisegundos.";
-      sources = ["NTSyCS Capítulo 4", "Resolución Exenta N° 123 (Régimen de Frecuencia)"];
-      isClosedLoop = true;
-    } else {
-      agentResponse = `Hola. Gracias por utilizar ConectaCompliance. Veo que perteneces al sector ${userProfile?.coordinadoType}. Para darte una respuesta certera, por favor especifica si tu duda es técnica (EDAC, SITR) o comercial (Mercado de Corto Plazo).`;
-    }
-
-    // Simulando latencia del LLM
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    // Obtener la respuesta generada por el último nodo (SITR, EDAC, o General)
+    const agentMessages = (finalState as any).messages;
+    const agentResponse = agentMessages[agentMessages.length - 1].content;
+    const sources = ["Base RAG CEN", "Norma Técnica Resumen"];
+    const isClosedLoop = true; // Activar el Lazo Cerrado (Feedback flow)
 
     return NextResponse.json({
       role: 'assistant',
@@ -65,8 +64,11 @@ export async function POST(req: Request) {
       isClosedLoop
     });
 
-  } catch (error) {
-    console.error('Error en el Orquestador:', error);
-    return NextResponse.json({ error: 'Error procesando la solicitud del agente' }, { status: 500 });
+  } catch (error: any) {
+    console.error('❌ Error en el Orquestador:', error);
+    return NextResponse.json({ 
+      error: 'Error procesando la solicitud del agente',
+      details: error.message || 'Error desconocido'
+    }, { status: 500 });
   }
 }
