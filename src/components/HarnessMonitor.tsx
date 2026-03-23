@@ -3,75 +3,102 @@
 import { motion } from "framer-motion";
 import { Shield, TrendingDown, Settings, Lock, CheckCircle2 } from "lucide-react";
 
-const pillars = [
-  { id: "normativo", label: "Normativo", icon: Shield, color: "text-blue-400", bg: "bg-blue-400/20" },
-  { id: "economico", label: "Económico", icon: TrendingDown, color: "text-orange-400", bg: "bg-orange-400/20" },
-  { id: "operacional", label: "Operacional", icon: Settings, color: "text-emerald-400", bg: "bg-emerald-400/20" },
-  { id: "cyber", label: "NERC CIP", icon: Lock, color: "text-red-400", bg: "bg-red-400/20" },
+const steps = [
+  { id: 1, label: "REQUEST_RECEIVED", agent: "Gateway", time: "08:41:01" },
+  { id: 2, label: "LOGIC_ORCHESTRATION", agent: "Harness_V7", time: "08:41:03" },
+  { id: 3, label: "NORMATIVE_AUDIT", agent: "Agente_CEN", time: "08:41:05" },
+  { id: 4, label: "RISK_ASSESSMENT", agent: "Risk_Engine", time: "08:41:08" },
+  { id: 5, label: "FINAL_VALIDATION", agent: "Compliance_Bot", time: "08:41:10" },
+  { id: 6, label: "TECHNICAL_VERDICT", agent: "Aegis_AI", time: "08:41:12" },
 ];
 
 export function HarnessMonitor({ status = "idle" }: { status?: "idle" | "processing" | "complete" }) {
   return (
-    <div className="relative w-full max-w-2xl mx-auto py-12 flex flex-col items-center">
-      {/* Central Hexagon (Harness) */}
-      <div className="relative w-48 h-48 mb-12">
-        <motion.div
-          animate={status === "processing" ? { rotate: 360 } : {}}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute inset-0 border-2 border-dashed border-accent/30 rounded-full"
-        />
-        <div className="absolute inset-4 glass-panel rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(56,189,248,0.2)]">
-          <div className="text-center group">
-            <h4 className="text-xs uppercase tracking-widest text-accent font-bold mb-1">Harness</h4>
-            <div className="text-2xl font-black text-white group-hover:scale-110 transition-transform">V6</div>
-          </div>
+    <div className="w-full max-w-lg mx-auto py-8">
+      <div className="mb-10 text-center">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-[10px] font-black uppercase tracking-[0.2em] text-accent mb-4">
+            <Settings className="w-3 h-3 animate-spin-slow" />
+            <span>Multi-Agent Traceability</span>
         </div>
+        <h3 className="text-xl font-heading font-black text-white italic tracking-tighter uppercase">
+            {status === "processing" ? "Orquestando Resolución..." : "Trazabilidad de Inferencia"}
+        </h3>
       </div>
 
-      {/* Pillars Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full px-4">
-        {pillars.map((pillar, idx) => (
-          <motion.div
-            key={pillar.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.1 }}
-            className={`glass-card p-4 rounded-xl flex flex-col items-center gap-3 relative overflow-hidden ${status === "processing" ? "pillar-glow" : ""}`}
-          >
-            {status === "complete" && (
-              <motion.div 
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="absolute top-2 right-2 text-success"
-              >
-                <CheckCircle2 className="w-4 h-4" />
-              </motion.div>
-            )}
-            <div className={`${pillar.bg} p-2 rounded-lg ${pillar.color}`}>
-              <pillar.icon className="w-6 h-6" />
-            </div>
-            <span className="text-xs font-bold text-gray-300 uppercase tracking-tighter">{pillar.label}</span>
-            <div className="w-full bg-white/5 h-1 rounded-full overflow-hidden">
-               <motion.div 
-                 initial={{ width: 0 }}
-                 animate={status === "processing" ? { width: "100%" } : status === "complete" ? { width: "100%" } : {}}
-                 transition={{ duration: 2 + idx }}
-                 className={`h-full ${pillar.color.replace('text', 'bg')}`}
-               />
-            </div>
-          </motion.div>
-        ))}
+      <div className="relative space-y-6">
+        {/* Vertical Line */}
+        <div className="absolute left-[15px] top-2 bottom-2 w-px bg-white/10" />
+
+        {steps.map((step, idx) => {
+          const isPending = status === "processing" && idx > 2; // Mock progress
+          const isActive = status === "processing" && idx === 2;
+
+          return (
+            <motion.div
+              key={step.id}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: idx * 0.1 }}
+              className={cn(
+                "relative pl-10 flex items-center justify-between group transition-all duration-500",
+                isPending ? "opacity-30 grayscale" : "opacity-100"
+              )}
+            >
+              {/* Node Dot */}
+              <div className={cn(
+                "absolute left-0 w-8 h-8 rounded-full border flex items-center justify-center transition-all duration-500 z-10",
+                isPending 
+                    ? "bg-[#161B29] border-white/10 text-gray-700" 
+                    : isActive 
+                        ? "bg-accent border-accent shadow-[0_0_20px_rgba(45,108,223,0.5)] text-white scale-110" 
+                        : "bg-success/20 border-success/30 text-success"
+              )}>
+                {isPending ? (
+                    <span className="text-[10px] font-technical">{step.id}</span>
+                ) : isActive ? (
+                    <motion.div 
+                        animate={{ scale: [1, 1.2, 1] }} 
+                        transition={{ duration: 1, repeat: Infinity }}
+                    >
+                        <Settings className="w-3 h-3" />
+                    </motion.div>
+                ) : (
+                    <Shield className="w-3 h-3" />
+                )}
+              </div>
+
+              {/* Step Info */}
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-0.5">
+                    <span className="text-[11px] font-black text-white italic tracking-tighter uppercase">{step.label}</span>
+                    <span className="h-px bg-white/5 flex-1" />
+                    <span className="text-[9px] font-technical text-gray-600">{step.time}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="text-[8px] text-gray-600 font-bold uppercase tracking-widest">Agente:</span>
+                    <span className={cn(
+                        "text-[9px] font-technical italic",
+                        isActive ? "text-accent" : "text-gray-400"
+                    )}>{step.agent}</span>
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
-      
+
       {status === "processing" && (
-        <motion.p 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="mt-8 text-sm text-accent font-code animate-pulse"
-        >
-          Sintetizando Antecedentes y Acciones bajo Metodología Tung V2...
-        </motion.p>
+        <div className="mt-12 p-4 rounded-xl bg-accent/5 border border-accent/10 backdrop-blur-md">
+            <div className="flex items-center gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-accent animate-ping" />
+                <p className="text-[10px] text-accent font-black uppercase tracking-[0.2em] leading-relaxed">
+                    Sintetizando evidencias normativas bajo metodología <span className="underline decoration-accent/30 underline-offset-4">Tung V7</span>...
+                </p>
+            </div>
+        </div>
       )}
     </div>
   );
 }
+
+import { cn } from "@/lib/utils";

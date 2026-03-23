@@ -9,51 +9,52 @@ interface WhitePaperCardProps {
 }
 
 export function WhitePaperCard({ paper }: WhitePaperCardProps) {
-  // Map categories to some placeholder images for the mockup feel
-  const getThumbnail = (category: string) => {
-    if (category.includes("SITR")) return "https://images.unsplash.com/photo-1558485940-8473c4d51622?q=80&w=300&auto=format&fit=crop";
-    if (category.includes("PMU")) return "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=300&auto=format&fit=crop";
-    return "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=300&auto=format&fit=crop";
-  };
-
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-[#0F172A]/40 backdrop-blur-3xl border border-white/10 rounded-2xl overflow-hidden flex flex-col group transition-all duration-300"
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="bg-[#161B29]/40 backdrop-blur-xl border border-white-[0.03] rounded-xl overflow-hidden flex flex-col group transition-all duration-300 hover:border-accent/30 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]"
     >
-      {/* Thumbnail area with Image */}
-      <div className="relative h-44 overflow-hidden">
-        <img 
-            src={getThumbnail(paper.category)} 
-            alt={paper.title}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-60"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] to-transparent opacity-60" />
+      {/* Abstract Industrial Header */}
+      <div className="relative h-24 overflow-hidden bg-[#0D111C]">
+        <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity">
+            <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0)', backgroundSize: '12px 12px' }} />
+        </div>
+        <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-accent/5 border border-accent/10 flex items-center justify-center text-accent/40 group-hover:text-accent/60 transition-colors">
+                <FileDown className="w-6 h-6" />
+            </div>
+        </div>
+        <div className="absolute bottom-2 right-3 px-2 py-0.5 rounded bg-black/40 border border-white/5 text-[8px] font-technical text-gray-500 uppercase tracking-widest">
+            v{paper.id}.2.4
+        </div>
       </div>
 
       {/* Content Area */}
-      <div className="p-5 flex-1 flex flex-col">
-        <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">White Paper</span>
+      <div className="p-4 flex-1 flex flex-col">
+        <div className="flex items-center gap-2 mb-2">
+            <span className="px-1.5 py-0.5 rounded bg-accent/10 border border-accent/20 text-[8px] text-accent font-black uppercase tracking-widest">
+                {paper.category}
+            </span>
+        </div>
         
-        <h4 className="font-heading font-bold text-white text-base leading-tight mb-4 line-clamp-2">
+        <h4 className="font-heading font-black text-white text-[13px] leading-snug mb-3 line-clamp-2 italic group-hover:text-accent transition-colors">
             {paper.title}
         </h4>
         
-        <div className="space-y-2 mb-6 text-[10px] text-gray-500 font-bold uppercase tracking-tighter">
-            <div className="flex items-center gap-1.5">
-                <span>Autor:</span>
-                <span className="text-gray-300">{paper.author}</span>
+        <div className="grid grid-cols-2 gap-3 mb-5 border-t border-white/5 pt-3">
+            <div className="space-y-0.5">
+                <span className="text-[8px] text-gray-600 font-black uppercase tracking-widest block">Autor</span>
+                <span className="text-[10px] text-gray-400 font-medium truncate italic">{paper.author}</span>
             </div>
-            <div className="flex items-center gap-1.5">
-                <span>Fecha:</span>
-                <span className="text-gray-300">{paper.date}</span>
+            <div className="space-y-0.5">
+                <span className="text-[8px] text-gray-600 font-black uppercase tracking-widest block">Fecha</span>
+                <span className="text-[10px] text-gray-400 font-technical italic">{paper.date}</span>
             </div>
         </div>
 
-        <button className="w-full py-3 rounded-xl bg-[#2D6CDF] hover:bg-[#3B82F6] text-white text-xs font-black tracking-widest transition-all flex items-center justify-center gap-2 group/btn shadow-[0_4px_15px_rgba(45,108,223,0.3)]">
-            DESCARGAR PDF
-            <FileDown className="w-4 h-4 group-hover/btn:translate-y-0.5 transition-transform" />
+        <button className="w-full py-2.5 rounded-lg bg-white/5 hover:bg-accent hover:text-white border border-white/5 text-gray-400 text-[10px] font-black tracking-[0.2em] transition-all flex items-center justify-center gap-2 uppercase active:scale-[0.98]">
+            VER DOCUMENTO
         </button>
       </div>
     </motion.div>

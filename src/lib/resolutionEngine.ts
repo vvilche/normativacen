@@ -9,6 +9,19 @@ export interface Step {
     priority: "CRÍTICA" | "Alta" | "Media";
 }
 
+export interface Control {
+    id: string;
+    label: string;
+    status: "MET" | "FAIL";
+}
+
+export interface KPIs {
+    score: string;
+    risk: "LOW" | "MEDIUM" | "HIGH";
+    latency: string;
+    protocol: string;
+}
+
 export interface Resolution {
     id: string;
     type: string;
@@ -17,6 +30,8 @@ export interface Resolution {
     acciones: Step[];
     confianza: number;
     date: string;
+    controls: Control[];
+    kpis: KPIs;
 }
 
 const resolutions: Record<string, Resolution> = {
@@ -26,6 +41,18 @@ const resolutions: Record<string, Resolution> = {
         verdict: "El Sistema de Almacenamiento (BESS) presenta desviaciones en la latencia de respuesta SITR (> 2s), comprometiendo su participación en Servicios Complementarios.",
         date: "22 Mar 2026",
         confianza: 98,
+        controls: [
+            { id: "TC-BESS-001", label: "PTP Sync", status: "MET" },
+            { id: "TC-BESS-002", label: "DNP3 Latency", status: "FAIL" },
+            { id: "TC-BESS-003", label: "RTU Hardening", status: "MET" },
+            { id: "TC-BESS-004", label: "Grid Stability", status: "MET" },
+        ],
+        kpis: {
+            score: "88.2%",
+            risk: "MEDIUM",
+            latency: "2.1s",
+            protocol: "NTSyCS 4.2"
+        },
         antecedentes: [
             { source: "AT-SITR-1 (Marzo 2025)", text: "Las exigencias de latencia para activos BESS en Control de Frecuencia se han reducido a < 2 segundos." },
             { source: "NTSyCS Cap. 4.2", text: "La falta de visibilidad en tiempo real gatilla la Indisponibilidad del Activo para SSCC." },
@@ -43,6 +70,17 @@ const resolutions: Record<string, Resolution> = {
         verdict: "Inyección de excedentes en Media Tensión excede los límites de fluctuación del DS88 (+/- 7%), arriesgando multas del regulador.",
         date: "20 Mar 2026",
         confianza: 97,
+        controls: [
+            { id: "TC-PMGD-101", label: "Volt-VAR Drop", status: "FAIL" },
+            { id: "TC-PMGD-102", label: "Grid Stability", status: "MET" },
+            { id: "TC-PMGD-103", label: "Inverter Comm", status: "MET" },
+        ],
+        kpis: {
+            score: "92.5%",
+            risk: "LOW",
+            latency: "450ms",
+            protocol: "DS88 / MT"
+        },
         antecedentes: [
             { source: "Reglamento DS 88", text: "Obligación de coordinación con la distribuidora para el vertimiento de excedentes." },
             { source: "NT Distribución Cap. 5", text: "Límites de inyección por capacidad de transformación local y estabilidad de tensión." },
@@ -60,6 +98,17 @@ const resolutions: Record<string, Resolution> = {
         verdict: "Hallazgos de vulnerabilidad física y lógica en Subestación Seccionadora 220kV representan riesgo de inestabilidad sistémica (Efecto Dominó).",
         date: "18 Mar 2026",
         confianza: 99,
+        controls: [
+            { id: "TC-NERC-011", label: "Physical Perim", status: "FAIL" },
+            { id: "TC-NERC-012", label: "DMZ Auth", status: "MET" },
+            { id: "TC-NERC-013", label: "OT Segment", status: "MET" },
+        ],
+        kpis: {
+            score: "76.4%",
+            risk: "HIGH",
+            latency: "12ms",
+            protocol: "CIP-014"
+        },
         antecedentes: [
             { source: "NTSyCS 2025 (Seguridad)", text: "Exigencia de segmentación lógica total entre red de operación (OT) y administrativa (IT)." },
             { source: "NERC CIP-014", text: "Requisitos de protección física y lógica para Infraestructura Crítica Sistémica (ICS)." },
@@ -77,6 +126,17 @@ const resolutions: Record<string, Resolution> = {
         verdict: "El Phasor Measurement Unit (PMU) SEL-487E cumple con los requisitos de la norma CEN-REG-ELEC-2022 para Medición Sincrofasorial.",
         date: "27 Oct 2023",
         confianza: 99,
+        controls: [
+            { id: "TC-PMU-001", label: "Phasor Sync", status: "MET" },
+            { id: "TC-PMU-002", label: "C37.118 Frame", status: "MET" },
+            { id: "TC-PMU-003", label: "GPS Accuracy", status: "MET" },
+        ],
+        kpis: {
+            score: "99.2%",
+            risk: "LOW",
+            latency: "42ms",
+            protocol: "CEN-REG-2022"
+        },
         antecedentes: [
             { source: "NTSyCS Cap. 5 Art. 3.2", text: "Toda instalación de generación o subestación crítica debe contar con redundancia PMU para visibilidad fasorial." },
             { source: "Procedimiento DP-042 CEN", text: "Los equipos PMU deben cumplir con el estándar IEEE C37.118 y latencia < 100ms." }
@@ -97,6 +157,5 @@ export function getResolutionByQuery(query: string): Resolution {
     if (q.includes("transmisión") || q.includes("subestación") || q.includes("nerc") || q.includes("cip")) return resolutions.TRANSMISION;
     if (q.includes("pmu") || q.includes("fasor") || q.includes("sincro")) return resolutions.PMU;
     
-    // Default to a blended response or PMGD if query is vague
     return resolutions.PMGD;
 }

@@ -3,26 +3,26 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0B1221;
+  --background: #0B0F1A;
   --foreground: #E9EEF5;
-  --card: #1E293B;
+  --card: #161B29;
   --card-foreground: #F8FAFC;
-  --popover: #0B1221;
+  --popover: #0B0F1A;
   --popover-foreground: #E9EEF5;
   --primary: #2D6CDF;
   --primary-foreground: #FFFFFF;
   --secondary: #1E293B;
   --secondary-foreground: #F8FAFC;
-  --muted: #0F172A;
-  --muted-foreground: #94A3B8;
+  --muted: #0D111C;
+  --muted-foreground: #64748B;
   --accent: #2D6CDF;
   --accent-foreground: #FFFFFF;
-  --destructive: #DC2626;
+  --destructive: #EF4444;
   --destructive-foreground: #FFFFFF;
-  --border: #1E293B;
-  --input: #1E293B;
+  --border: rgba(255, 255, 255, 0.05);
+  --input: #161B29;
   --ring: #2D6CDF;
-  --success: #16A34A;
+  --success: #10B981;
   --success-foreground: #FFFFFF;
 }
 
@@ -44,31 +44,45 @@
   
   --font-heading: var(--font-space-grotesk);
   --font-body: var(--font-source-sans);
+  --font-mono: 'JetBrains Mono', 'Roboto Mono', monospace;
 
-  --radius-lg: 0.5rem;
-  --radius-md: 0.25rem;
-  --radius-sm: 0.125rem;
+  --radius-lg: 0.75rem;
+  --radius-md: 0.5rem;
+  --radius-sm: 0.25rem;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-body), sans-serif;
+  font-size: 0.875rem; /* Default to text-sm (14px) */
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Glassmorphism Evolution (Wheel Style) */
+.font-technical {
+  font-family: var(--font-mono);
+  letter-spacing: -0.02em;
+}
+
+/* Glassmorphism Refinado V7 */
 .glass-card {
-  background: rgba(30, 41, 59, 0.4);
-  backdrop-filter: blur(12px);
+  background: rgba(22, 27, 41, 0.4);
+  backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .glass-panel {
-  background: rgba(15, 23, 42, 0.8);
-  backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(11, 15, 26, 0.7);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .btn-primary {
-  @apply bg-primary text-white font-bold py-3 px-6 rounded-lg hover:shadow-[0_0_20px_rgba(45,108,223,0.4)] transition-all;
+  @apply bg-primary text-white font-black py-2.5 px-5 rounded-xl hover:shadow-[0_0_20px_rgba(45,108,223,0.3)] transition-all active:scale-[0.98] uppercase tracking-widest text-[10px];
+}
+
+/* Utilidades de Densidad */
+.compact-grid {
+  display: grid;
+  gap: 0.75rem;
 }
