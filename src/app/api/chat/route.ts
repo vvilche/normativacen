@@ -53,15 +53,29 @@ export async function POST(req: Request) {
     
     // Obtener la respuesta generada por el último nodo (SITR, EDAC, o General)
     const agentMessages = (finalState as any).messages;
-    const agentResponse = agentMessages[agentMessages.length - 1].content;
+    const fullContent = agentMessages[agentMessages.length - 1].content;
     const sources = ["Base RAG CEN", "Norma Técnica Resumen"];
-    const isClosedLoop = true; // Activar el Lazo Cerrado (Feedback flow)
+    
+    // Extracción de metadatos estructurados [RES_JSON]
+    let resolution = null;
+    let cleanContent = fullContent;
+    
+    const jsonMatch = fullContent.match(/\[RES_JSON\]([\s\S]*?)\[\/RES_JSON\]/);
+    if (jsonMatch) {
+      try {
+        resolution = JSON.parse(jsonMatch[1].trim());
+        cleanContent = fullContent.replace(jsonMatch[0], '').trim();
+      } catch (e) {
+        console.error('Error al parsear resolución JSON:', e);
+      }
+    }
 
     return NextResponse.json({
       role: 'assistant',
-      content: agentResponse,
+      content: cleanContent,
       sources,
-      isClosedLoop
+      resolution,
+      isClosedLoop: true
     });
 
   } catch (error: any) {
