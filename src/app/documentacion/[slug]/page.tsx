@@ -65,7 +65,8 @@ export default function WhitePaperPage() {
         // Extract TOC
         const tocMatches = rawContent.match(/^##\s+(.*)/gm);
         if (tocMatches) {
-          setToc([...new Set(tocMatches.map(m => m.replace('##', '').trim()))]);
+          const cleanTOC = tocMatches.map(m => m.replace('##', '').trim());
+          setToc(Array.from(new Set(cleanTOC)));
         }
 
         setContent(data.content);
