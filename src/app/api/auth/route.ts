@@ -114,7 +114,44 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
       }
 
-      if (!user.isVerified) return NextResponse.json({ error: 'Cuenta no verificada', unverified: true }, { status: 403 });
+      if (!user.isVerified) {
+        // Generar nuevo OTP para que el usuario pueda completar la verificación
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+        
+        user.otp = { code: otpCode, expiresAt: otpExpiry };
+        await user.save();
+        
+        console.log(`[AUTH] Resending OTP during login for unverified user: ${email}`);
+        
+        // Versión simplificada del envío (reutilizando la lógica de arriba sería mejor refactorizar, pero para rapidez lo pondré aquí)
+        try {
+          await postmarkClient.sendEmail({
+            From: POSTMARK_SENDER,
+            To: email,
+            Subject: "Nuevo Código de Verificación - NormativaCEN",
+            HtmlBody: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                <h2 style="color: #2563eb; text-align: center;">NormativaCEN</h2>
+                <p>Tu cuenta aún no ha sido verificada. Usa este nuevo código para ingresar:</p>
+                <div style="background: #f3f4f6; padding: 20px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #111827; border-radius: 8px; margin: 20px 0;">
+                  ${otpCode}
+                </div>
+                <p style="font-size: 14px; color: #6b7280;">Este código expirará en 10 minutos.</p>
+              </div>
+            `,
+            TextBody: `Tu código de verificación para NormativaCEN es: ${otpCode}`,
+            MessageStream: "outbound"
+          });
+        } catch (e) {
+          console.log(`[DEVELOPMENT FALLBACK] OTP Code: ${otpCode}`);
+        }
+
+        return NextResponse.json({ 
+          error: 'Cuenta no verificada. Se ha enviado un nuevo código.', 
+          unverified: true 
+        }, { status: 403 });
+      }
 
       const token = jwt.sign({ userId: user._id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
       const response = NextResponse.json({ message: 'Login exitoso', token });
