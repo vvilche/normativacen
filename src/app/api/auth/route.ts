@@ -49,7 +49,7 @@ export async function POST(req: Request) {
       
       try {
         const response = await postmarkClient.sendEmail({
-          From: POSTMARK_SENDER,
+          From: `NormativaCEN <${POSTMARK_SENDER}>`,
           To: email,
           Subject: "Código de Verificación - NormativaCEN",
           HtmlBody: `
@@ -127,7 +127,7 @@ export async function POST(req: Request) {
         // Versión simplificada del envío (reutilizando la lógica de arriba sería mejor refactorizar, pero para rapidez lo pondré aquí)
         try {
           await postmarkClient.sendEmail({
-            From: POSTMARK_SENDER,
+            From: `NormativaCEN <${POSTMARK_SENDER}>`,
             To: email,
             Subject: "Nuevo Código de Verificación - NormativaCEN",
             HtmlBody: `
