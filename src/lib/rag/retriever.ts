@@ -1,4 +1,4 @@
-import clientPromise from "./mongoClient";
+import clientPromise, { getConnectionStatus, setConnectionFailed } from "./mongoClient";
 
 /**
  * ==========================================
@@ -8,8 +8,43 @@ import clientPromise from "./mongoClient";
  * para evitar depender de modelos de embeddings externos (Error 404).
  */
 
+/**
+ * Helper para crear un retriever simulado (Fallback)
+ */
+function createMockRetriever() {
+  return {
+    invoke: async (query: string) => {
+      console.log("💡 [MOCK RAG] Generando contexto simulado para: " + query);
+      return [
+        { 
+          pageContent: `[REFERENCIA SIMULADA]: Requisitos técnicos generales para ${query}. 
+          Según estándares CEN 2025, se debe priorizar la latencia < 500ms y la ciberseguridad industrial.`, 
+          metadata: { source: "Simulación de Contingencia" } 
+        }
+      ];
+    }
+  };
+}
+
 export async function getRetriever() {
-  const client = await clientPromise;
+  if (getConnectionStatus()) {
+    console.log("💡 [MOCK RAG] Saltando intento de conexión (fallo previo registrado).");
+    return createMockRetriever();
+  }
+
+  let client;
+  try {
+    // Timeout de 5s para no bloquear el orquestador si MongoDB es inalcanzable
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error("Timeout conectando a MongoDB")), 5000)
+    );
+    client = await Promise.race([clientPromise, timeoutPromise]) as any;
+  } catch (err) {
+    console.warn("⚠️ MongoDB inalcanzable, usando Retriever Simulado:", err);
+    setConnectionFailed();
+    return createMockRetriever();
+  }
+
   const collection = client.db("normativacen").collection("knowledge_base");
 
   // Implementamos una interfaz similar a la de LangChain para no romper el orquestador
@@ -19,7 +54,6 @@ export async function getRetriever() {
       
       try {
         // Opción 1: Búsqueda por Texto de MongoDB ($text)
-        // Requiere un índice de texto creado en el seed
         const cursor = collection.find(
           { $text: { $search: query } },
           { score: { $meta: "textScore" } }

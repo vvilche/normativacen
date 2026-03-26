@@ -35,4 +35,4 @@ La resiliencia del Sistema Eléctrico Nacional (SEN) ante apagones totales o par
 - `[Sintética-Especulativa]`: Valorización de ENS basada en el "Insumo de Costo de Falla" de la CNE.
 
 ---
-*© 2026 NORMATIVACEN.CL - Framework: Metodología Tung Alpha*
+*© 2026 NORMATIVACEN.CL - Reporte de Cumplimiento Técnico*

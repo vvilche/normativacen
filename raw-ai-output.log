@@ -1,0 +1,19 @@
+[HALLAZGO_HIGHLIGHT]Disponibilidad de generación verificada.[/HALLAZGO_HIGHLIGHT]
+
+En relación con la Planta PV de 150MW, se requiere verificación sobre los siguientes puntos normativos, basados en el contexto proporcionado:
+
+1.  **Inyección de Potencia Reactiva (DS88):**
+    *   Según el **DS88**, los Pequeños Medios de Generación Distribuida (PMGD) deben ser capaces de operar con un factor de potencia entre 0.95 inductivo y 0.95 capacitivo en el punto de conexión.
+    *   ¿Se están cumpliendo activamente estos rangos y se monitorea la inyección/absorción de reactivos para mantener el factor de potencia dentro de los límites requeridos?
+
+2.  **Monitoreo en Tiempo Real (Capacidad > 500 kW):**
+    *   Para una planta de 150MW (capacidad instalada superior a 500 kW), el monitoreo en tiempo real de los parámetros operativos es obligatorio.
+    *   ¿Se tiene acceso a la telemetría actualizada y se están reportando los datos de forma fiable y continua conforme a esta obligación?
+
+**Solicitud de Información Adicional:**
+Para una verificación profunda del cumplimiento normativo, se solicita:
+*   Los últimos reportes de operación y telemetría de la planta.
+*   Configuración actual de los controles de potencia reactiva.
+
+[METRICS_JSON]
+[SEO_TAGS]

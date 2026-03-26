@@ -19,6 +19,7 @@ export default function Home() {
   const [processingStatus, setProcessingStatus] = useState<"idle" | "processing" | "complete">("idle");
   const [resolutionData, setResolutionData] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("Dashboard");
+  const [dashboardStats, setDashboardStats] = useState<any>(null);
 
   useEffect(() => {
     const registered = localStorage.getItem('isRegistered') === 'true';
@@ -27,6 +28,12 @@ export default function Home() {
       setIsRegistered(true);
       setUserProfile(JSON.parse(profile));
     }
+
+    // Fetch dashboard stats
+    fetch('/api/dashboard')
+      .then(res => res.json())
+      .then(data => setDashboardStats(data))
+      .catch(err => console.error("Error fetching dashboard stats:", err));
   }, []);
 
   const handleConsultar = () => {
@@ -53,45 +60,53 @@ export default function Home() {
       const data = await response.json();
       
       if (response.ok) {
-        // Transformar la respuesta de la IA al formato de Resolution V7
-        const aiResolution = data.resolution || {
-          verdict: "CUMPLE PARCIAL",
-          risk: "Medio",
-          score: 85,
-          controls: [
-            { id: "IA.1", label: "Análisis Inteligente Real", status: "MET" },
-            { id: "IA.2", label: "Verificación RAG", status: "MET" }
-          ]
-        };
+        // Mapeo de formato estructurado: metrics[], hallazgo, seoTags
+        const metrics = data.resolution?.metrics || [];
+        
+        // Generar controles desde las métricas Tung (cada métrica es un control)
+        const controls = metrics.map((m: any, i: number) => ({
+          id: `T.${i + 1}`,
+          label: `${m.label}: ${m.value}`,
+          status: m.status === "critical" || m.status === "warning" ? "FAIL" : "MET"
+        }));
+
+        // Determinar verdict y risk desde las métricas
+        const hasCritical = metrics.some((m: any) => m.status === "critical");
+        const hasWarning = metrics.some((m: any) => m.status === "warning");
+        const verdict = hasCritical ? "NO CUMPLE" : hasWarning ? "CUMPLE PARCIAL" : "CUMPLE";
+        const risk = hasCritical ? "Crítico" : hasWarning ? "Alto" : "Bajo";
+        const score = hasCritical ? 40 : hasWarning ? 72 : 95;
 
         setResolutionData({
           id: `RES-${Date.now()}`,
-          verdict: aiResolution.verdict,
+          verdict,
           reasoning: data.content,
-          protocol: "LangGraph-Tung-V8",
-          controls: aiResolution.controls,
+          hallazgo: data.hallazgo || null,
+          seoTags: data.seoTags || [],
+          protocol: "LangGraph-Engineering-Matrix",
+          acciones: data.resolution?.actionPlan || [],
+          controls,
           kpis: {
-            score: aiResolution.score,
-            risk: aiResolution.risk,
+            score,
+            risk,
             latency: "2.4s",
             protocol: "NTSyCS 2025"
           },
           steps: [
-            { id: 1, agent: "Router", action: "Identificando dominio normativo", status: "complete" },
-            { id: 2, agent: "Retriever", action: "Recuperando contexto de MongoDB", status: "complete" },
-            { id: 3, agent: "Gemini 1.5 Pro", action: "Generando veredicto técnico", status: "complete" }
+            { id: 1, agent: "Orquestador Tung", action: "Clasificando perfil de Coordinado", status: "complete" },
+            { id: 2, agent: "Motor RAG", action: "Explorando base de datos normativa", status: "complete" },
+            { id: 3, agent: "Especialista CEN", action: "Analizando evidencia normativa", status: "complete" }
           ]
         });
       } else {
         throw new Error(data.error);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error en procesamiento IA:", error);
-      // Fallback a un error visible
       setResolutionData({
         id: "error",
         verdict: "ERROR",
-        reasoning: "Hubo un problema al conectar con el orquestador de IA. Por favor, verifica tu conexión o intenta más tarde.",
+        reasoning: `Hubo un problema al procesar la solicitud: ${error.message || 'Error de conexión'}. Verifica el Orquestador.`,
         protocol: "Error-Handler",
         controls: [],
         kpis: { score: 0, risk: "Alto", latency: "0s", protocol: "N/A" },
@@ -195,72 +210,28 @@ export default function Home() {
                     </div>
                 </div>
             ) : activeTab === "Dashboard" ? (
-                <>
-                    {processingStatus === "idle" && (
-                        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-8">
-                            <div className="space-y-3 max-w-3xl">
-                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/5 border border-accent/10 text-[9px] font-black uppercase tracking-[0.25em] text-accent/60 mb-2">
-                                    <Zap className="w-3 h-3" />
-                                    <span>Harness Intelligence Hub v7.2</span>
-                                </div>
-                                <h1 className="text-4xl md:text-5xl font-heading font-black text-white italic tracking-tighter leading-none">
-                                    Orquestador de <span className="text-accent underline decoration-accent/20 underline-offset-[8px] uppercase">Cumplimiento</span>
-                                </h1>
-                                <p className="text-gray-500 text-base font-medium max-w-xl mx-auto">
-                                    Activa el motor de razonamiento multi-agente para auditorías normativas del SEN.
-                                </p>
-                            </div>
-                            
-                            <div className="w-full max-w-xl relative group">
-                                <div className="relative bg-[#161B29]/60 backdrop-blur-xl border border-white-[0.03] rounded-2xl p-2 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)] flex items-center transition-all group-focus-within:border-accent/30 group-focus-within:bg-[#161B29]/80">
-                                    <div className="pl-4 pr-1 text-gray-700">
-                                        <Search className="w-5 h-5" />
-                                    </div>
-                                    <input
-                                        type="text"
-                                        className="w-full bg-transparent border-none text-white text-lg focus:outline-none placeholder-gray-700 py-4 font-semibold px-2"
-                                        placeholder="Consultar SITR para BESS..."
-                                        value={query}
-                                        onChange={(e) => setQuery(e.target.value)}
-                                    />
-                                    <button 
-                                        onClick={handleConsultar}
-                                        className="bg-accent hover:bg-accent/90 text-white font-black py-3 px-6 rounded-xl transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(45,108,223,0.3)] hover:scale-[1.02] active:scale-[0.98] uppercase tracking-widest text-[11px]"
-                                    >
-                                        EJECUTAR <ChevronRight className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {processingStatus === "processing" && (
-                        <div className="flex flex-col items-center justify-center min-h-[60vh]">
-                            <div className="bg-[#161B29]/40 border border-white-[0.03] rounded-2xl p-8 backdrop-blur-xl w-full max-w-md">
-                                <HarnessMonitor status={processingStatus} />
-                            </div>
-                        </div>
-                    )}
-
-                    {processingStatus === "complete" && resolutionData && (
-                        <DashboardView 
-                            resolutionData={resolutionData}
-                            recommendedPapers={getRecommendedPapers()}
-                            onReset={() => {
-                                setProcessingStatus("idle");
-                                setQuery("");
-                            }}
-                        />
-                    )}
-                </>
+                    <DashboardView 
+                        resolution={resolutionData}
+                        stats={dashboardStats}
+                        processingStatus={processingStatus}
+                        recommendedPapers={getRecommendedPapers()}
+                        query={query}
+                        setQuery={setQuery}
+                        onExecute={handleConsultar}
+                        onReset={() => {
+                            setProcessingStatus("idle");
+                            setQuery("");
+                            setResolutionData(null);
+                        }}
+                    />
             ) : (
                 <div className="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-6 animate-in zoom-in-95 duration-300">
                     <div className="bg-white/5 p-12 rounded-[40px] border border-white/10 backdrop-blur-3xl shadow-2xl relative overflow-hidden group">
                         <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                         <FileText className="w-16 h-16 text-accent mx-auto mb-6 opacity-40 animate-pulse" />
-                        <h2 className="text-2xl font-black text-white mb-3 italic tracking-tight uppercase">Mantenimiento de Nodo</h2>
+                        <span className="text-xs font-mono text-muted-foreground uppercase tracking-[0.3em]">Sincronizando Base Normativa...</span>
                         <p className="text-gray-500 max-w-xs mx-auto text-sm leading-relaxed font-medium">
-                            La sección de <span className="text-accent underline decoration-accent/20 underline-offset-4">{activeTab}</span> está siendo sincronizada con el motor de inferencia <strong>Harness Tung V2.</strong>
+                            La sección de <span className="text-accent underline decoration-accent/20 underline-offset-4">{activeTab}</span> está siendo sincronizada con el motor de inferencia especializado.
                         </p>
                     </div>
                 </div>

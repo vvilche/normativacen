@@ -13,10 +13,26 @@ if (!process.env.MONGODB_URI) {
 }
 
 const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/conecta_mock";
-const options = {};
+const options = {
+  serverSelectionTimeoutMS: 5000, // No esperar más de 5 segundos
+  connectTimeoutMS: 5000,
+};
 
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
+let isConnectionFailed = false;
+
+export function resetConnectionStatus() {
+  isConnectionFailed = false;
+}
+
+export function getConnectionStatus() {
+  return isConnectionFailed;
+}
+
+export function setConnectionFailed() {
+  isConnectionFailed = true;
+}
 
 if (process.env.NODE_ENV === "development") {
   let globalWithMongo = global as typeof globalThis & {

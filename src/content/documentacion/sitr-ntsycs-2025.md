@@ -1,4 +1,4 @@
-# White Paper: SITR y Exigencias NTSyCS 2025 (Metodología Tung)
+# White Paper: SITR y Exigencias NTSyCS 2025
 
 [METRICS_JSON]
 { "Disponibilidad": ">= 99.5%", "Latencia SITR": "< 100ms", "Sincro GPS": "< 1ms", "Audit Status": "PASS" }
@@ -32,4 +32,4 @@ La infraestructura de comunicaciones para el envío de datos en tiempo real (SIT
 - `[Sintética-Especulativa]`: Estimación de multas basada en históricos de fallos de telemetría 2023-2024.
 
 ---
-*© 2026 NORMATIVACEN.CL - Framework: Metodología Tung Alpha*
+*© 2026 NORMATIVACEN.CL - Reporte de Cumplimiento Técnico*

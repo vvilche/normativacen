@@ -1,8 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { FileText, Download, Share2, Printer, Mail, CheckCircle2, MoreHorizontal } from "lucide-react";
+import { FileText, Download, Share2, Printer, Mail, CheckCircle2, MoreHorizontal, ShieldAlert, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
+import dynamic from "next/dynamic";
+
+const ReportExportButton = dynamic(() => import("./ReportExportButton").then(mod => mod.ReportExportButton), { 
+  ssr: false,
+  loading: () => <div className="w-full h-10 bg-white/5 animate-pulse rounded-lg" />
+});
 
 interface Step {
   id: string;
@@ -25,6 +31,8 @@ interface ResolutionProps {
   verdict?: string;
   controls?: any[];
   kpis?: any;
+  hallazgo?: string;
+  seoTags?: string[];
 }
 
 export function ResolutionCard({ 
@@ -33,7 +41,10 @@ export function ResolutionCard({
   type = "Regulatorio",
   verdict = "El Phasor Measurement Unit (PMU) SEL-487E cumple con los requisitos de la norma CEN-REG-ELEC-2022 Sección 4.2 para Medición Sincrofasorial...",
   controls = [],
-  kpis = { score: "94.2%", risk: "LOW", protocol: "v1.4", latency: "45ms" }
+  kpis = { score: "94.2%", risk: "LOW", protocol: "v1.4", latency: "45ms" },
+  hallazgo,
+  seoTags = [],
+  acciones = []
 }: ResolutionProps) {
   
   return (
@@ -51,7 +62,7 @@ export function ResolutionCard({
                 </div>
                 <div>
                     <h3 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] mb-0.5">Technical Compliance Overview</h3>
-                    <p className="text-xs font-technical text-white/90">Agent: <span className="text-accent">Aegis_AI_v7.2</span> | ID: {id}</p>
+                    <p className="text-xs font-technical text-white/90">Agent: <span className="text-accent">NormativaCEN_Orchestrator_v2025</span> | ID: {id}</p>
                 </div>
             </div>
             <div className="flex items-center gap-4">
@@ -133,11 +144,69 @@ export function ResolutionCard({
                     </div>
                 </div>
             ))}
-            <button className="w-full py-1 text-[8px] text-gray-600 font-black uppercase tracking-widest hover:text-accent transition-colors pt-2">
-                Descargar Reporte Técnico (.pdf)
-            </button>
+            
           </div>
         </div>
+
+        <div className="mt-8 border-t border-white/5 pt-6">
+            <ReportExportButton report={{ 
+                id: id || "PENDING", 
+                title: `Informe Técnico: ${id || 'AUDIT'}`,
+                coordinado: "Empresa Coordinada",
+                agentType: "Orchestrator",
+                verdict: verdict || "", 
+                date: date || "", 
+                hallazgo: hallazgo || "", 
+                seoTags: seoTags || [],
+                normativeReferences: [],
+                actionPlan: acciones || [],
+                metrics: controls.map(c => ({ 
+                    label: c.label, 
+                    value: 'CHECKED', 
+                    status: c.status === 'MET' ? 'success' : 'critical' 
+                })) 
+            }} />
+        </div>
+
+        {/* Recommended Action Plan (New Section) */}
+        {acciones && acciones.length > 0 && (
+          <div className="mt-8 border-t border-white/5 pt-6 space-y-4">
+              <div className="flex items-center gap-2 mb-2">
+                  <ShieldAlert className="w-4 h-4 text-accent" />
+                  <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Recommended Action Plan</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {acciones.map((action) => (
+                      <div key={action.id} className="bg-white/5 border border-white/5 rounded-lg p-3 group/item hover:bg-white/10 transition-all">
+                          <div className="flex justify-between items-start mb-1">
+                              <span className="text-[10px] font-technical text-accent font-black">{action.id}</span>
+                              <span className={cn(
+                                  "text-[8px] px-1.5 py-0.5 rounded font-black uppercase tracking-tighter",
+                                  action.priority === "CRÍTICA" ? "bg-danger/20 text-danger" : "bg-warning/20 text-warning"
+                                )}>
+                                  {action.priority}
+                              </span>
+                          </div>
+                          <p className="text-[11px] text-gray-400 font-medium leading-tight group-hover/item:text-white transition-colors capitalize">
+                              {action.task}
+                          </p>
+                      </div>
+                  ))}
+              </div>
+          </div>
+        )}
+
+        {/* SEO Tags Footer */}
+        {seoTags && seoTags.length > 0 && (
+            <div className="mt-6 flex flex-wrap gap-2 pt-4 border-t border-white/5">
+                {seoTags.map((tag, i) => (
+                    <div key={i} className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-blue-500/5 border border-blue-500/10 text-[9px] font-black text-blue-400 uppercase tracking-widest">
+                        <Tag className="w-2.5 h-2.5" />
+                        {tag}
+                    </div>
+                ))}
+            </div>
+        )}
       </motion.div>
     </div>
   );

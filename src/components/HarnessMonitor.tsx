@@ -47,10 +47,10 @@ export function HarnessMonitor({ status = "idle" }: { status?: "idle" | "process
               {/* Node Dot */}
               <div className={cn(
                 "absolute left-0 w-8 h-8 rounded-full border flex items-center justify-center transition-all duration-500 z-10",
-                isPending 
-                    ? "bg-[#161B29] border-white/10 text-gray-700" 
-                    : isActive 
-                        ? "bg-accent border-accent shadow-[0_0_20px_rgba(45,108,223,0.5)] text-white scale-110" 
+                isPending
+                    ? "bg-[#161B29] border-white/10 text-gray-700"
+                    : isActive
+                        ? "bg-accent border-accent shadow-[0_0_20px_rgba(45,108,223,0.5)] text-white scale-110"
                         : "bg-success/20 border-success/30 text-success"
               )}>
                 {isPending ? (
@@ -92,7 +92,7 @@ export function HarnessMonitor({ status = "idle" }: { status?: "idle" | "process
             <div className="flex items-center gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-accent animate-ping" />
                 <p className="text-[10px] text-accent font-black uppercase tracking-[0.2em] leading-relaxed">
-                    Sintetizando evidencias normativas bajo metodología <span className="underline decoration-accent/30 underline-offset-4">Tung V7</span>...
+                    Sintetizando evidencias normativas vigentes...
                 </p>
             </div>
         </div>
