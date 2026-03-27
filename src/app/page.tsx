@@ -11,6 +11,8 @@ import { WhitePaperCard } from "@/components/WhitePaperCard";
 import { whitePapers } from "@/lib/data/whitePapers";
 import { getResolutionByQuery } from "@/lib/resolutionEngine";
 import { IndustrialBackground } from "@/components/IndustrialBackground";
+import { ResolutionsView } from "@/components/ResolutionsView";
+import { NormsView } from "@/components/NormsView";
 import { Code, Cpu, Activity, Layout, Layers, Box, Globe, PenTool } from "lucide-react";
 
 export default function Home() {
@@ -312,6 +314,10 @@ export default function Home() {
                         ))}
                     </div>
                 </div>
+            ) : activeTab === "Resoluciones" ? (
+                <ResolutionsView />
+            ) : activeTab === "Normas" ? (
+                <NormsView />
             ) : activeTab === "Dashboard" ? (
                     <DashboardView 
                         resolution={resolutionData}
@@ -328,16 +334,25 @@ export default function Home() {
                         }}
                     />
             ) : (
-                <div className="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-6 animate-in zoom-in-95 duration-300">
-                    <div className="bg-white/5 p-12 rounded-[40px] border border-white/10 backdrop-blur-3xl shadow-2xl relative overflow-hidden group">
-                        <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <FileText className="w-16 h-16 text-accent mx-auto mb-6 opacity-40 animate-pulse" />
-                        <span className="text-xs font-mono text-muted-foreground uppercase tracking-[0.3em]">Sincronizando Base Normativa...</span>
-                        <p className="text-gray-500 max-w-xs mx-auto text-sm leading-relaxed font-medium">
-                            La sección de <span className="text-accent underline decoration-accent/20 underline-offset-4">{activeTab}</span> está siendo sincronizada con el motor de inferencia especializado.
+            ) : (
+                <div className="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-6 animate-in zoom-in-95 duration-500">
+                    <div className="bg-[#161B29]/40 p-16 rounded-[40px] border border-white/5 backdrop-blur-3xl shadow-2xl relative overflow-hidden group max-w-2xl">
+                        <div className="absolute inset-0 bg-gold/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="w-20 h-20 rounded-2xl bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-8 shadow-gold">
+                            <Activity className="w-10 h-10 text-gold animate-pulse" />
+                        </div>
+                        <h3 className="text-2xl font-heading font-black text-white italic mb-2 uppercase tracking-tighter">Sincronización en Curso</h3>
+                        <p className="text-gray-500 text-sm leading-relaxed font-medium mb-8">
+                            El módulo de <span className="text-gold uppercase font-black">{activeTab}</span> está siendo integrado con la matriz de 9 agentes especializados. La base normativa CEN 2025 está en proceso de indexación.
                         </p>
+                        <div className="flex items-center justify-center gap-1.5">
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="w-1.5 h-1.5 rounded-full bg-gold/40 animate-bounce" style={{ animationDelay: `${i * 0.2}s` }} />
+                            ))}
+                        </div>
                     </div>
                 </div>
+            )}
             )}
         </div>
     </DashboardLayout>

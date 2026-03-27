@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { FileDown, Calendar, User } from "lucide-react";
 import { WhitePaper } from "@/lib/data/whitePapers";
+import Link from "next/link";
 
 interface WhitePaperCardProps {
   paper: WhitePaper;
@@ -53,9 +54,12 @@ export function WhitePaperCard({ paper }: WhitePaperCardProps) {
             </div>
         </div>
 
-        <button className="w-full py-2.5 rounded-lg bg-white/5 hover:bg-gold hover:text-black border border-white/5 text-gray-400 text-[10px] font-black tracking-[0.2em] transition-all flex items-center justify-center gap-2 uppercase active:scale-[0.98] shadow-gold">
+        <Link 
+          href={paper.downloadUrl}
+          className="w-full py-2.5 rounded-lg bg-white/5 hover:bg-gold hover:text-black border border-white/5 text-gray-400 text-[10px] font-black tracking-[0.2em] transition-all flex items-center justify-center gap-2 uppercase active:scale-[0.98] shadow-gold"
+        >
             VER DOCUMENTO
-        </button>
+        </Link>
       </div>
     </motion.div>
   );
