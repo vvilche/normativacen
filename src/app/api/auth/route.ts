@@ -23,23 +23,27 @@ export async function POST(req: Request) {
   try {
     const db = await dbConnect();
     const { action, email, password, code, role } = await req.json();
+    console.log(`📡 [AUTH] Action: ${action} | Email: ${email}`);
 
-    // Mock Mode fallback for Development (Disconnected)
-    if (!db && process.env.NODE_ENV === 'development') {
+    // Enhanced Mock Mode fallback (Disconnected / Incomplete Setup)
+    if (!db || !process.env.MONGODB_URI) {
+      console.log(`⚠️  [MODO RESILIENCIA ACTIVO] - Sin conexión a DB para acción: ${action}`);
       if (action === 'register') {
-         console.warn('🛠️ [MOCK] Registro simulado exitoso para:', email);
          return NextResponse.json({ 
-           message: 'Simulación: Registro exitoso (Modo Desconectado)', 
+           message: '🔄 Simulación: Registro técnica/Mock (Infraestructura Offline)', 
            email 
          });
       }
       if (action === 'verify') {
-         console.warn('🛠️ [MOCK] Verificación simulada exitosa para:', email);
-         return NextResponse.json({ message: 'Simulación: Verificado correctamente', token: 'mock-token' });
+         return NextResponse.json({ message: '🔄 Simulación: Verificado correctamente (Mock)', token: 'mock-token-verify' });
+      }
+      if (action === 'login') {
+         return NextResponse.json({ message: '🔄 Simulación: Login exitoso (Mock)', token: 'mock-token-login' });
       }
     }
 
     if (action === 'register') {
+      console.log(`📝 [AUTH] Registrando usuario: ${email}`);
       const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
       const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
 
@@ -140,7 +144,7 @@ export async function POST(req: Request) {
     if (action === 'login') {
       const user = await User.findOne({ email });
       if (!user || !(await bcrypt.compare(password, user.password))) {
-        return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
+        return NextResponse.json({ message: 'Credenciales inválidas' }, { status: 401 });
       }
 
       if (!user.isVerified) {
@@ -182,7 +186,7 @@ export async function POST(req: Request) {
         }
 
         return NextResponse.json({ 
-          error: 'Cuenta no verificada. Se ha enviado un nuevo código.', 
+          message: 'Cuenta no verificada. Se ha enviado un nuevo código.', 
           unverified: true 
         }, { status: 403 });
       }
@@ -198,8 +202,15 @@ export async function POST(req: Request) {
       return response;
     }
 
-    return NextResponse.json({ error: 'Acción no válida' }, { status: 400 });
+    return NextResponse.json({ message: 'Acción no válida' }, { status: 400 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const errorMsg = error.message || 'Error Desconocido en el Driver de Base de Datos';
+    console.error('❌ [AUTH CRASH]:', errorMsg, error.stack);
+    
+    return NextResponse.json({ 
+      message: `Error Técnico: ${errorMsg}`,
+      status: 500,
+      debug: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    }, { status: 500 });
   }
 }

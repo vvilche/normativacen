@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     }
 
     const token = req.headers.get('cookie')?.split('auth_token=')[1]?.split(';')[0];
-    if (!token) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    if (!token) return NextResponse.json({ message: 'No autorizado' }, { status: 401 });
 
     const decoded: any = jwt.verify(token, JWT_SECRET);
 
@@ -30,9 +30,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Descarga registrada' });
     }
 
-    return NextResponse.json({ error: 'Acción no válida' }, { status: 400 });
+    return NextResponse.json({ message: 'Acción no válida' }, { status: 400 });
   } catch (error: any) {
     console.error('❌ Error en Tracking Route:', error.message);
-    return NextResponse.json({ error: 'Error procesando tracking', detail: error.message }, { status: 500 });
+    return NextResponse.json({ message: 'Error procesando tracking', detail: error.message }, { status: 500 });
   }
 }

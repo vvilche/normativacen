@@ -43,10 +43,14 @@ export function LeadGenModal({ isOpen, onClose, onSuccess }: LeadGenModalProps) 
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Error al iniciar registro');
+      if (!res.ok) {
+        const errorText = data.message || data.error || `Error del sistema (Código: ${res.status})`;
+        throw new Error(errorText);
+      }
 
       setStep('otp');
     } catch (err: any) {
+      console.error('❌ Error de registro:', err.message);
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -70,7 +74,10 @@ export function LeadGenModal({ isOpen, onClose, onSuccess }: LeadGenModalProps) 
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Código inválido');
+      if (!res.ok) {
+        const errorText = data.message || data.error || `Error de verificación (Código: ${res.status})`;
+        throw new Error(errorText);
+      }
 
       // Persistence for unified flow
       localStorage.setItem('isRegistered', 'true');
@@ -78,6 +85,7 @@ export function LeadGenModal({ isOpen, onClose, onSuccess }: LeadGenModalProps) 
 
       onSuccess(formData);
     } catch (err: any) {
+      console.error('❌ Error de OTP:', err.message);
       setError(err.message);
     } finally {
       setIsLoading(false);
