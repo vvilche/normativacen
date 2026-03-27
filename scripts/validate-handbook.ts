@@ -47,13 +47,27 @@ async function runValidation() {
       const lastMsg = result.messages[result.messages.length - 1];
       const content = lastMsg.content;
       
+      // Importar generador de reporte para ver los nuevos campos de Bonus
+      const { generateTechnicalReport } = await import('../src/lib/reportingEngine');
+      const report = generateTechnicalReport(
+        { content, metrics: { metrics: [] }, hallazgo: "", seoTags: [] },
+        sample.category.toLowerCase(),
+        { company: "Empresa de Pruebas" }
+      );
+
       const verdict = content.includes("NO CUMPLE") || content.includes("[RECHAZADO]") ? "NO CUMPLE 🔴" : "CUMPLE 🟢";
-      
+      const fine = report.projectedFineUTA ? `${report.projectedFineUTA.category} (${report.projectedFineUTA.min}-${report.projectedFineUTA.max} UTA)` : "No calculada";
+      const deadline = report.actionPlan[0]?.deadline || "N/A";
+
       console.log(`✅ Resultado: ${verdict}`);
+      console.log(`💰 Riesgo Económico: ${fine}`);
+      console.log(`🗓️  Plazo Sugerido: ${deadline}`);
       
       results.push({
         ...sample,
         verdict,
+        fine,
+        deadline,
         reasoning: content.slice(0, 300) + "..."
       });
     } catch (err: any) {

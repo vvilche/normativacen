@@ -23,7 +23,8 @@ export interface TechnicalReport {
   metrics: ReportMetric[];
   seoTags: string[];
   normativeReferences: string[];
-  actionPlan: { id: string; task: string; priority: string }[];
+  actionPlan: { id: string; task: string; priority: string; deadline: string }[];
+  projectedFineUTA?: { min: number; max: number; category: string };
 }
 
 /**
@@ -58,7 +59,8 @@ export function generateTechnicalReport(
     metrics: agentOutput.metrics?.metrics || [],
     seoTags: agentOutput.seoTags || [],
     normativeReferences: extractNormativeReferences(agentOutput.content),
-    actionPlan: extractActionPlan(agentOutput.content)
+    actionPlan: extractActionPlan(agentOutput.content),
+    projectedFineUTA: calculateProjectedFine(agentOutput.content)
   };
 }
 
@@ -86,21 +88,46 @@ function extractNormativeReferences(text: string): string[] {
 /**
  * Extrae pasos de acción del texto si están numerados o con bullets.
  */
-function extractActionPlan(text: string): { id: string; task: string; priority: string }[] {
+function extractActionPlan(text: string): { id: string; task: string; priority: string; deadline: string }[] {
   const lines = text.split('\n');
-  const plan: { id: string; task: string; priority: string }[] = [];
+  const plan: { id: string; task: string; priority: string; deadline: string }[] = [];
   let idCounter = 1;
 
   lines.forEach(line => {
     const trimmed = line.trim();
     if (trimmed.match(/^[0-9]\.|^[-*]/)) {
+      const isCritical = trimmed.toLowerCase().includes('crítico') || trimmed.toLowerCase().includes('urgente');
+      const isHigh = trimmed.toLowerCase().includes('grave') || trimmed.toLowerCase().includes('inmediato');
+
       plan.push({
         id: `A${idCounter++}`,
         task: trimmed.replace(/^[0-9]\.|^[-*]/, '').trim(),
-        priority: trimmed.toLowerCase().includes('crítico') || trimmed.toLowerCase().includes('urgente') ? 'CRÍTICA' : 'Media'
+        priority: isCritical ? 'CRÍTICA' : (isHigh ? 'ALTA' : 'Media'),
+        deadline: isCritical ? '15 días' : (isHigh ? '30 días' : '60 días')
       });
     }
   });
 
-  return plan.slice(0, 5); // Máximo 5 acciones para el reporte ejecutivo
+  return plan.slice(0, 5); 
+}
+
+/**
+ * Simula el cálculo de multas en UTA de acuerdo a la severidad detectada.
+ */
+function calculateProjectedFine(text: string): { min: number; max: number; category: string } | undefined {
+  const lower = text.toLowerCase();
+  
+  if (lower.includes('crítico') || lower.includes('no cumple') || lower.includes('incumplimiento grave')) {
+    return { min: 1000, max: 10000, category: 'GRAVÍSIMA' };
+  }
+  
+  if (lower.includes('alerta') || lower.includes('riesgo alto') || lower.includes('mejorar')) {
+    return { min: 100, max: 1000, category: 'GRAVE' };
+  }
+  
+  if (lower.includes('recomendación') || lower.includes('informativo')) {
+    return { min: 1, max: 100, category: 'LEVE' };
+  }
+
+  return undefined;
 }
