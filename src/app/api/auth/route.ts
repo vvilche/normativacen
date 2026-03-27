@@ -20,10 +20,25 @@ const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
-  await dbConnect();
-  const { action, email, password, code, role } = await req.json();
-
   try {
+    const db = await dbConnect();
+    const { action, email, password, code, role } = await req.json();
+
+    // Mock Mode fallback for Development (Disconnected)
+    if (!db && process.env.NODE_ENV === 'development') {
+      if (action === 'register') {
+         console.warn('🛠️ [MOCK] Registro simulado exitoso para:', email);
+         return NextResponse.json({ 
+           message: 'Simulación: Registro exitoso (Modo Desconectado)', 
+           email 
+         });
+      }
+      if (action === 'verify') {
+         console.warn('🛠️ [MOCK] Verificación simulada exitosa para:', email);
+         return NextResponse.json({ message: 'Simulación: Verificado correctamente', token: 'mock-token' });
+      }
+    }
+
     if (action === 'register') {
       const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
       const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
