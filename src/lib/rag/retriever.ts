@@ -1,4 +1,11 @@
+import { MongoClient, Document } from "mongodb";
 import clientPromise, { getConnectionStatus, setConnectionFailed } from "./mongoClient";
+
+interface RagDocument extends Document {
+  text?: string;
+  topic?: string;
+  metadata?: Record<string, unknown>;
+}
 
 /**
  * ==========================================
@@ -32,20 +39,20 @@ export async function getRetriever() {
     return createMockRetriever();
   }
 
-  let client;
+  let client: MongoClient;
   try {
     // Timeout de 5s para no bloquear el orquestador si MongoDB es inalcanzable
-    const timeoutPromise = new Promise((_, reject) => 
+    const timeoutPromise = new Promise<never>((_, reject) => 
       setTimeout(() => reject(new Error("Timeout conectando a MongoDB")), 5000)
     );
-    client = await Promise.race([clientPromise, timeoutPromise]) as any;
+    client = await Promise.race([clientPromise, timeoutPromise]);
   } catch (err) {
     console.warn("⚠️ MongoDB inalcanzable, usando Retriever Simulado:", err);
     setConnectionFailed();
     return createMockRetriever();
   }
 
-  const collection = client.db("normativacen").collection("knowledge_base");
+  const collection = client.db("normativacen").collection<RagDocument>("knowledge_base");
 
   // Implementamos una interfaz similar a la de LangChain para no romper el orquestador
   return {
@@ -53,11 +60,12 @@ export async function getRetriever() {
       console.log(`🔍 Buscando contexto para: "${query}"...`);
       
       try {
+        /* eslint-disable @typescript-eslint/no-explicit-any */
         // Opción 1: Búsqueda por Texto de MongoDB ($text)
         const cursor = collection.find(
-          { $text: { $search: query } },
-          { score: { $meta: "textScore" } }
-        ).sort({ score: { $meta: "textScore" } }).limit(3);
+          { $text: { $search: query } } as any,
+          { score: { $meta: "textScore" } } as any
+        ).sort({ score: { $meta: "textScore" } } as any).limit(3);
 
         const results = await cursor.toArray();
         
@@ -73,15 +81,16 @@ export async function getRetriever() {
               { text: { $regex: escapedQuery, $options: "i" } },
               { topic: { $regex: escapedQuery, $options: "i" } }
             ]
-          }).limit(3).toArray();
+          } as any).limit(3).toArray();
+          /* eslint-enable @typescript-eslint/no-explicit-any */
           
-          return regexResults.map((doc: any) => ({
+          return regexResults.map((doc) => ({
             pageContent: doc.text || "",
             metadata: doc.metadata || {}
           }));
         }
 
-        return results.map((doc: any) => ({
+        return results.map((doc) => ({
           pageContent: doc.text || "",
           metadata: doc.metadata || {}
         }));

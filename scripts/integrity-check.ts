@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv';
-import { generateTechnicalReport } from '../lib/reportingEngine';
+import { generateTechnicalReport } from '../src/lib/reportingEngine';
 
 dotenv.config({ path: '.env.local' });
 

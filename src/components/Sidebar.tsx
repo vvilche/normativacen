@@ -58,7 +58,7 @@ export function Sidebar({ activeTab = "Dashboard", setActiveTab }: SidebarProps)
 
       <nav className="flex-1 space-y-1">
         <div className="text-[9px] text-gray-600 font-bold uppercase tracking-[0.3em] mb-3 pl-1 opacity-40">Orquestador</div>
-        {navItems.map((item) => (
+        {navItems.map((item: { label: string; icon: any }) => (
             <SidebarItem 
                 key={item.label}
                 icon={item.icon} 

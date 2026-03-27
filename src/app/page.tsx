@@ -13,17 +13,31 @@ import { getResolutionByQuery } from "@/lib/resolutionEngine";
 import { IndustrialBackground } from "@/components/IndustrialBackground";
 import { ResolutionsView } from "@/components/ResolutionsView";
 import { NormsView } from "@/components/NormsView";
-import { Code, Cpu, Activity, Layout, Layers, Box, Globe, PenTool } from "lucide-react";
+import { Code, Cpu, Activity, Layers, Globe, PenTool } from "lucide-react";
+
+interface UserProfile {
+  name: string;
+  role: string;
+  company: string;
+  activeAsset?: string;
+}
+
+interface DashboardStats {
+  globalScore: number;
+  totalAssets: number;
+  criticalRisks: number;
+  totalExposureUTA: number;
+}
 
 export default function Home() {
   const [query, setQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
-  const [userProfile, setUserProfile] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [processingStatus, setProcessingStatus] = useState<"idle" | "processing" | "complete">("idle");
   const [resolutionData, setResolutionData] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("Dashboard");
-  const [dashboardStats, setDashboardStats] = useState<any>(null);
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats | undefined>(undefined);
 
   useEffect(() => {
     const isTokenInCookie = document.cookie.includes('auth_token');
@@ -69,15 +83,15 @@ export default function Home() {
         const metrics = data.resolution?.metrics || [];
         
         // Generar controles desde las métricas Tung (cada métrica es un control)
-        const controls = metrics.map((m: any, i: number) => ({
+        const controls = metrics.map((m: { label: string; value: string; status: string }, i: number) => ({
           id: `T.${i + 1}`,
           label: `${m.label}: ${m.value}`,
           status: m.status === "critical" || m.status === "warning" ? "FAIL" : "MET"
         }));
 
         // Determinar verdict y risk desde las métricas
-        const hasCritical = metrics.some((m: any) => m.status === "critical");
-        const hasWarning = metrics.some((m: any) => m.status === "warning");
+        const hasCritical = metrics.some((m: { status: string }) => m.status === "critical");
+        const hasWarning = metrics.some((m: { status: string }) => m.status === "warning");
         const verdict = hasCritical ? "NO CUMPLE" : hasWarning ? "CUMPLE PARCIAL" : "CUMPLE";
         const risk = hasCritical ? "Crítico" : hasWarning ? "Alto" : "Bajo";
         const score = hasCritical ? 40 : hasWarning ? 72 : 95;
@@ -106,12 +120,13 @@ export default function Home() {
       } else {
         throw new Error(data.error);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error en procesamiento IA:", error);
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
       setResolutionData({
         id: "error",
         verdict: "ERROR",
-        reasoning: `Hubo un problema al procesar la solicitud: ${error.message || 'Error de conexión'}. Verifica el Orquestador.`,
+        reasoning: `Hubo un problema al procesar la solicitud: ${errorMessage}. Verifica el Orquestador.`,
         protocol: "Error-Handler",
         controls: [],
         kpis: { score: 0, risk: "Alto", latency: "0s", protocol: "N/A" },

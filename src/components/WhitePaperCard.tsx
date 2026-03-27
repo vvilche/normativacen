@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { FileDown, Calendar, User } from "lucide-react";
+import { FileText, Download, ChevronRight, Sparkles } from "lucide-react";
 import { WhitePaper } from "@/lib/data/whitePapers";
 import Link from "next/link";
 
@@ -23,7 +23,7 @@ export function WhitePaperCard({ paper }: WhitePaperCardProps) {
         </div>
         <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-12 h-12 rounded-full bg-gold/5 border border-gold/10 flex items-center justify-center text-gold/40 group-hover:text-gold/60 transition-colors shadow-gold">
-                <FileDown className="w-6 h-6" />
+                <Download className="w-6 h-6" />
             </div>
         </div>
         <div className="absolute bottom-2 right-3 px-2 py-0.5 rounded bg-black/40 border border-white/5 text-[8px] font-technical text-gray-500 uppercase tracking-widest">

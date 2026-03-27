@@ -30,9 +30,14 @@ export interface TechnicalReport {
  * Genera un reporte basado en la salida estructurada de un agente.
  */
 export function generateTechnicalReport(
-  agentOutput: { content: string; metrics: any; hallazgo: string; seoTags: string[] },
+  agentOutput: { 
+    content: string; 
+    metrics: { metrics: ReportMetric[] }; 
+    hallazgo: string; 
+    seoTags: string[] 
+  },
   agentType: string,
-  userProfile: any
+  userProfile: { company?: string; [key: string]: unknown }
 ): TechnicalReport {
   const date = new Date().toLocaleDateString('es-CL', {
     day: '2-digit',

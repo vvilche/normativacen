@@ -3,7 +3,6 @@ import { BaseMessage, AIMessage, HumanMessage } from "@langchain/core/messages";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import {
   QUALITY_AUDITOR_PROMPT,
-  ORCHESTRATOR_SYSTEM_PROMPT,
   SITR_AGENT_PROMPT,
   CONSUMO_AGENT_PROMPT as EDAC_AGENT_PROMPT,
   SSCC_AGENT_PROMPT,
@@ -23,7 +22,7 @@ import { getRetriever } from "../rag/retriever";
  */
 export interface AgentState {
   messages: BaseMessage[];
-  userProfile: any;
+  userProfile: { company?: string; [key: string]: unknown } | null;
   next_node?: string;
   contextText?: string;
   draftResponse?: string;
@@ -113,10 +112,9 @@ async function createAgentNode(systemPrompt: string, state: AgentState, agentTyp
   try {
     const retriever = await getRetriever();
     const lastUserMsg = state.messages[state.messages.length - 1].content as string;
-    // @ts-ignore
-    const docs = await retriever.invoke(lastUserMsg);
+        const docs = await retriever.invoke(lastUserMsg);
     if (docs && docs.length > 0) {
-      contextText = docs.map((d: any) => d.pageContent).join("\n\n");
+      contextText = docs.map((d: { pageContent: string }) => d.pageContent).join("\n\n");
     }
   } catch (error) {
     console.warn(`⚠️ Fallo en RAG Retrieval para ${agentTypeName}:`, error);
@@ -229,67 +227,48 @@ export function buildOrchestratorGraph() {
   const workflow = new StateGraph<AgentState>({
     channels: {
       messages: {
-        //@ts-ignore
-        value: (prev, next) => prev.concat(next),
+                value: (prev, next) => prev.concat(next),
         default: () => [],
       },
       userProfile: {
-        //@ts-ignore
-        value: (prev, next) => next || prev,
+                value: (prev, next) => next || prev,
         default: () => ({}),
       },
       next_node: {
-        //@ts-ignore
-        value: (prev, next) => next || prev,
+                value: (prev, next) => next || prev,
         default: () => "sitrAgent",
       },
       contextText: {
-        //@ts-ignore
-        value: (prev, next) => next || prev,
+                value: (prev, next) => next || prev,
         default: () => "",
       },
       draftResponse: {
-        //@ts-ignore
-        value: (prev, next) => next || prev,
+                value: (prev, next) => next || prev,
         default: () => "",
       },
       revisionCount: {
-        //@ts-ignore
-        value: (prev, next) => next || prev,
+                value: (prev, next) => next || prev,
         default: () => 0,
       },
       lastAgentNode: {
-        //@ts-ignore
-        value: (prev, next) => next || prev,
+                value: (prev, next) => next || prev,
         default: () => "",
       },
     },
   })
-  // @ts-ignore
-  .addNode("router", orchestratorRouter)
-  // @ts-ignore
-  .addNode("sitrAgent", sitrAgentNode)
-  // @ts-ignore
-  .addNode("consumoAgent", consumoAgentNode)
-  // @ts-ignore
-  .addNode("ssccAgent", ssccAgentNode)
-  // @ts-ignore
-  .addNode("bessAgent", bessAgentNode)
-  // @ts-ignore
-  .addNode("cibersegAgent", cibersegAgentNode)
+    .addNode("router", orchestratorRouter)
+    .addNode("sitrAgent", sitrAgentNode)
+    .addNode("consumoAgent", consumoAgentNode)
+    .addNode("ssccAgent", ssccAgentNode)
+    .addNode("bessAgent", bessAgentNode)
+    .addNode("cibersegAgent", cibersegAgentNode)
   .addNode("procedimentalAgent", procedimentalAgentNode)
-  // @ts-ignore
-  .addNode("generacionAgent", generacionAgentNode)
-  // @ts-ignore
-  .addNode("transmisionAgent", transmisionAgentNode)
-  // @ts-ignore
-  .addNode("infotecnicaAgent", infotecnicaAgentNode)
-  // @ts-ignore
-  .addNode("qualityAuditor", qualityAuditorNode)
-  // @ts-ignore
-  .addEdge(START, "router")
-  // @ts-ignore
-  .addConditionalEdges("router",
+    .addNode("generacionAgent", generacionAgentNode)
+    .addNode("transmisionAgent", transmisionAgentNode)
+    .addNode("infotecnicaAgent", infotecnicaAgentNode)
+    .addNode("qualityAuditor", qualityAuditorNode)
+    .addEdge(START, "router")
+    .addConditionalEdges("router",
     (state: AgentState) => state.next_node || "sitrAgent",
     {
       sitrAgent: "sitrAgent",
@@ -303,26 +282,16 @@ export function buildOrchestratorGraph() {
       infotecnicaAgent: "infotecnicaAgent",
     }
   )
-  // @ts-ignore
-  .addEdge("sitrAgent", "qualityAuditor")
-  // @ts-ignore
-  .addEdge("consumoAgent", "qualityAuditor")
-  // @ts-ignore
-  .addEdge("ssccAgent", "qualityAuditor")
-  // @ts-ignore
-  .addEdge("bessAgent", "qualityAuditor")
-  // @ts-ignore
-  .addEdge("cibersegAgent", "qualityAuditor")
-  // @ts-ignore
-  .addEdge("procedimentalAgent", "qualityAuditor")
-  // @ts-ignore
-  .addEdge("generacionAgent", "qualityAuditor")
-  // @ts-ignore
-  .addEdge("transmisionAgent", "qualityAuditor")
-  // @ts-ignore
-  .addEdge("infotecnicaAgent", "qualityAuditor")
-  // @ts-ignore
-  .addConditionalEdges("qualityAuditor",
+    .addEdge("sitrAgent", "qualityAuditor")
+    .addEdge("consumoAgent", "qualityAuditor")
+    .addEdge("ssccAgent", "qualityAuditor")
+    .addEdge("bessAgent", "qualityAuditor")
+    .addEdge("cibersegAgent", "qualityAuditor")
+    .addEdge("procedimentalAgent", "qualityAuditor")
+    .addEdge("generacionAgent", "qualityAuditor")
+    .addEdge("transmisionAgent", "qualityAuditor")
+    .addEdge("infotecnicaAgent", "qualityAuditor")
+    .addConditionalEdges("qualityAuditor",
     (state: AgentState) => state.next_node === "end" ? END : (state.next_node || END),
     {
       sitrAgent: "sitrAgent",

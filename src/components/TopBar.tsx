@@ -1,4 +1,4 @@
-import { Search, Bell, Mail, ScanFace, LogOut } from "lucide-react";
+import { Bell, Mail, LogOut } from "lucide-react";
 
 interface TopBarProps {
   user?: {
