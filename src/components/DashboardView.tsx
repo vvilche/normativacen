@@ -75,7 +75,7 @@ export function DashboardView({
             className="w-full max-w-4xl mx-auto py-12"
         >
             <div className="text-center mb-8 space-y-2">
-                <h2 className="text-3xl font-heading font-black text-white italic tracking-tighter uppercase font-technical">
+                <h2 className="text-3xl font-heading font-bold text-white italic tracking-tight uppercase font-technical">
                     Orquestador de <span className="text-gold underline decoration-gold/20 underline-offset-8">Cumplimiento</span>
                 </h2>
                 <p className="text-gray-400 text-sm font-medium">Activa el motor de razonamiento multi-agente para auditorías normativas del SEN.</p>
@@ -121,7 +121,7 @@ export function DashboardView({
           <div className="flex justify-between items-center bg-white/5 p-4 py-3 rounded-xl border border-white/5 backdrop-blur-md">
             <div className="flex items-center gap-3">
                 <div className="w-2 h-6 bg-gold rounded-full shadow-gold animate-pulse" />
-                <h2 className="text-xs font-black text-white tracking-[0.2em] uppercase italic flex items-center gap-2">
+                <h2 className="text-xs font-bold text-white tracking-[0.2em] uppercase italic flex items-center gap-2">
                     CEN Intelligence Hub <span className="text-slate-500 font-technical px-2 py-0.5 rounded bg-white/5 lowercase">v9.2.1</span>
                     <span className="text-[10px] text-gold animate-pulse shadow-gold">● LIVE</span>
                 </h2>
@@ -161,7 +161,7 @@ export function DashboardView({
 
             <div className="lg:col-span-3 bg-[#161B29]/30 border border-white/5 rounded-2xl p-6 backdrop-blur-xl shadow-xl relative overflow-hidden group opacity-60 hover:opacity-100 transition-opacity">
                 <div className="absolute inset-0 bg-gold/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <h4 className="text-[8px] font-black text-gray-500 uppercase tracking-widest mb-4">Trazabilidad Multi-Agente</h4>
+                <h4 className="text-[8px] font-bold text-gray-500 uppercase tracking-widest mb-4">Trazabilidad Multi-Agente</h4>
                 <HarnessMonitor status="complete" />
             </div>
           </div>
@@ -206,7 +206,7 @@ function StatCard({ icon, label, value, sub, highlight = false }: any) {
         {icon}
       </div>
       <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">{label}</p>
-      <h3 className="text-3xl font-black text-white tracking-tighter">{value}</h3>
+      <h3 className="text-3xl font-bold text-white tracking-tight">{value}</h3>
       <p className="text-[10px] text-gray-400 mt-2 font-technical">{sub}</p>
     </motion.div>
   );

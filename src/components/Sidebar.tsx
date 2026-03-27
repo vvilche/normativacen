@@ -22,7 +22,7 @@ const SidebarItem = ({ icon: Icon, label, active, onClick, danger }: SidebarItem
     )}
   >
     <Icon className={cn("w-3.5 h-3.5", active && "text-gold shadow-gold")} />
-    <span className="text-[10px] font-black uppercase tracking-[0.14em] shrink-0">{label}</span>
+    <span className="text-[10px] font-bold uppercase tracking-[0.14em] shrink-0">{label}</span>
   </div>
 );
 
@@ -51,13 +51,13 @@ export function Sidebar({ activeTab = "Dashboard", setActiveTab }: SidebarProps)
     <aside className="w-56 h-screen bg-[#0B0F1A] border-r border-white/5 flex flex-col p-5 fixed left-0 top-0 z-50">
       <div className="flex items-center gap-2.5 mb-8 pl-1">
         <div className="w-6 h-6 rounded-md bg-gold flex items-center justify-center text-black shadow-gold">
-            <span className="font-black italic text-sm">N</span>
+            <span className="font-bold italic text-sm">N</span>
         </div>
-        <span className="text-lg font-heading font-black text-white italic tracking-tighter">Normativa<span className="text-gold">CEN</span></span>
+        <span className="text-lg font-heading font-bold text-white italic tracking-tight">Normativa<span className="text-gold">CEN</span></span>
       </div>
 
       <nav className="flex-1 space-y-1">
-        <div className="text-[9px] text-gray-600 font-black uppercase tracking-[0.3em] mb-3 pl-1 opacity-40">Orquestador</div>
+        <div className="text-[9px] text-gray-600 font-bold uppercase tracking-[0.3em] mb-3 pl-1 opacity-40">Orquestador</div>
         {navItems.map((item) => (
             <SidebarItem 
                 key={item.label}

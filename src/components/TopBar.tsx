@@ -41,13 +41,13 @@ export function TopBar({ user }: TopBarProps) {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2.5 group">
             <div className="text-right">
-              <p className="text-[11px] font-black text-white/90 group-hover:text-gold transition-colors uppercase tracking-tight">{displayName}</p>
+              <p className="text-[11px] font-bold text-white/90 group-hover:text-gold transition-colors uppercase tracking-tight">{displayName}</p>
               <div className="flex items-center justify-end gap-1">
                   <div className="w-1 h-1 rounded-full bg-success shadow-[0_0_5px_rgba(16,185,129,0.5)]" />
-                  <span className="text-[8px] text-gray-600 font-black uppercase tracking-[0.15em]">Online</span>
+                  <span className="text-[8px] text-gray-600 font-bold uppercase tracking-[0.15em]">Online</span>
               </div>
             </div>
-            <div className="w-8 h-8 rounded-lg bg-gold/10 border border-gold/20 overflow-hidden flex items-center justify-center text-gold font-black text-xs shadow-gold">
+            <div className="w-8 h-8 rounded-lg bg-gold/10 border border-gold/20 overflow-hidden flex items-center justify-center text-gold font-bold text-xs shadow-gold">
               {initials}
             </div>
           </div>
