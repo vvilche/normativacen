@@ -5,10 +5,19 @@ import dbConnect from '@/lib/dbConnect';
 import User from '@/lib/models/User';
 import * as postmark from 'postmark';
 
-const postmarkClient = new postmark.ServerClient(process.env.POSTMARK_API_TOKEN || '');
-const POSTMARK_SENDER = process.env.POSTMARK_SENDER || 'admin@normativacen.cl';
+function getPostmarkClient() {
+  const token = process.env.POSTMARK_API_TOKEN || '';
+  if (!token) {
+    console.warn('⚠️ POSTMARK_API_TOKEN no configurada. El sistema operará en modo de simulación de correo.');
+    return null;
+  }
+  return new postmark.ServerClient(token);
+}
 
+const POSTMARK_SENDER = process.env.POSTMARK_SENDER || 'admin@normativacen.cl';
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   await dbConnect();
@@ -48,27 +57,32 @@ export async function POST(req: Request) {
       console.log(`[POSTMARK] Sending OTP to: ${email} (Code: ${otpCode})`);
       
       try {
-        const response = await postmarkClient.sendEmail({
-          From: `NormativaCEN <${POSTMARK_SENDER}>`,
-          To: email,
-          Subject: "Código de Verificación - NormativaCEN",
-          HtmlBody: `
-            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-              <h2 style="color: #2563eb; text-align: center;">NormativaCEN</h2>
-              <p>Hola,</p>
-              <p>Has iniciado el proceso de acceso en nuestra plataforma de cumplimiento normativo. Tu código de verificación es:</p>
-              <div style="background: #f3f4f6; padding: 20px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #111827; border-radius: 8px; margin: 20px 0;">
-                ${otpCode}
+        const client = getPostmarkClient();
+        if (client) {
+          const response = await client.sendEmail({
+            From: `NormativaCEN <${POSTMARK_SENDER}>`,
+            To: email,
+            Subject: "Código de Verificación - NormativaCEN",
+            HtmlBody: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                <h2 style="color: #2563eb; text-align: center;">NormativaCEN</h2>
+                <p>Hola,</p>
+                <p>Has iniciado el proceso de acceso en nuestra plataforma de cumplimiento normativo. Tu código de verificación es:</p>
+                <div style="background: #f3f4f6; padding: 20px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #111827; border-radius: 8px; margin: 20px 0;">
+                  ${otpCode}
+                </div>
+                <p style="font-size: 14px; color: #6b7280;">Este código expirará en 10 minutos. Si no solicitaste este código, puedes ignorar este mensaje.</p>
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+                <p style="font-size: 12px; color: #9ca3af; text-align: center;">© 2026 NormativaCEN.cl - Santiago, Chile</p>
               </div>
-              <p style="font-size: 14px; color: #6b7280;">Este código expirará en 10 minutos. Si no solicitaste este código, puedes ignorar este mensaje.</p>
-              <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-              <p style="font-size: 12px; color: #9ca3af; text-align: center;">© 2026 NormativaCEN.cl - Santiago, Chile</p>
-            </div>
-          `,
-          TextBody: `Tu código de verificación para NormativaCEN es: ${otpCode}. Expira en 10 minutos.`,
-          MessageStream: "outbound"
-        });
-        console.log(`[POSTMARK] Email sent successfully. ID: ${response.MessageID}`);
+            `,
+            TextBody: `Tu código de verificación para NormativaCEN es: ${otpCode}. Expira en 10 minutos.`,
+            MessageStream: "outbound"
+          });
+          console.log(`[POSTMARK] Email sent successfully. ID: ${response.MessageID}`);
+        } else {
+          console.log(`[AUTH-SIM] Simulación de envío de OTP para ${email}: ${otpCode}`);
+        }
       } catch (postmarkError: any) {
         console.error("Error sending via Postmark:", postmarkError.message);
         // Fallback log for development
@@ -126,23 +140,28 @@ export async function POST(req: Request) {
         
         // Versión simplificada del envío (reutilizando la lógica de arriba sería mejor refactorizar, pero para rapidez lo pondré aquí)
         try {
-          await postmarkClient.sendEmail({
-            From: `NormativaCEN <${POSTMARK_SENDER}>`,
-            To: email,
-            Subject: "Nuevo Código de Verificación - NormativaCEN",
-            HtmlBody: `
-              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-                <h2 style="color: #2563eb; text-align: center;">NormativaCEN</h2>
-                <p>Tu cuenta aún no ha sido verificada. Usa este nuevo código para ingresar:</p>
-                <div style="background: #f3f4f6; padding: 20px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #111827; border-radius: 8px; margin: 20px 0;">
-                  ${otpCode}
+          const client = getPostmarkClient();
+          if (client) {
+            await client.sendEmail({
+              From: `NormativaCEN <${POSTMARK_SENDER}>`,
+              To: email,
+              Subject: "Nuevo Código de Verificación - NormativaCEN",
+              HtmlBody: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                  <h2 style="color: #2563eb; text-align: center;">NormativaCEN</h2>
+                  <p>Tu cuenta aún no ha sido verificada. Usa este nuevo código para ingresar:</p>
+                  <div style="background: #f3f4f6; padding: 20px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #111827; border-radius: 8px; margin: 20px 0;">
+                    ${otpCode}
+                  </div>
+                  <p style="font-size: 14px; color: #6b7280;">Este código expirará en 10 minutos.</p>
                 </div>
-                <p style="font-size: 14px; color: #6b7280;">Este código expirará en 10 minutos.</p>
-              </div>
-            `,
-            TextBody: `Tu código de verificación para NormativaCEN es: ${otpCode}`,
-            MessageStream: "outbound"
-          });
+              `,
+              TextBody: `Tu código de verificación para NormativaCEN es: ${otpCode}`,
+              MessageStream: "outbound"
+            });
+          } else {
+             console.log(`[AUTH-SIM-LOGIN] Simulación de envío de OTP para ${email}: ${otpCode}`);
+          }
         } catch (e) {
           console.log(`[DEVELOPMENT FALLBACK] OTP Code: ${otpCode}`);
         }

@@ -45,7 +45,7 @@ export async function getRetriever() {
     const timeoutPromise = new Promise<never>((_, reject) => 
       setTimeout(() => reject(new Error("Timeout conectando a MongoDB")), 5000)
     );
-    client = await Promise.race([clientPromise, timeoutPromise]);
+    client = await Promise.race([clientPromise(), timeoutPromise]);
   } catch (err) {
     console.warn("⚠️ MongoDB inalcanzable, usando Retriever Simulado:", err);
     setConnectionFailed();

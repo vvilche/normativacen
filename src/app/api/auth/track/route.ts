@@ -5,6 +5,8 @@ import User from '@/lib/models/User';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: Request) {
   await dbConnect();
   const { slug, action } = await req.json();

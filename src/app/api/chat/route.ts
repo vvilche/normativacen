@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     const queryHash = crypto.createHash('md5').update(normalizedQuery).digest('hex');
 
     // 0. Verificar Caché (Repositorio de Resoluciones)
-    const client = await clientPromise;
+    const client = await clientPromise();
     const cacheCollection = client.db("normativacen").collection("technical_resolutions");
     
     const cachedResult = await cacheCollection.findOne({ queryHash });

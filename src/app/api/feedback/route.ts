@@ -27,7 +27,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Faltan campos requeridos" }, { status: 400 });
     }
 
-    const client = await clientPromise;
+    const client = await clientPromise();
     const db = client.db("normativacen");
     const collection = db.collection("agent_feedback");
 
@@ -80,7 +80,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "agentType requerido" }, { status: 400 });
     }
 
-    const client = await clientPromise;
+    const client = await clientPromise();
     const db = client.db("normativacen");
     const collection = db.collection("agent_feedback");
 
