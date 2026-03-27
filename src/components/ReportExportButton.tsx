@@ -67,8 +67,24 @@ export const ReportExportButton: React.FC<ReportExportButtonProps> = ({ report }
     const splitHallazgo = doc.splitTextToSize(report.hallazgo, pageWidth - 30);
     doc.text(splitHallazgo, 15, hallazgoY + 7);
 
+    // Riesgo Económico (NEW)
+    let fineY = hallazgoY + (splitHallazgo.length * 5) + 12;
+    if (report.projectedFineUTA) {
+        doc.setFillColor(254, 242, 242); // Light red for risk
+        doc.rect(15, fineY, pageWidth - 30, 15, 'F');
+        doc.setTextColor(153, 27, 27);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`RIESGO ECONÓMICO DETECTADO: CATEGORÍA ${report.projectedFineUTA.category}`, 20, fineY + 7);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.text(`PROYECCIÓN DE MULTA: ${report.projectedFineUTA.min} - ${report.projectedFineUTA.max} UTA (Sujeto a resolución SEC)`, 20, fineY + 11);
+        doc.setTextColor(15, 23, 42);
+        doc.setFontSize(10);
+        fineY += 20;
+    }
+
     // Plan de Acción
-    const actionY = hallazgoY + (splitHallazgo.length * 5) + 15;
+    const actionY = fineY + 5;
     doc.setFont('helvetica', 'bold');
     doc.text('PLAN DE ACCIÓN RECOMENDADO:', 15, actionY);
     
@@ -87,7 +103,10 @@ export const ReportExportButton: React.FC<ReportExportButtonProps> = ({ report }
         
         doc.setFontSize(8);
         doc.setTextColor(100, 116, 139);
-        doc.text(`[PRIORIDAD: ${action.priority}]`, pageWidth - 45, yPos + 1);
+        doc.text(`[PRIORIDAD: ${action.priority}]`, pageWidth - 45, yPos - 1);
+        doc.setTextColor(15, 23, 42);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`PLAZO: ${action.deadline || '30 días'}`, pageWidth - 45, yPos + 4);
         doc.setFontSize(10);
         doc.setTextColor(15, 23, 42);
     });

@@ -13,7 +13,8 @@ const ReportExportButton = dynamic(() => import("./ReportExportButton").then(mod
 interface Step {
   id: string;
   task: string;
-  priority: "CRÍTICA" | "Alta" | "Media";
+  priority: "CRÍTICA" | "Alta" | "Media" | "ALTA";
+  deadline: string;
 }
 
 interface Evidence {
@@ -159,7 +160,7 @@ export function ResolutionCard({
                 hallazgo: hallazgo || "", 
                 seoTags: seoTags || [],
                 normativeReferences: [],
-                actionPlan: acciones || [],
+                actionPlan: acciones.map(a => ({ ...a, deadline: a.deadline || "30 días" })),
                 metrics: controls.map(c => ({ 
                     label: c.label, 
                     value: 'CHECKED', 
