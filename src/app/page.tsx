@@ -334,7 +334,6 @@ export default function Home() {
                         }}
                     />
             ) : (
-            ) : (
                 <div className="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-6 animate-in zoom-in-95 duration-500">
                     <div className="bg-[#161B29]/40 p-16 rounded-[40px] border border-white/5 backdrop-blur-3xl shadow-2xl relative overflow-hidden group max-w-2xl">
                         <div className="absolute inset-0 bg-gold/5 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -352,7 +351,6 @@ export default function Home() {
                         </div>
                     </div>
                 </div>
-            )}
             )}
         </div>
     </DashboardLayout>
