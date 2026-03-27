@@ -10,6 +10,8 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { WhitePaperCard } from "@/components/WhitePaperCard";
 import { whitePapers } from "@/lib/data/whitePapers";
 import { getResolutionByQuery } from "@/lib/resolutionEngine";
+import { IndustrialBackground } from "@/components/IndustrialBackground";
+import { Code, Cpu, Activity, Layout, Layers, Box, Globe, PenTool } from "lucide-react";
 
 export default function Home() {
   const [query, setQuery] = useState("");
@@ -128,50 +130,139 @@ export default function Home() {
     return whitePapers.slice(0, 3);
   };
 
-  // Landing view for unauthenticated users
   if (!isRegistered) {
     return (
-      <main className="flex-1 flex flex-col items-center justify-start min-h-screen pt-12 pb-12 px-4 sm:px-6 relative overflow-hidden bg-[#0B0F1A] font-sans text-sm">
-        {/* Nav for Landing */}
-        <nav className="absolute top-0 w-full p-5 flex justify-between items-center z-50 max-w-7xl mx-auto">
-            <div className="flex items-center gap-2 font-heading font-black text-lg text-white italic tracking-tighter">
-                <div className="w-5 h-5 rounded bg-accent flex items-center justify-center text-white text-[10px]">N</div>
-                <span>NormativaCEN</span>
-            </div>
-            <a href="/login" className="px-4 py-1.5 rounded-lg bg-white/5 border border-white/5 text-gray-400 text-[10px] font-black uppercase tracking-widest hover:text-white transition-all">
-                Login
-            </a>
+      <main className="flex-1 flex flex-col items-center justify-start min-h-screen bg-[#0B0F1A] font-sans selection:bg-gold/30 selection:text-gold relative overflow-x-hidden">
+        <IndustrialBackground />
+
+        {/* --- NAVIGATION --- */}
+        <nav className="fixed top-0 w-full p-6 flex justify-between items-center z-50 px-8">
+            <motion.div 
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="flex items-center gap-3 font-premium font-black text-xl text-white tracking-widest"
+            >
+                <div className="w-6 h-6 rounded bg-gold flex items-center justify-center text-black text-[12px] shadow-gold">N</div>
+                <span>NORMATIVA<span className="text-gold">CEN</span></span>
+            </motion.div>
+            <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+            >
+                <a href="/login" className="px-5 py-2 rounded-xl bg-white/5 border border-white/10 text-white/60 text-[10px] font-black uppercase tracking-[0.2em] hover:text-white hover:bg-white/10 transition-all backdrop-blur-md">
+                    Acceso Cliente
+                </a>
+            </motion.div>
         </nav>
 
-        <div className="text-center z-10 max-w-4xl mx-auto flex flex-col items-center mt-24">
+        {/* --- HERO SECTION --- */}
+        <section className="relative z-10 w-full max-w-7xl mx-auto px-6 pt-32 pb-40 flex flex-col items-center text-center">
             <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/5 border border-accent/10 text-[9px] font-black uppercase tracking-[0.25em] text-accent/60 mb-8 backdrop-blur-md"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gold/5 border border-gold/10 text-[10px] font-black uppercase tracking-[0.3em] text-gold mb-10 backdrop-blur-xl"
             >
-                <Zap className="w-3 h-3" />
-                <span>Agentic Compliance Engine V7</span>
+                <Zap className="w-3.5 h-3.5 fill-gold" />
+                <span>Agentic Compliance Matrix v9.1.5</span>
             </motion.div>
             
-            <h1 className="font-heading text-6xl md:text-7xl font-black tracking-tighter text-white mb-6 italic leading-[0.9] uppercase">
-                Compliance <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-cyan-400">Intelligence</span>
-            </h1>
-
-            <p className="text-lg text-gray-600 max-w-xl mb-12 font-medium leading-relaxed italic">
-                De complejidad normativa a veredictos técnicos accionables. <br />
-                Multi-agente. Tiempo real. Precisión industrial.
-            </p>
-
-            <button 
-                onClick={() => setIsModalOpen(true)}
-                className="group relative px-10 py-4 bg-accent rounded-2xl overflow-hidden transition-all hover:shadow-[0_20px_40px_-10px_rgba(45,108,223,0.4)] active:scale-95"
+            <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="font-premium text-7xl md:text-9xl font-black tracking-tighter text-white mb-8 max-w-5xl"
             >
-                <div className="relative flex items-center gap-2 text-white font-black tracking-widest uppercase text-[12px]">
-                    Comenzar Análisis <ChevronRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
+                COMPLIANCE <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-gold to-white bg-[length:200%_auto] animate-[gradient_3s_linear_infinite]">INTELLIGENCE</span>
+            </motion.h1>
+
+            <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="text-xl text-gray-400 max-w-2xl mb-14 font-medium leading-relaxed"
+            >
+                De complejidad regulatoria a <span className="text-white border-b-2 border-gold/40">veredictos técnicos</span> accionables. <br />
+                Multi-agente. Orquestado. Industrial.
+            </motion.p>
+
+            <motion.button 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5 }}
+                onClick={() => setIsModalOpen(true)}
+                className="group relative px-12 py-5 bg-gold rounded-full overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-gold"
+            >
+                <div className="relative flex items-center gap-3 text-black font-black tracking-[0.2em] uppercase text-[13px]">
+                    Comenzar Análisis Técnico <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </div>
-            </button>
-        </div>
+            </motion.button>
+        </section>
+
+        {/* --- FEATURES GRID (The 8 Agents) --- */}
+        <section className="relative z-10 w-full max-w-7xl mx-auto px-6 py-20 bg-gradient-to-b from-transparent via-white/[0.02] to-transparent">
+            <div className="text-center mb-16">
+                <h2 className="text-gold text-[10px] font-black uppercase tracking-[0.4em] mb-4">Arquitectura de Inferencia</h2>
+                <h3 className="text-3xl text-white font-premium mb-4">8 Agentes Especializados</h3>
+                <div className="w-12 h-1 bg-gold mx-auto rounded-full" />
+            </div>
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                    { icon: ShieldCheck, name: "Agente SITR", desc: "Monitoreo PMU y telemetría crítica." },
+                    { icon: Database, name: "Motor RAG", desc: "Indexación normativa en tiempo real." },
+                    { icon: Cpu, name: "Orquestador Tung", desc: "Gobernanza y ruteo semántico." },
+                    { icon: FileText, name: "Analista EDAC", desc: "Validación de esquemas de desconexión." },
+                    { icon: Globe, name: "Monitor CEN", desc: "Sincronización con el Coordinador." },
+                    { icon: Activity, name: "Inferencia Técnica", desc: "Cálculo de penalizaciones y riesgos." },
+                    { icon: Layers, name: "Arquetipo de Activos", desc: "Modelado PV, BESS y Eólicos." },
+                    { icon: PenTool, name: "Motor de Reportes", desc: "Exportación Dossier PDF V8.2." }
+                ].map((feature, i) => (
+                    <motion.div 
+                        key={i}
+                        whileHover={{ y: -5, backgroundColor: "rgba(234, 179, 8, 0.05)" }}
+                        className="p-8 rounded-[32px] bg-white/[0.03] border border-white/[0.05] backdrop-blur-xl transition-all group"
+                    >
+                        <feature.icon className="w-8 h-8 text-gold mb-6 opacity-60 group-hover:opacity-100 transition-opacity" />
+                        <h4 className="text-white font-black text-[13px] uppercase tracking-widest mb-3">{feature.name}</h4>
+                        <p className="text-gray-500 text-[11px] leading-relaxed font-medium">{feature.desc}</p>
+                    </motion.div>
+                ))}
+            </div>
+        </section>
+
+        {/* --- LIVE EVIDENCE (Mockup) --- */}
+        <section className="relative z-10 w-full max-w-5xl mx-auto px-6 py-40 flex flex-col items-center">
+             <div className="w-full rounded-[40px] border border-white/5 bg-black/40 p-8 backdrop-blur-2xl shadow-2xl relative group">
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-gold/10 blur-[60px] rounded-full animate-pulse" />
+                <div className="flex items-center gap-4 mb-8">
+                    <div className="flex gap-2">
+                        <div className="w-3 h-3 rounded-full bg-red-500/50" />
+                        <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
+                        <div className="w-3 h-3 rounded-full bg-green-500/50" />
+                    </div>
+                    <div className="h-px flex-1 bg-white/5" />
+                    <span className="text-[10px] font-mono text-white/20 uppercase tracking-[0.2em]">In-Line Resolution Preview</span>
+                </div>
+                
+                <div className="space-y-4">
+                    <div className="h-4 w-2/3 bg-white/5 rounded animate-pulse" />
+                    <div className="h-4 w-1/2 bg-white/5 rounded animate-pulse" />
+                    <div className="grid grid-cols-3 gap-4 pt-8">
+                        <div className="h-20 rounded-2xl bg-gold/5 border border-gold/10" />
+                        <div className="h-20 rounded-2xl bg-white/5 border border-white/10" />
+                        <div className="h-20 rounded-2xl bg-white/5 border border-white/10" />
+                    </div>
+                </div>
+                
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    <div className="px-6 py-3 rounded-full bg-gold text-black font-black uppercase tracking-widest text-[10px] shadow-gold scale-90 group-hover:scale-100 transition-transform">
+                        Ver Demo Interactiva
+                    </div>
+                </div>
+             </div>
+        </section>
 
         <LeadGenModal 
             isOpen={isModalOpen} 
@@ -183,8 +274,19 @@ export default function Home() {
             }} 
         />
         
-        <footer className="mt-auto pt-20 text-center text-gray-800 text-[9px] font-black uppercase tracking-[0.3em] opacity-40">
-            © 2026 NormativaCEN · INDUSTRIAL COMPLIANCE V7.2.4
+        <footer className="relative z-10 w-full border-t border-white/5 py-20 px-6 mt-20">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10 opacity-40 grayscale hover:grayscale-0 transition-all duration-700">
+                <div className="flex items-center gap-3 font-premium font-black text-xl text-white tracking-widest">
+                    <div className="w-5 h-5 rounded bg-white flex items-center justify-center text-black text-[10px]">N</div>
+                    <span>NORMATIVA<span className="text-white">CEN</span></span>
+                </div>
+                <div className="flex gap-10 text-[9px] font-black uppercase tracking-[0.3em] text-white">
+                    <span>Industrial Intelligence</span>
+                    <span>Multi-Agent Engine</span>
+                    <span>ISO 2025 Compliance</span>
+                </div>
+                <p className="text-[9px] text-white text-right">© 2026 NormativaCEN · Industrial Excellence</p>
+            </div>
         </footer>
       </main>
     );

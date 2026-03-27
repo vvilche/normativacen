@@ -71,15 +71,15 @@ export async function getRetriever() {
             ]
           }).limit(3).toArray();
           
-          return regexResults.map(doc => ({
-            pageContent: doc.text,
-            metadata: doc.metadata
+          return regexResults.map((doc: any) => ({
+            pageContent: doc.text || "",
+            metadata: doc.metadata || {}
           }));
         }
 
-        return results.map(doc => ({
-          pageContent: doc.text,
-          metadata: doc.metadata
+        return results.map((doc: any) => ({
+          pageContent: doc.text || "",
+          metadata: doc.metadata || {}
         }));
       } catch (error) {
         console.error("❌ Error en Retriever:", error);

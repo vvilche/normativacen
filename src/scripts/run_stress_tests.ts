@@ -1,8 +1,8 @@
-import { buildOrchestratorGraph } from "./orchestratorGraph";
-import { HumanMessage } from "@langchain/core/messages";
 import * as dotenv from "dotenv";
-
 dotenv.config({ path: ".env.local" });
+
+import { buildOrchestratorGraph } from "../lib/agents/orchestratorGraph";
+import { HumanMessage } from "@langchain/core/messages";
 
 const STRESS_SCENARIOS = [
   {
@@ -32,7 +32,7 @@ async function runStressTests() {
     };
 
     try {
-      const result = await app.invoke(state);
+      const result = await app.invoke(state) as { messages: any[], next_node: string };
       const lastMsg = result.messages[result.messages.length - 1];
       console.log(`🤖 AGENTE RESPONSABLE: ${result.next_node}`);
       console.log("--------------------------------------------------");

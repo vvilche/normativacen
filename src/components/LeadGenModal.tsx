@@ -106,7 +106,7 @@ export function LeadGenModal({ isOpen, onClose, onSuccess }: LeadGenModalProps) 
           >
             <div className="bg-[#0B1221] border border-white/10 rounded-2xl shadow-2xl overflow-hidden relative">
               {/* Decorative Header */}
-              <div className="h-1.5 bg-gradient-to-r from-accent via-cyan-400 to-success" />
+              <div className="h-1.5 bg-gradient-to-r from-gold via-white/40 to-gold shadow-gold" />
               
               <div className="p-6 md:p-8">
                 <button 
@@ -117,7 +117,7 @@ export function LeadGenModal({ isOpen, onClose, onSuccess }: LeadGenModalProps) 
                 </button>
 
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
+                  <div className="w-12 h-12 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-gold">
                     {step === 'form' ? <Lock className="w-5 h-5" /> : <Key className="w-5 h-5" />}
                   </div>
                   <div>
@@ -245,7 +245,7 @@ export function LeadGenModal({ isOpen, onClose, onSuccess }: LeadGenModalProps) 
                     <button 
                       type="submit" 
                       disabled={isLoading}
-                      className="w-full mt-6 bg-accent hover:shadow-[0_0_20px_rgba(45,108,223,0.3)] text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                      className="w-full mt-6 bg-gold hover:shadow-gold text-black font-black py-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 uppercase tracking-widest text-[11px]"
                     >
                       {isLoading ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
@@ -260,7 +260,7 @@ export function LeadGenModal({ isOpen, onClose, onSuccess }: LeadGenModalProps) 
                     <div className="mt-6 pt-6 border-t border-white/5 text-center">
                       <p className="text-gray-500 text-sm">
                         ¿Ya tienes cuenta?{' '}
-                        <a href="/login" className="text-accent font-bold hover:underline transition-all">
+                        <a href="/login" className="text-gold font-bold hover:underline transition-all">
                           Inicia sesión aquí
                         </a>
                       </p>

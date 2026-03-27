@@ -1,8 +1,8 @@
-import { buildOrchestratorGraph } from "./orchestratorGraph";
-import { HumanMessage } from "@langchain/core/messages";
 import * as dotenv from "dotenv";
-
 dotenv.config({ path: ".env.local" });
+
+import { buildOrchestratorGraph } from "../lib/agents/orchestratorGraph";
+import { HumanMessage } from "@langchain/core/messages";
 
 async function testOrchestrator() {
   const app = buildOrchestratorGraph();
@@ -28,7 +28,7 @@ async function testOrchestrator() {
     };
 
     try {
-      const result = await app.invoke(state);
+      const result = await app.invoke(state) as { messages: any[], next_node: string };
       const lastMsg = result.messages[result.messages.length - 1];
       console.log(`✅ Agente Destino: ${result.next_node}`);
       console.log(`📄 Respuesta (primeros 200 chars): ${lastMsg.content.substring(0, 200)}...`);

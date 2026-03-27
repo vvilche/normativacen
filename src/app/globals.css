@@ -24,6 +24,8 @@
   --ring: #2D6CDF;
   --success: #10B981;
   --success-foreground: #FFFFFF;
+  --gold: #EAB308;
+  --gold-muted: rgba(234, 179, 8, 0.1);
 }
 
 @theme inline {
@@ -41,6 +43,8 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
+  --color-gold: var(--gold);
+  --color-gold-muted: var(--gold-muted);
   
   --font-heading: var(--font-inter);
   --font-body: var(--font-inter);
@@ -60,9 +64,15 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, .h1 { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; letter-spacing: -0.03em; text-transform: uppercase; font-style: italic; }
-h2, .h2 { font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
-h3, .h3 { font-family: var(--font-heading); font-size: 1.125rem; font-weight: 700; }
+h1, .h1 { font-family: var(--font-heading); font-size: 2.5rem; font-weight: 900; letter-spacing: -0.05em; text-transform: uppercase; line-height: 0.9; }
+h2, .h2 { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; letter-spacing: -0.03em; text-transform: uppercase; }
+h3, .h3 { font-family: var(--font-heading); font-size: 1.125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+
+.font-premium {
+  font-family: var(--font-heading);
+  font-style: normal;
+  letter-spacing: -0.02em;
+}
 
 .text-technical {
   font-family: var(--font-mono);
@@ -103,3 +113,16 @@ h3, .h3 { font-family: var(--font-heading); font-size: 1.125rem; font-weight: 70
 .status-badge {
   @apply px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter border;
 }
+
+/* Industrial Patterns */
+.bg-industrial-grid {
+  background-image: 
+    linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.text-gold { color: var(--gold); }
+.bg-gold { background-color: var(--gold); }
+.border-gold { border-color: var(--gold); }
+.shadow-gold { box-shadow: 0 0 20px rgba(234, 179, 8, 0.2); }
