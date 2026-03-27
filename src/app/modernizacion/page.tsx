@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Cpu, RefreshCcw, ShieldCheck, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { IndustrialBackground } from '@/components/IndustrialBackground';
 
 const ModernizationPage = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -47,7 +48,8 @@ const ModernizationPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-8 md:p-16">
+    <div className="min-h-screen bg-[#0B0F1A] p-8 md:p-16 relative">
+      <IndustrialBackground />
       <div className="max-w-4xl mx-auto space-y-12">
         <header className="space-y-4 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-medium mb-4">

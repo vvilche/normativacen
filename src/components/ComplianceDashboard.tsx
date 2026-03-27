@@ -128,14 +128,14 @@ export function ComplianceDashboard() {
 function StatCard({ icon, label, value, sub, highlight = false }: any) {
   return (
     <div className={`p-5 rounded-2xl border backdrop-blur-sm transition-all hover:translate-y-[-2px] ${
-      highlight ? 'bg-critical/5 border-critical/30 ring-1 ring-critical/20' : 'bg-[#1E293B]/40 border-white/5'
+      highlight ? 'bg-critical/5 border-critical/30 ring-1 ring-critical/20' : 'bg-[#1E293B]/40 border-white/5 hover:border-gold/20'
     }`}>
-      <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center mb-4 border border-white/5">
+      <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center mb-4 border border-white/5 group-hover:border-gold/20">
         {icon}
       </div>
-      <p className="text-xs text-slate-400 mb-1">{label}</p>
-      <h3 className="text-2xl font-black text-white">{value}</h3>
-      <p className="text-[10px] text-slate-500 mt-1">{sub}</p>
+      <p className="text-[10px] uppercase font-black tracking-widest text-slate-500 mb-1">{label}</p>
+      <h3 className="text-2xl font-black text-white italic">{value}</h3>
+      <p className="text-[10px] text-slate-500 mt-1 font-medium">{sub}</p>
     </div>
   );
 }

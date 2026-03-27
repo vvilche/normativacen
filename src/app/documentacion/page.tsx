@@ -3,6 +3,7 @@
 import React from 'react';
 import { BookOpen, ShieldCheck, Zap, Terminal, Cpu, ArrowRight, CheckCircle2, Lock, Download } from 'lucide-react';
 import Link from 'next/link';
+import { IndustrialBackground } from '@/components/IndustrialBackground';
 
 const DocumentationPage = () => {
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
@@ -14,12 +15,8 @@ const DocumentationPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-primary/30">
-      {/* Background decoration */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent/5 blur-[120px] rounded-full" />
-      </div>
+    <div className="min-h-screen bg-[#0B0F1A] text-foreground selection:bg-primary/30 relative">
+      <IndustrialBackground />
 
       <div className="max-w-5xl mx-auto p-6 md:p-12 lg:p-20 space-y-24">
         {/* Header */}
