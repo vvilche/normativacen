@@ -96,13 +96,13 @@ export async function POST(req: Request) {
       user.otp = undefined; // Clear OTP after verification
       await user.save();
         
-      const token = jwt.sign({ userId: user._id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+      const token = jwt.sign({ userId: user._id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '5d' });
       const response = NextResponse.json({ message: 'Verificado correctamente', token });
       // Set httpOnly: false so client-side React can detect the session to unlock the UI
       response.cookies.set('auth_token', token, { 
         httpOnly: false, 
         secure: true, 
-        maxAge: 604800,
+        maxAge: 432000,
         path: '/' 
       });
       return response;
@@ -153,12 +153,12 @@ export async function POST(req: Request) {
         }, { status: 403 });
       }
 
-      const token = jwt.sign({ userId: user._id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+      const token = jwt.sign({ userId: user._id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '5d' });
       const response = NextResponse.json({ message: 'Login exitoso', token });
       response.cookies.set('auth_token', token, { 
         httpOnly: false, 
         secure: true, 
-        maxAge: 604800,
+        maxAge: 432000,
         path: '/' 
       });
       return response;

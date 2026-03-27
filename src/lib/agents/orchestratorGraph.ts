@@ -11,7 +11,8 @@ import {
   CIBERSEG_AGENT_PROMPT,
   PROCEDIMENTAL_AGENT_PROMPT,
   GENERACION_AGENT_PROMPT,
-  TRANSMISION_AGENT_PROMPT
+  TRANSMISION_AGENT_PROMPT,
+  INFOTECNICA_AGENT_PROMPT
 } from "./prompts";
 import { getRetriever } from "../rag/retriever";
 
@@ -24,8 +25,10 @@ export interface AgentState {
   messages: BaseMessage[];
   userProfile: any;
   next_node?: string;
-  contextText?: string; // New: Share RAG context with Auditor
-  draftResponse?: string; // New: Hold agent draft for revision
+  contextText?: string;
+  draftResponse?: string;
+  revisionCount?: number; // Tracker for self-correction loops
+  lastAgentNode?: string; // Remember which agent drafted the response
 }
 
 // -------------------------------------------------------
@@ -55,9 +58,9 @@ async function callGemini(systemPrompt: string, userMessages: BaseMessage[], con
 // ROUTER LLM - Clasificador semántico de intención
 // -------------------------------------------------------
 const ROUTER_SYSTEM_PROMPT = `Eres un clasificador de intenciones para un sistema de cumplimiento normativo (NormativaCEN).
-Tu ÚNICA tarea es identificar cuál de los 8 agentes especializados es el adecuado.
+Tu ÚNICA tarea es identificar cuál de los 9 agentes especializados es el adecuado.
 Responde con EXACTAMENTE UNO de estos códigos:
-SITR | CONSUMO | SSCC | BESS | CIBERSEG | PROCEDIMENTAL | GENERACION | TRANSMISION
+SITR | CONSUMO | SSCC | BESS | CIBERSEG | PROCEDIMENTAL | GENERACION | TRANSMISION | INFOTECNICA
 
 Guía de clasificación:
 - SITR: telecomunicaciones, latencia, GPS, protocolos (DNP3, ICCP, 104), SCADA.
@@ -68,6 +71,7 @@ Guía de clasificación:
 - PROCEDIMENTAL: trámites CEN, plazos SEC, auditorías administrativas, PES.
 - GENERACION: centrales >= 9MW, PMGD, EDAG, ERAG, despacho.
 - TRANSMISION: subestaciones, STN, PDC, visibilidad de red.
+- INFOTECNICA: fichas técnicas, parámetros eléctricos, impedancia, ampacidad, datos de placa, instalaciones específicas por nombre.
 
 Responde SOLO el código.`;
 
@@ -89,15 +93,15 @@ async function orchestratorRouter(state: AgentState): Promise<Partial<AgentState
     const routeCode = (typeof response.content === 'string' ? response.content : "").trim().toUpperCase();
     
     // Extraer solo la palabra clave si el LLM responde con más texto por error
-    const match = routeCode.match(/(SITR|CONSUMO|SSCC|BESS|CIBERSEG|PROCEDIMENTAL|GENERACION|TRANSMISION)/);
+    const match = routeCode.match(/(SITR|CONSUMO|SSCC|BESS|CIBERSEG|PROCEDIMENTAL|GENERACION|TRANSMISION|INFOTECNICA)/);
     const validatedCode = match ? match[1] : "SITR";
 
     const next_node = `${validatedCode.toLowerCase()}Agent`;
     console.log(`🔀 Router LLM → ${next_node}`);
-    return { next_node };
+    return { next_node, lastAgentNode: next_node };
   } catch (err) {
     console.warn("⚠️ Router LLM falló, usando fallback SITR:", err);
-    return { next_node: "sitrAgent" };
+    return { next_node: "sitrAgent", lastAgentNode: "sitrAgent" };
   }
 }
 
@@ -119,19 +123,27 @@ async function createAgentNode(systemPrompt: string, state: AgentState, agentTyp
   }
 
   const profileContext = "\n\nPerfil del Coordinado: " + JSON.stringify(state.userProfile);
-  const fullPrompt = systemPrompt + profileContext;
+  
+  // Si esto es un re-intento, incluimos las observaciones del auditor en el prompt
+  const isRetry = (state.revisionCount || 0) > 0;
+  const retryInstructions = isRetry 
+    ? `\n\n[INSTRUCCIÓN DE REVISIÓN]: Tu respuesta preliminar fue rechazada por falta de detalle técnico. 
+       OBSERVACIONES: ${state.messages[state.messages.length - 1].content}`
+    : "";
+
+  const fullPrompt = systemPrompt + profileContext + retryInstructions;
 
   const draftResponse = await callGemini(fullPrompt, state.messages, contextText);
   
-  // Guardamos contexto y borrador para el Auditor
   return { 
     contextText, 
-    draftResponse 
+    draftResponse,
+    lastAgentNode: agentTypeName // Guardar quién hizo el último borrador
   };
 }
 
 // -------------------------------------------------------
-// NODOS DE AGENTES (8 agentes)
+// NODOS DE AGENTES (9 agentes especializados)
 // -------------------------------------------------------
 const sitrAgentNode = (s: AgentState) => createAgentNode(SITR_AGENT_PROMPT, s, "sitrAgent");
 const consumoAgentNode = (s: AgentState) => createAgentNode(EDAC_AGENT_PROMPT, s, "consumoAgent");
@@ -143,19 +155,70 @@ const generacionAgentNode = (s: AgentState) => createAgentNode(GENERACION_AGENT_
 const transmisionAgentNode = (s: AgentState) => createAgentNode(TRANSMISION_AGENT_PROMPT, s, "transmisionAgent");
 
 // -------------------------------------------------------
+// NODO ESPECIALIZADO: InfoTécnica (CEN API Integration)
+// -------------------------------------------------------
+async function infotecnicaAgentNode(state: AgentState): Promise<Partial<AgentState>> {
+  const lastMessage = state.messages[state.messages.length - 1];
+  const query = typeof lastMessage.content === "string" ? lastMessage.content : "";
+  
+  let techContext = "";
+  
+  try {
+    // Intento de búsqueda proactiva en la API de InfoTécnica
+    // Ejemplo: buscar subestaciones si la query parece referirse a una
+    const typesToSearch = ["subestaciones", "centrales", "lineas"];
+    for (const type of typesToSearch) {
+      if (query.toLowerCase().includes(type.slice(0, -1))) {
+         const response = await fetch(`https://api-infotecnica.coordinador.cl/v1/${type}/?search=${encodeURIComponent(query)}&format=json`);
+         if (response.ok) {
+           const data = await response.json();
+           const results = Array.isArray(data) ? data : data.results || [];
+           if (results.length > 0) {
+             techContext += `\n[RESULTADOS EN TIEMPO REAL INFO-TÉCNICA - ${type.toUpperCase()}]:\n${JSON.stringify(results.slice(0, 3), null, 2)}`;
+             break;
+           }
+         }
+      }
+    }
+  } catch (err) {
+    console.warn("⚠️ API InfoTécnica no disponible:", err);
+  }
+
+  const result = await createAgentNode(INFOTECNICA_AGENT_PROMPT, state, "infotecnicaAgent");
+  return {
+    ...result,
+    contextText: (result.contextText || "") + techContext
+  };
+}
+
+// -------------------------------------------------------
 // NODO: Auditoría de Calidad (Antialucinación)
 // -------------------------------------------------------
 async function qualityAuditorNode(state: AgentState): Promise<Partial<AgentState>> {
-  console.log("🛡️ Quality Auditor → Validando integridad técnica...");
+  const currentRevision = state.revisionCount || 0;
+  console.log(`🛡️ Quality Auditor → Validando integridad técnica (Revisión #${currentRevision + 1})...`);
   
   const auditorInput = [
     new HumanMessage(`REVISA ESTE BORRADOR:\n\n${state.draftResponse}`)
   ];
 
-  const finalResponse = await callGemini(QUALITY_AUDITOR_PROMPT, auditorInput, state.contextText);
+  const feedback = await callGemini(QUALITY_AUDITOR_PROMPT, auditorInput, state.contextText);
   
+  // Check for REJECTION logic
+  if (feedback.includes('[RECHAZADO]') && currentRevision < 2) {
+    console.log("❌ Auditoría FALLIDA. Solicitando re-elaboración al especialista...");
+    return {
+      messages: [new AIMessage(feedback)],
+      revisionCount: currentRevision + 1,
+      next_node: state.lastAgentNode // Enviar de vuelta al agente que falló
+    };
+  }
+
+  // Si pasa o alcanzó el límite de reintentos
+  console.log("✅ Auditoría APROBADA (o límite de revisiones alcanzado).");
   return { 
-    messages: [new AIMessage(finalResponse)]
+    messages: [new AIMessage(feedback)],
+    next_node: "end" 
   };
 }
 
@@ -190,6 +253,16 @@ export function buildOrchestratorGraph() {
         value: (prev, next) => next || prev,
         default: () => "",
       },
+      revisionCount: {
+        //@ts-ignore
+        value: (prev, next) => next || prev,
+        default: () => 0,
+      },
+      lastAgentNode: {
+        //@ts-ignore
+        value: (prev, next) => next || prev,
+        default: () => "",
+      },
     },
   })
   // @ts-ignore
@@ -210,6 +283,8 @@ export function buildOrchestratorGraph() {
   // @ts-ignore
   .addNode("transmisionAgent", transmisionAgentNode)
   // @ts-ignore
+  .addNode("infotecnicaAgent", infotecnicaAgentNode)
+  // @ts-ignore
   .addNode("qualityAuditor", qualityAuditorNode)
   // @ts-ignore
   .addEdge(START, "router")
@@ -225,6 +300,7 @@ export function buildOrchestratorGraph() {
       procedimentalAgent: "procedimentalAgent",
       generacionAgent: "generacionAgent",
       transmisionAgent: "transmisionAgent",
+      infotecnicaAgent: "infotecnicaAgent",
     }
   )
   // @ts-ignore
@@ -244,7 +320,23 @@ export function buildOrchestratorGraph() {
   // @ts-ignore
   .addEdge("transmisionAgent", "qualityAuditor")
   // @ts-ignore
-  .addEdge("qualityAuditor", END);
+  .addEdge("infotecnicaAgent", "qualityAuditor")
+  // @ts-ignore
+  .addConditionalEdges("qualityAuditor",
+    (state: AgentState) => state.next_node === "end" ? END : (state.next_node || END),
+    {
+      sitrAgent: "sitrAgent",
+      consumoAgent: "consumoAgent",
+      ssccAgent: "ssccAgent",
+      bessAgent: "bessAgent",
+      cibersegAgent: "cibersegAgent",
+      procedimentalAgent: "procedimentalAgent",
+      generacionAgent: "generacionAgent",
+      transmisionAgent: "transmisionAgent",
+      infotecnicaAgent: "infotecnicaAgent",
+      [END]: END
+    }
+  );
 
   return workflow.compile();
 }

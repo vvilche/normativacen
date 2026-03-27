@@ -18,10 +18,7 @@ export default function DashboardPage() {
   }, []);
 
   return (
-  return (
     <div className="min-h-screen text-slate-200 font-sans selection:bg-gold/30 relative overflow-hidden">
-      <IndustrialBackground />
-
       {/* Navigation */}
       <nav className="border-b border-white/5 bg-[#0B0F1A]/80 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -53,12 +50,12 @@ export default function DashboardPage() {
           <div>
             <div className="flex items-center gap-2 text-gold mb-2">
               <ShieldCheck className="w-5 h-5 shadow-gold" />
-              <span className="text-[10px] font-black tracking-[0.3em] uppercase">Panel de Control Estratégico v9.2</span>
+              <span className="text-[10px] font-black tracking-[0.3em] uppercase">Panel de Control Estratégico v9.2.1</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight italic">Salud de Activos del Coordinado</h1>
             <p className="text-slate-400 mt-2 max-w-2xl text-sm font-medium">
               Monitoreo en tiempo real de cumplimiento, riesgos regulatorios y exposición económica 
-              basado en la matriz de <span className="text-white underline decoration-gold/40 underline-offset-4">8 especialistas de IA</span>.
+              basado en la matriz de <span className="text-white underline decoration-gold/40 underline-offset-4">9 especialistas de IA</span>.
             </p>
           </div>
 

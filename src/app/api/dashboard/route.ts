@@ -11,7 +11,7 @@ export async function GET() {
     // Simulación de agregación de datos (en producción esto vendría de una agregación de MongoDB)
     const dashboardData = {
       globalScore: 88.5,
-      totalAssets: 12,
+      totalAssets: 9,
       criticalRisks: 3,
       totalExposureUTA: 12500,
       

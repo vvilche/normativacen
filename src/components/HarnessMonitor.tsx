@@ -16,7 +16,7 @@ export function HarnessMonitor({ status = "idle" }: { status?: "idle" | "process
   return (
     <div className="w-full max-w-lg mx-auto py-8">
       <div className="mb-10 text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-[10px] font-black uppercase tracking-[0.2em] text-accent mb-4">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/10 border border-gold/20 text-[10px] font-black uppercase tracking-[0.2em] text-gold mb-4 shadow-gold">
             <Settings className="w-3 h-3 animate-spin-slow" />
             <span>Multi-Agent Traceability</span>
         </div>
@@ -48,9 +48,9 @@ export function HarnessMonitor({ status = "idle" }: { status?: "idle" | "process
               <div className={cn(
                 "absolute left-0 w-8 h-8 rounded-full border flex items-center justify-center transition-all duration-500 z-10",
                 isPending
-                    ? "bg-[#161B29] border-white/10 text-gray-700"
+                    ? "bg-[#161B29] border-white/10 text-slate-700"
                     : isActive
-                        ? "bg-accent border-accent shadow-[0_0_20px_rgba(45,108,223,0.5)] text-white scale-110"
+                        ? "bg-gold border-gold shadow-gold text-black scale-110"
                         : "bg-success/20 border-success/30 text-success"
               )}>
                 {isPending ? (
@@ -75,10 +75,10 @@ export function HarnessMonitor({ status = "idle" }: { status?: "idle" | "process
                     <span className="text-[9px] font-technical text-gray-600">{step.time}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="text-[8px] text-gray-600 font-bold uppercase tracking-widest">Agente:</span>
+                    <span className="text-[8px] text-slate-600 font-bold uppercase tracking-widest">Agente:</span>
                     <span className={cn(
                         "text-[9px] font-technical italic",
-                        isActive ? "text-accent" : "text-gray-400"
+                        isActive ? "text-gold" : "text-slate-500"
                     )}>{step.agent}</span>
                 </div>
               </div>
@@ -88,10 +88,10 @@ export function HarnessMonitor({ status = "idle" }: { status?: "idle" | "process
       </div>
 
       {status === "processing" && (
-        <div className="mt-12 p-4 rounded-xl bg-accent/5 border border-accent/10 backdrop-blur-md">
+        <div className="mt-12 p-4 rounded-xl bg-gold/5 border border-gold/10 backdrop-blur-md">
             <div className="flex items-center gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-accent animate-ping" />
-                <p className="text-[10px] text-accent font-black uppercase tracking-[0.2em] leading-relaxed">
+                <div className="w-1.5 h-1.5 rounded-full bg-gold animate-ping shadow-gold" />
+                <p className="text-[10px] text-gold font-black uppercase tracking-[0.2em] leading-relaxed">
                     Sintetizando evidencias normativas vigentes...
                 </p>
             </div>

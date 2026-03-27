@@ -15,13 +15,13 @@ const SidebarItem = ({ icon: Icon, label, active, onClick, danger }: SidebarItem
     className={cn(
       "flex items-center gap-2.5 px-3 py-2 rounded-lg cursor-pointer transition-all border border-transparent",
       active 
-        ? "bg-accent/10 text-accent font-black border-accent/20 shadow-[0_0_15px_rgba(45,108,223,0.1)]" 
+        ? "bg-gold/10 text-gold font-black border-gold/20 shadow-[0_0_15px_rgba(234,179,8,0.1)]" 
         : danger 
           ? "text-red-500/60 hover:text-red-500 hover:bg-red-500/5 hover:border-red-500/10"
           : "text-gray-500/80 hover:text-white hover:bg-white/5 hover:border-white/5"
     )}
   >
-    <Icon className={cn("w-3.5 h-3.5", active && "text-accent")} />
+    <Icon className={cn("w-3.5 h-3.5", active && "text-gold shadow-gold")} />
     <span className="text-[10px] font-black uppercase tracking-[0.14em] shrink-0">{label}</span>
   </div>
 );
@@ -43,16 +43,17 @@ export function Sidebar({ activeTab = "Dashboard", setActiveTab }: SidebarProps)
     { icon: FileText, label: "Resoluciones" },
     { icon: Book, label: "Normas" },
     { icon: BarChart3, label: "Reportes" },
+    { icon: Settings, label: "Infotécnica" }, // Using Settings for now, or BarChart3
     { icon: Library, label: "Biblioteca" },
   ];
 
   return (
     <aside className="w-56 h-screen bg-[#0B0F1A] border-r border-white/5 flex flex-col p-5 fixed left-0 top-0 z-50">
       <div className="flex items-center gap-2.5 mb-8 pl-1">
-        <div className="w-6 h-6 rounded-md bg-accent flex items-center justify-center text-white shadow-[0_0_10px_rgba(45,108,223,0.3)]">
+        <div className="w-6 h-6 rounded-md bg-gold flex items-center justify-center text-black shadow-gold">
             <span className="font-black italic text-sm">N</span>
         </div>
-        <span className="text-lg font-heading font-black text-white italic tracking-tighter">NormativaCEN</span>
+        <span className="text-lg font-heading font-black text-white italic tracking-tighter">Normativa<span className="text-gold">CEN</span></span>
       </div>
 
       <nav className="flex-1 space-y-1">

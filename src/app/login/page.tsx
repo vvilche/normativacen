@@ -17,7 +17,8 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (localStorage.getItem('isRegistered') === 'true') {
+    const isTokenInCookie = document.cookie.includes('auth_token');
+    if (localStorage.getItem('isRegistered') === 'true' || isTokenInCookie) {
       router.push('/');
     }
   }, [router]);
@@ -82,7 +83,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
-      <IndustrialBackground />
       
       <div className="w-full max-w-md space-y-8 p-10 rounded-3xl border border-white/10 bg-[#0B0F1A]/60 backdrop-blur-2xl shadow-2xl relative overflow-hidden">
         {/* Decorative Header */}
@@ -117,7 +117,7 @@ export default function LoginPage() {
                     type="email"
                     required
                     placeholder="ingeniero@coordinado.cl"
-                    className="w-full pl-12 pr-4 py-4 rounded-xl bg-black/20 border border-white/5 focus:border-gold/50 outline-none transition-all placeholder:text-gray-700 text-white font-medium"
+                    className="w-full pl-12 pr-4 py-4 rounded-xl bg-black/20 border border-white/5 focus:border-gold/50 outline-none transition-all placeholder:text-slate-500 text-white font-medium"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
@@ -132,7 +132,7 @@ export default function LoginPage() {
                     type="password"
                     required
                     placeholder="••••••••"
-                    className="w-full pl-12 pr-4 py-4 rounded-xl bg-black/20 border border-white/5 focus:border-gold/50 outline-none transition-all placeholder:text-gray-700 text-white font-medium"
+                    className="w-full pl-12 pr-4 py-4 rounded-xl bg-black/20 border border-white/5 focus:border-gold/50 outline-none transition-all placeholder:text-slate-500 text-white font-medium"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
@@ -168,7 +168,7 @@ export default function LoginPage() {
                 required
                 maxLength={6}
                 placeholder="000000"
-                className="w-full pl-12 pr-4 py-4 rounded-xl bg-black/20 border border-white/5 focus:border-gold/50 outline-none transition-all text-center tracking-[1em] text-2xl font-mono text-gold font-bold"
+                className="w-full pl-12 pr-4 py-4 rounded-xl bg-black/20 border border-white/5 focus:border-gold/50 outline-none transition-all text-center tracking-[1em] text-2xl font-mono text-gold font-bold placeholder:text-slate-500"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
               />

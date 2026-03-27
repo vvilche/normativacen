@@ -123,7 +123,7 @@ export const ReportExportButton: React.FC<ReportExportButtonProps> = ({ report }
         <div>
             <h4 className="text-xs font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
                 Generar Dossier Técnico
-                <span className="text-[10px] text-gray-600 font-technical lowercase">v7.2.5</span>
+                <span className="text-[10px] text-gray-600 font-technical lowercase">v9.2.1</span>
             </h4>
             <p className="text-[10px] text-gray-500 mt-1 font-medium font-technical italic">
                 {report.id} · Industrial Engineering White Paper (Tung V2)

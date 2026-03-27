@@ -24,7 +24,8 @@ export default function Home() {
   const [dashboardStats, setDashboardStats] = useState<any>(null);
 
   useEffect(() => {
-    const registered = localStorage.getItem('isRegistered') === 'true';
+    const isTokenInCookie = document.cookie.includes('auth_token');
+    const registered = localStorage.getItem('isRegistered') === 'true' || isTokenInCookie;
     const profile = localStorage.getItem('userProfile');
     if (registered && profile) {
       setIsRegistered(true);
@@ -133,7 +134,6 @@ export default function Home() {
   if (!isRegistered) {
     return (
       <main className="flex-1 flex flex-col items-center justify-start min-h-screen bg-[#0B0F1A] font-sans selection:bg-gold/30 selection:text-gold relative overflow-x-hidden">
-        <IndustrialBackground />
 
         {/* --- NAVIGATION --- */}
         <nav className="fixed top-0 w-full p-6 flex justify-between items-center z-50 px-8">
@@ -164,7 +164,7 @@ export default function Home() {
                 className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gold/5 border border-gold/10 text-[10px] font-black uppercase tracking-[0.3em] text-gold mb-10 backdrop-blur-xl"
             >
                 <Zap className="w-3.5 h-3.5 fill-gold" />
-                <span>Agentic Compliance Matrix v9.1.5</span>
+                <span>Agentic Compliance Matrix v9.2.0 (Asset-Aware)</span>
             </motion.div>
             
             <motion.h1 
@@ -204,20 +204,21 @@ export default function Home() {
         <section className="relative z-10 w-full max-w-7xl mx-auto px-6 py-20 bg-gradient-to-b from-transparent via-white/[0.02] to-transparent">
             <div className="text-center mb-16">
                 <h2 className="text-gold text-[10px] font-black uppercase tracking-[0.4em] mb-4">Arquitectura de Inferencia</h2>
-                <h3 className="text-3xl text-white font-premium mb-4">8 Agentes Especializados</h3>
+                <h3 className="text-3xl text-white font-premium mb-4">9 Agentes Especializados</h3>
                 <div className="w-12 h-1 bg-gold mx-auto rounded-full" />
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
                     { icon: ShieldCheck, name: "Agente SITR", desc: "Monitoreo PMU y telemetría crítica." },
-                    { icon: Database, name: "Motor RAG", desc: "Indexación normativa en tiempo real." },
-                    { icon: Cpu, name: "Orquestador Tung", desc: "Gobernanza y ruteo semántico." },
-                    { icon: FileText, name: "Analista EDAC", desc: "Validación de esquemas de desconexión." },
-                    { icon: Globe, name: "Monitor CEN", desc: "Sincronización con el Coordinador." },
-                    { icon: Activity, name: "Inferencia Técnica", desc: "Cálculo de penalizaciones y riesgos." },
-                    { icon: Layers, name: "Arquetipo de Activos", desc: "Modelado PV, BESS y Eólicos." },
-                    { icon: PenTool, name: "Motor de Reportes", desc: "Exportación Dossier PDF V8.2." }
+                    { icon: Database, name: "InfoTécnica", desc: "Consulta de fichas técnicas y activos del SEN." },
+                    { icon: Cpu, name: "Orquestador Tung", desc: "Gobernanza y ruteo semántico entre especialistas." },
+                    { icon: ShieldCheck, name: "Ciberseguridad", desc: "Auditoría NERC CIP y seguridad perimetral OT." },
+                    { icon: FileText, name: "Económico", desc: "Cálculo de multas UTA y remuneración SSCC." },
+                    { icon: Activity, name: "Generación/BESS", desc: "Modelado de inyección reactiva y FFR." },
+                    { icon: Layers, name: "Transmisión", desc: "Integridad de red STN y observabilidad." },
+                    { icon: Globe, name: "Consumo/EDAC", desc: "Validación de esquemas de desconexión de carga." },
+                    { icon: PenTool, name: "Auditor de Calidad", desc: "Refinamiento normativo y reportes ejecutivos." }
                 ].map((feature, i) => (
                     <motion.div 
                         key={i}

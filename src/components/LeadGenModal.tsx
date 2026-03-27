@@ -145,7 +145,7 @@ export function LeadGenModal({ isOpen, onClose, onSuccess }: LeadGenModalProps) 
                           required
                           type="text" 
                           placeholder="Juan Pérez"
-                          className="w-full bg-[#0F172A] border border-white/5 rounded-xl p-3.5 text-white focus:outline-none focus:border-accent transition-all placeholder:text-gray-700 text-sm"
+                          className="w-full bg-[#0F172A] border border-white/5 rounded-xl p-3.5 text-white focus:outline-none focus:border-accent transition-all placeholder:text-slate-500 text-sm"
                           value={formData.name}
                           onChange={(e) => setFormData({...formData, name: e.target.value})}
                         />
@@ -156,7 +156,7 @@ export function LeadGenModal({ isOpen, onClose, onSuccess }: LeadGenModalProps) 
                           required
                           type="email" 
                           placeholder="juan@empresa.cl"
-                          className="w-full bg-[#0F172A] border border-white/5 rounded-xl p-3.5 text-white focus:outline-none focus:border-accent transition-all placeholder:text-gray-700 text-sm"
+                          className="w-full bg-[#0F172A] border border-white/5 rounded-xl p-3.5 text-white focus:outline-none focus:border-accent transition-all placeholder:text-slate-500 text-sm"
                           value={formData.email}
                           onChange={(e) => setFormData({...formData, email: e.target.value})}
                         />
@@ -170,7 +170,7 @@ export function LeadGenModal({ isOpen, onClose, onSuccess }: LeadGenModalProps) 
                           required
                           type="text" 
                           placeholder="Generadora Solar"
-                          className="w-full bg-[#0F172A] border border-white/5 rounded-xl p-3.5 text-white focus:outline-none focus:border-accent transition-all placeholder:text-gray-700 text-sm"
+                          className="w-full bg-[#0F172A] border border-white/5 rounded-xl p-3.5 text-white focus:outline-none focus:border-accent transition-all placeholder:text-slate-500 text-sm"
                           value={formData.company}
                           onChange={(e) => setFormData({...formData, company: e.target.value})}
                         />
@@ -181,7 +181,7 @@ export function LeadGenModal({ isOpen, onClose, onSuccess }: LeadGenModalProps) 
                           required
                           type="text" 
                           placeholder="Ingeniero SCADA"
-                          className="w-full bg-[#0F172A] border border-white/5 rounded-xl p-3.5 text-white focus:outline-none focus:border-accent transition-all placeholder:text-gray-700 text-sm"
+                          className="w-full bg-[#0F172A] border border-white/5 rounded-xl p-3.5 text-white focus:outline-none focus:border-accent transition-all placeholder:text-slate-500 text-sm"
                           value={formData.role}
                           onChange={(e) => setFormData({...formData, role: e.target.value})}
                         />
@@ -275,7 +275,7 @@ export function LeadGenModal({ isOpen, onClose, onSuccess }: LeadGenModalProps) 
                         required
                         maxLength={6}
                         placeholder="000000"
-                        className="w-full pl-12 pr-4 py-4 rounded-xl bg-[#0F172A] border border-white/5 focus:border-accent outline-none transition-all text-center tracking-[0.8em] text-2xl font-mono text-white"
+                        className="w-full pl-12 pr-4 py-4 rounded-xl bg-[#0F172A] border border-white/5 focus:border-accent outline-none transition-all text-center tracking-[0.8em] text-2xl font-mono text-white placeholder:text-slate-500"
                         value={otpCode}
                         onChange={(e) => setOtpCode(e.target.value)}
                       />

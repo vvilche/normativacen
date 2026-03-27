@@ -55,7 +55,7 @@ export function DashboardView({
 
   const defaultStats = {
     globalScore: 88.5,
-    totalAssets: 12,
+    totalAssets: 9,
     criticalRisks: 3,
     totalExposureUTA: 12500
   };
@@ -65,37 +65,7 @@ export function DashboardView({
   return (
     <div className="w-full space-y-8 pb-20">
       
-      {/* Top Strategic Row - Always Visible or with subtle opacity when processing */}
-      <motion.div 
-        animate={{ opacity: processingStatus === 'processing' ? 0.3 : 1 }}
-        className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8"
-      >
-            <StatCard 
-              icon={<ShieldCheck className="text-success" />} 
-              label="Compliance Score" 
-              value={`${currentStats.globalScore}%`} 
-              sub="Promedio Sistémico"
-            />
-            <StatCard 
-              icon={<AlertTriangle className="text-red-500" />} 
-              label="Riesgos Críticos" 
-              value={currentStats.criticalRisks} 
-              sub="Acción Requerida"
-              highlight
-            />
-            <StatCard 
-              icon={<DollarSign className="text-amber-500" />} 
-              label="Exposición SEC" 
-              value={`${currentStats.totalExposureUTA.toLocaleString()} UTA`} 
-              sub="Multas Estimadas"
-            />
-            <StatCard 
-              icon={<Activity className="text-blue-500" />} 
-              label="Activos Monitoreados" 
-              value={currentStats.totalAssets} 
-              sub="Matriz 8 Agentes"
-            />
-      </motion.div>
+      {/* Top Strategic Row Removed per User Request (De-cluttering) */}
 
       {/* Search / Command Bar - Integrated into the Hub */}
       {processingStatus === "idle" && (
@@ -106,9 +76,9 @@ export function DashboardView({
         >
             <div className="text-center mb-8 space-y-2">
                 <h2 className="text-3xl font-heading font-black text-white italic tracking-tighter uppercase font-technical">
-                    Orquestador de <span className="text-accent underline decoration-accent/20 underline-offset-8">Cumplimiento</span>
+                    Orquestador de <span className="text-gold underline decoration-gold/20 underline-offset-8">Cumplimiento</span>
                 </h2>
-                <p className="text-gray-500 text-sm font-medium">Activa el motor de razonamiento multi-agente para auditorías normativas del SEN.</p>
+                <p className="text-gray-400 text-sm font-medium">Activa el motor de razonamiento multi-agente para auditorías normativas del SEN.</p>
             </div>
             
             <div className="relative group">
@@ -118,7 +88,7 @@ export function DashboardView({
                     </div>
                     <input
                         type="text"
-                        className="w-full bg-transparent border-none text-white text-lg focus:outline-none placeholder-gray-800 py-4 font-semibold px-2"
+                        className="w-full bg-transparent border-none text-white text-lg focus:outline-none placeholder-slate-500 py-4 font-semibold px-2"
                         placeholder="Consultar SITR para BESS..."
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
@@ -126,7 +96,7 @@ export function DashboardView({
                     />
                     <button 
                         onClick={() => onExecute(query)}
-                        className="bg-accent hover:bg-accent/90 text-white font-black py-3 px-8 rounded-xl transition-all flex items-center gap-2 shadow-lg hover:scale-[1.02] active:scale-[0.98] uppercase tracking-widest text-[11px]"
+                        className="bg-gold hover:bg-gold/90 text-black font-black py-3 px-8 rounded-xl transition-all flex items-center gap-2 shadow-gold hover:scale-[1.02] active:scale-[0.98] uppercase tracking-widest text-[11px]"
                     >
                         EJECUTAR <ChevronRight className="w-4 h-4" />
                     </button>
@@ -150,10 +120,10 @@ export function DashboardView({
           {/* Page Title & Actions */}
           <div className="flex justify-between items-center bg-white/5 p-4 py-3 rounded-xl border border-white/5 backdrop-blur-md">
             <div className="flex items-center gap-3">
-                <div className="w-2 h-6 bg-accent rounded-full animate-pulse" />
+                <div className="w-2 h-6 bg-gold rounded-full shadow-gold animate-pulse" />
                 <h2 className="text-xs font-black text-white tracking-[0.2em] uppercase italic flex items-center gap-2">
-                    CEN Intelligence Hub <span className="text-gray-600 font-technical px-2 py-0.5 rounded bg-white/5 lowercase">v7.2.5</span>
-                    <span className="text-[10px] text-accent animate-pulse">● LIVE</span>
+                    CEN Intelligence Hub <span className="text-slate-500 font-technical px-2 py-0.5 rounded bg-white/5 lowercase">v9.2.1</span>
+                    <span className="text-[10px] text-gold animate-pulse shadow-gold">● LIVE</span>
                 </h2>
             </div>
             <div className="flex items-center gap-5">
@@ -164,7 +134,7 @@ export function DashboardView({
                 <div className="h-4 w-px bg-white/10" />
                 <button 
                     onClick={onReset}
-                    className="flex items-center gap-2 text-[9px] text-accent font-black uppercase tracking-[0.3em] hover:brightness-125 transition-all"
+                    className="flex items-center gap-2 text-[9px] text-gold font-black uppercase tracking-[0.3em] hover:brightness-125 transition-all"
                 >
                     NUEVA CONSULTA
                     <ChevronRight className="w-3.5 h-3.5 animate-bounce-x" />
@@ -173,7 +143,7 @@ export function DashboardView({
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <div className="lg:col-span-8 space-y-6">
+            <div className="lg:col-span-9 space-y-6">
                 <ResolutionCard 
                     antecedentes={resolution?.antecedentes}
                     acciones={resolution?.acciones}
@@ -189,32 +159,35 @@ export function DashboardView({
                 />
             </div>
 
-            <div className="lg:col-span-4 bg-[#161B29]/60 border border-white/5 rounded-2xl p-8 backdrop-blur-2xl shadow-2xl relative overflow-hidden group">
-                <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="lg:col-span-3 bg-[#161B29]/30 border border-white/5 rounded-2xl p-6 backdrop-blur-xl shadow-xl relative overflow-hidden group opacity-60 hover:opacity-100 transition-opacity">
+                <div className="absolute inset-0 bg-gold/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <h4 className="text-[8px] font-black text-gray-500 uppercase tracking-widest mb-4">Trazabilidad Multi-Agente</h4>
                 <HarnessMonitor status="complete" />
             </div>
           </div>
         </div>
       )}
 
-      {/* Recommended White Papers Section */}
-      <section className="space-y-6 pt-6">
-        <div className="flex items-center justify-between border-b border-white/5 pb-3">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-accent" />
-            <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] italic">
-                Engineering Library Recommendations
-            </h3>
+      {/* Recommended White Papers Section - Only show when idle to keep results focused */}
+      {processingStatus === "idle" && (
+        <section className="space-y-6 pt-6 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+          <div className="flex items-center justify-between border-b border-white/5 pb-3">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-gold" />
+              <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] italic">
+                  Engineering Library Recommendations
+              </h3>
+            </div>
+            <span className="text-[9px] text-slate-500 font-technical uppercase">3 MATCHES FOUND</span>
           </div>
-          <span className="text-[9px] text-gray-700 font-technical uppercase">3 MATCHES FOUND</span>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {recommendedPapers.map((paper) => (
-            <WhitePaperCard key={paper.id} paper={paper} />
-          ))}
-        </div>
-      </section>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {recommendedPapers.map((paper) => (
+              <WhitePaperCard key={paper.id} paper={paper} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
@@ -226,7 +199,7 @@ function StatCard({ icon, label, value, sub, highlight = false }: any) {
       className={`p-5 rounded-2xl border backdrop-blur-md transition-all ${
         highlight 
           ? 'bg-red-500/5 border-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.1)]' 
-          : 'bg-[#161B29]/60 border-white/5 hover:border-blue-500/30'
+          : 'bg-[#161B29]/60 border-white/5 hover:border-gold/30'
       }`}
     >
       <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center mb-4 border border-white/5 shadow-inner">

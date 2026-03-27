@@ -60,7 +60,7 @@ export function ComplianceDashboard() {
           icon={<Activity className="text-accent" />} 
           label="Activos Monitoreados" 
           value={data.totalAssets} 
-          sub="Matriz 8 Agentes"
+          sub="Matriz 9 Agentes"
         />
       </div>
 

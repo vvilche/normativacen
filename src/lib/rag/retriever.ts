@@ -64,10 +64,14 @@ export async function getRetriever() {
         // Opción 2: Fallback a Regex si no hay resultados por $text
         if (results.length === 0) {
           console.log("💡 Fallback a Regex search...");
+          
+          // Escapar caracteres especiales para el regex
+          const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          
           const regexResults = await collection.find({
             $or: [
-              { text: { $regex: query, $options: "i" } },
-              { topic: { $regex: query, $options: "i" } }
+              { text: { $regex: escapedQuery, $options: "i" } },
+              { topic: { $regex: escapedQuery, $options: "i" } }
             ]
           }).limit(3).toArray();
           

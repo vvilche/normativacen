@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   description: "El primer Agente Experto en cumplimiento de la Normativa del Coordinador Eléctrico Nacional.",
 };
 
+import { IndustrialBackground } from "@/components/IndustrialBackground";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -19,7 +21,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${inter.variable} dark antialiased`} suppressHydrationWarning>
-      <body className="min-h-screen bg-background font-body text-foreground flex flex-col" suppressHydrationWarning>
+      <body className="min-h-screen bg-background font-body text-foreground flex flex-col relative" suppressHydrationWarning>
+        <IndustrialBackground />
         {children}
       </body>
     </html>

@@ -57,12 +57,12 @@ export function ResolutionCard({
         {/* Compact Header */}
         <div className="flex items-center justify-between mb-6 border-b border-white/5 pb-4">
             <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
+                <div className="w-8 h-8 rounded bg-gold/10 border border-gold/20 flex items-center justify-center text-gold shadow-gold">
                     <CheckCircle2 className="w-5 h-5" />
                 </div>
                 <div>
-                    <h3 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] mb-0.5">Technical Compliance Overview</h3>
-                    <p className="text-xs font-technical text-white/90">Agent: <span className="text-accent">NormativaCEN_Orchestrator_v2025</span> | ID: {id}</p>
+                    <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-0.5">Technical Compliance Overview</h3>
+                    <p className="text-xs font-technical text-white/90">Agent: <span className="text-gold">NormativaCEN_Orchestrator_v2025</span> | ID: {id}</p>
                 </div>
             </div>
             <div className="flex items-center gap-4">
@@ -172,14 +172,14 @@ export function ResolutionCard({
         {acciones && acciones.length > 0 && (
           <div className="mt-8 border-t border-white/5 pt-6 space-y-4">
               <div className="flex items-center gap-2 mb-2">
-                  <ShieldAlert className="w-4 h-4 text-accent" />
+                  <ShieldAlert className="w-4 h-4 text-gold shadow-gold" />
                   <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Recommended Action Plan</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {acciones.map((action) => (
                       <div key={action.id} className="bg-white/5 border border-white/5 rounded-lg p-3 group/item hover:bg-white/10 transition-all">
                           <div className="flex justify-between items-start mb-1">
-                              <span className="text-[10px] font-technical text-accent font-black">{action.id}</span>
+                              <span className="text-[10px] font-technical text-gold font-black">{action.id}</span>
                               <span className={cn(
                                   "text-[8px] px-1.5 py-0.5 rounded font-black uppercase tracking-tighter",
                                   action.priority === "CRÍTICA" ? "bg-danger/20 text-danger" : "bg-warning/20 text-warning"
@@ -200,7 +200,7 @@ export function ResolutionCard({
         {seoTags && seoTags.length > 0 && (
             <div className="mt-6 flex flex-wrap gap-2 pt-4 border-t border-white/5">
                 {seoTags.map((tag, i) => (
-                    <div key={i} className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-blue-500/5 border border-blue-500/10 text-[9px] font-black text-blue-400 uppercase tracking-widest">
+                    <div key={i} className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-gold/5 border border-gold/10 text-[9px] font-black text-gold/80 uppercase tracking-widest">
                         <Tag className="w-2.5 h-2.5" />
                         {tag}
                     </div>

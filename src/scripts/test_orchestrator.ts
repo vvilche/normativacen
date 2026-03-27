@@ -8,6 +8,7 @@ async function testOrchestrator() {
   const app = buildOrchestratorGraph();
   
   const testQueries = [
+    "¿Qué consideraciones debería tener si soy un centro de control para plantas hidráulicas tipo PMGD y PMG?",
     "Necesito validar la latencia de mi enlace SITR en una planta de 50MW",
     "¿Cuáles son los requisitos de NERC CIP para mi subestación?",
     "Mi BESS no está respondiendo a la frecuencia, ¿qué dice la norma?",

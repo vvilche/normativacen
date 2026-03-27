@@ -13,7 +13,7 @@ export function WhitePaperCard({ paper }: WhitePaperCardProps) {
     <motion.div
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="bg-[#161B29]/40 backdrop-blur-xl border border-white-[0.03] rounded-xl overflow-hidden flex flex-col group transition-all duration-300 hover:border-accent/30 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]"
+      className="bg-[#161B29]/40 backdrop-blur-xl border border-white-[0.03] rounded-xl overflow-hidden flex flex-col group transition-all duration-300 hover:border-gold/30 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]"
     >
       {/* Abstract Industrial Header */}
       <div className="relative h-24 overflow-hidden bg-[#0D111C]">
@@ -21,7 +21,7 @@ export function WhitePaperCard({ paper }: WhitePaperCardProps) {
             <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0)', backgroundSize: '12px 12px' }} />
         </div>
         <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-12 h-12 rounded-full bg-accent/5 border border-accent/10 flex items-center justify-center text-accent/40 group-hover:text-accent/60 transition-colors">
+            <div className="w-12 h-12 rounded-full bg-gold/5 border border-gold/10 flex items-center justify-center text-gold/40 group-hover:text-gold/60 transition-colors shadow-gold">
                 <FileDown className="w-6 h-6" />
             </div>
         </div>
@@ -33,12 +33,12 @@ export function WhitePaperCard({ paper }: WhitePaperCardProps) {
       {/* Content Area */}
       <div className="p-4 flex-1 flex flex-col">
         <div className="flex items-center gap-2 mb-2">
-            <span className="px-1.5 py-0.5 rounded bg-accent/10 border border-accent/20 text-[8px] text-accent font-black uppercase tracking-widest">
+            <span className="px-1.5 py-0.5 rounded bg-gold/10 border border-gold/20 text-[8px] text-gold font-black uppercase tracking-widest">
                 {paper.category}
             </span>
         </div>
         
-        <h4 className="font-heading font-black text-white text-[13px] leading-snug mb-3 line-clamp-2 italic group-hover:text-accent transition-colors">
+        <h4 className="font-heading font-black text-white text-[13px] leading-snug mb-3 line-clamp-2 italic group-hover:text-gold transition-colors">
             {paper.title}
         </h4>
         
@@ -53,7 +53,7 @@ export function WhitePaperCard({ paper }: WhitePaperCardProps) {
             </div>
         </div>
 
-        <button className="w-full py-2.5 rounded-lg bg-white/5 hover:bg-accent hover:text-white border border-white/5 text-gray-400 text-[10px] font-black tracking-[0.2em] transition-all flex items-center justify-center gap-2 uppercase active:scale-[0.98]">
+        <button className="w-full py-2.5 rounded-lg bg-white/5 hover:bg-gold hover:text-black border border-white/5 text-gray-400 text-[10px] font-black tracking-[0.2em] transition-all flex items-center justify-center gap-2 uppercase active:scale-[0.98] shadow-gold">
             VER DOCUMENTO
         </button>
       </div>

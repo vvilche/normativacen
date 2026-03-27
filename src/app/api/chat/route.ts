@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { buildOrchestratorGraph } from '../../../lib/agents/orchestratorGraph';
 import { HumanMessage, AIMessage } from '@langchain/core/messages';
 import { generateTechnicalReport } from '../../../lib/reportingEngine';
-import { resetConnectionStatus } from '../../../lib/rag/mongoClient';
+import clientPromise, { resetConnectionStatus } from '../../../lib/rag/mongoClient';
+import crypto from 'crypto';
 
 /**
  * ==========================================
@@ -33,10 +34,28 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'El perfil de usuario es inválido' }, { status: 400 });
     }
 
-    // Convertir mensajes de frontend a LangChain Messages
     const lcMessages = messages.map((m: any) => 
       m.role === 'user' ? new HumanMessage(m.content) : new AIMessage(m.content)
     );
+
+    const userQuery = messages.filter((m: any) => m.role === 'user').pop()?.content || "";
+    const normalizedQuery = userQuery.trim().toLowerCase();
+    const queryHash = crypto.createHash('md5').update(normalizedQuery).digest('hex');
+
+    // 0. Verificar Caché (Repositorio de Resoluciones)
+    const client = await clientPromise;
+    const cacheCollection = client.db("normativacen").collection("technical_resolutions");
+    
+    const cachedResult = await cacheCollection.findOne({ queryHash });
+    if (cachedResult) {
+      console.log(`🚀 [CACHE HIT] Sirviendo resolución desde el repositorio para hash: ${queryHash}`);
+      return NextResponse.json({
+        ...cachedResult.payload,
+        isCached: true
+      });
+    }
+
+    console.log(`⚙️ [CACHE MISS] Iniciando orquestador para: "${userQuery.substring(0, 50)}..."`);
 
     // 1. Initializar el Grafo Multi-Agente
     const app = buildOrchestratorGraph();
@@ -111,7 +130,7 @@ export async function POST(req: Request) {
 
     console.log(`✅ Respuesta exitosa: ${agentType} | Metrics: ${!!metricsJson}`);
 
-    return NextResponse.json({
+    const responsePayload = {
       role: 'assistant',
       content: cleanContent,
       sources,
@@ -120,7 +139,28 @@ export async function POST(req: Request) {
       seoTags,
       agentType,
       isClosedLoop: true
-    });
+    };
+
+    // 4. Persistir en el Repositorio de Resoluciones (Caché)
+    try {
+      await cacheCollection.updateOne(
+        { queryHash },
+        { 
+          $set: { 
+            queryHash,
+            originalQuery: normalizedQuery,
+            payload: responsePayload,
+            createdAt: new Date()
+          } 
+        },
+        { upsert: true }
+      );
+      console.log(`💾 [CACHE STORE] Resolución guardada en el repositorio: ${queryHash}`);
+    } catch (cacheErr) {
+      console.warn('⚠️ Error guardando en caché:', cacheErr);
+    }
+
+    return NextResponse.json(responsePayload);
 
   } catch (error: any) {
     console.error('❌ Error crítico en API Route:', error);
