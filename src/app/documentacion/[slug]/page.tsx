@@ -158,10 +158,10 @@ export default function WhitePaperPage() {
                  <div className="flex items-center gap-2 text-[10px] font-bold text-primary/80 uppercase tracking-widest">
                     <Database className="w-3 h-3" /> Normativa Vigente
                  </div>
-                 <h2 className="text-3xl font-heading font-black text-white tracking-tighter uppercase leading-none">
+                 <h2 className="text-2xl font-heading font-bold text-white tracking-tight uppercase leading-snug">
                     Análisis Técnico <span className="text-primary">y Normativo</span>
                  </h2>
-                 <p className="text-[10px] text-white/40 uppercase tracking-wider font-medium">Reporte de Auditoría Técnica 2025</p>
+                 <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-medium">Reporte de Auditoría Técnica 2025</p>
               </div>
               
               {/* COMPACT HORIZONTAL METRIC BAR */}
@@ -194,15 +194,15 @@ export default function WhitePaperPage() {
 
             {/* DOCUMENT CONTENT CONTEXT */}
             <article className="prose prose-invert max-w-none 
-              prose-headings:font-heading prose-headings:font-black prose-headings:tracking-tighter prose-headings:uppercase
-              prose-h1:text-2xl prose-h1:mb-4 prose-h1:text-white
-              prose-h2:text-lg prose-h2:mt-8 prose-h2:mb-3 prose-h2:text-primary
-              prose-p:text-white/60 prose-p:text-[13px] prose-p:leading-relaxed prose-p:mb-3
-              prose-strong:text-white prose-strong:font-black
-              prose-blockquote:border-l-2 prose-blockquote:border-primary prose-blockquote:bg-primary/5 prose-blockquote:p-4 prose-blockquote:rounded-r-lg prose-blockquote:italic
+              prose-headings:font-heading prose-headings:font-bold prose-headings:tracking-tight prose-headings:uppercase
+              prose-h1:text-xl prose-h1:mb-6 prose-h1:text-white prose-h1:leading-snug
+              prose-h2:text-base prose-h2:mt-10 prose-h2:mb-4 prose-h2:text-primary prose-h2:leading-relaxed
+              prose-p:text-white/70 prose-p:text-sm prose-p:leading-loose prose-p:mb-6 prose-p:font-medium
+              prose-strong:text-white prose-strong:font-bold
+              prose-blockquote:border-l-2 prose-blockquote:border-primary prose-blockquote:bg-primary/5 prose-blockquote:p-6 prose-blockquote:rounded-r-lg prose-blockquote:italic
               prose-table:border prose-table:border-white/5 prose-table:rounded-lg prose-table:overflow-hidden
-              prose-th:bg-white/5 prose-th:text-white/40 prose-th:p-2 prose-th:text-[8px] prose-th:uppercase prose-th:tracking-widest
-              prose-td:p-2 prose-td:text-[10px] prose-td:border-t prose-td:border-white/5 prose-td:text-white/50
+              prose-th:bg-white/5 prose-th:text-white/40 prose-th:p-3 prose-th:text-[9px] prose-th:uppercase prose-th:tracking-widest
+              prose-td:p-3 prose-td:text-[11px] prose-td:border-t prose-td:border-white/5 prose-td:text-white/50
             ">
               <ReactMarkdown
                 components={{
