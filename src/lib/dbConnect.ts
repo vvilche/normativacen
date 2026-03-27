@@ -19,10 +19,7 @@ async function dbConnect() {
   const MONGODB_URI = process.env.MONGODB_URI || '';
 
   if (!MONGODB_URI) {
-    if (process.env.NODE_ENV === 'production') {
-        throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
-    }
-    console.warn('⚠️ MONGODB_URI no definida. Operando en modo desconectado/simulado.');
+    console.warn('⚠️ MONGODB_URI no definida. Operando en MODO DE RESILIENCIA (Simulación).');
     return null;
   }
 
