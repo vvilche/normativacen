@@ -1,10 +1,23 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+});
+
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const jetBrains = JetBrains_Mono({
+  variable: "--font-jetbrains",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -20,7 +33,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${inter.variable} dark antialiased`} suppressHydrationWarning>
+    <html
+      lang="es"
+      className={`${inter.variable} ${spaceGrotesk.variable} ${jetBrains.variable} dark antialiased`}
+      suppressHydrationWarning
+    >
       <body className="min-h-screen bg-background font-body text-foreground flex flex-col relative" suppressHydrationWarning>
         <IndustrialBackground />
         {children}

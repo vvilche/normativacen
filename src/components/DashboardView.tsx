@@ -99,13 +99,20 @@ export function DashboardView({
         secondaryCTA: "Reportar Incidente",
       };
 
+  const showLanding = processingStatus !== "complete";
+  const isProcessing = processingStatus === "processing";
+  const summaryMetrics = stats
+    ? [
+        { label: "Score Global", value: `${stats.globalScore}%`, detail: "Promedio sistémico" },
+        { label: "Activos", value: stats.totalAssets, detail: "Monitoreados" },
+        { label: "Riesgos críticos", value: stats.criticalRisks, detail: "Atención inmediata", tone: "warning" },
+        { label: "Exposición UTA", value: `${stats.totalExposureUTA} UTA`, detail: "Multas estimadas" },
+      ]
+    : [];
+
   return (
     <div className="w-full space-y-8 pb-20">
-      
-      {/* Top Strategic Row Removed per User Request (De-cluttering) */}
-
-      {/* Search / Command Bar - Integrated into the Hub */}
-      {processingStatus === "idle" && (
+      {showLanding && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -113,43 +120,61 @@ export function DashboardView({
         >
           <section className="hero-section">
             <div className="space-y-4">
-              <span className="text-sm uppercase tracking-[0.5em] opacity-80">
-                {clientMode === "guide" ? "Modo Guía" : "Modo Operativo"}
-              </span>
+              <div className="flex flex-wrap gap-2 text-[10px] font-black uppercase tracking-[0.4em] opacity-80">
+                <span>{clientMode === "guide" ? "Modo Guía" : "Modo Operativo"}</span>
+                <span>Hub Inteligente</span>
+              </div>
               <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
                 {heroCopy.title}
               </h2>
-              <p className="text-white/80 text-base md:text-lg max-w-2xl">
+              <p className="text-base md:text-lg max-w-2xl opacity-85">
                 {heroCopy.subtitle}
               </p>
               <div className="flex flex-wrap gap-3 hero-actions">
                 <button
-                  className="bg-white text-primary px-6 py-3 rounded-xl font-bold uppercase tracking-[0.3em] text-xs"
+                  className="primary"
                   onClick={() => onExecute(prompts[0])}
                 >
                   {heroCopy.primaryCTA}
                 </button>
                 <button
-                  className="bg-white/20 border border-white/40 text-white px-6 py-3 rounded-xl font-bold uppercase tracking-[0.3em] text-xs"
+                  className="secondary"
                   onClick={() => onExecute(prompts[1] || prompts[0])}
                 >
                   {heroCopy.secondaryCTA}
                 </button>
               </div>
             </div>
-            <div className="bg-white/10 border border-white/20 rounded-2xl p-6">
-              <h5 className="text-sm font-bold uppercase tracking-[0.4em] mb-4 text-white/80">
+            <div
+              className="rounded-2xl p-6"
+              style={{ background: "var(--surface-soft)", border: "1px solid var(--border-subtle)" }}
+            >
+              <h5 className="text-sm font-bold uppercase tracking-[0.4em] mb-4 opacity-75">
                 Consultas sugeridas
               </h5>
               <ul className="space-y-3 text-sm">
                 {prompts.map((item, idx) => (
-                  <li key={idx} className="bg-white/10 border border-white/15 rounded-lg p-3">
+                  <li key={idx} className="rounded-lg p-3" style={{ background: "var(--surface-soft-alt)", border: "1px solid var(--border-subtle)" }}>
                     “{item}”
                   </li>
                 ))}
               </ul>
             </div>
           </section>
+
+          {summaryMetrics.length > 0 && (
+            <section className="dashboard-metrics">
+              {summaryMetrics.map((metric) => (
+                <div key={metric.label} className="metric-card">
+                  <span className="text-[10px] uppercase tracking-[0.35em] opacity-60">{metric.label}</span>
+                  <strong className={`text-2xl font-black ${metric.tone === "warning" ? "text-[#FFBA38]" : "text-inherit"}`}>
+                    {metric.value}
+                  </strong>
+                  <span className="text-xs opacity-60">{metric.detail}</span>
+                </div>
+              ))}
+            </section>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {modules.map((module) => (
@@ -158,7 +183,10 @@ export function DashboardView({
                   <span className="text-xs font-bold uppercase tracking-[0.3em] opacity-60">
                     {module.status.toUpperCase()}
                   </span>
-                  <div className="w-2 h-2 rounded-full" style={{ background: module.status === "completado" ? "#10B981" : module.status === "progreso" ? "#FFBA38" : "#CBD5F5" }} />
+                  <div
+                    className="w-2 h-2 rounded-full"
+                    style={{ background: module.status === "completado" ? "#10B981" : module.status === "progreso" ? "#FFBA38" : "#CBD5F5" }}
+                  />
                 </div>
                 <h4 className="text-lg font-bold mb-1">{module.title}</h4>
                 <p className="text-sm opacity-70">{module.description}</p>
@@ -168,23 +196,27 @@ export function DashboardView({
 
           <div className="search-panel space-y-4">
             <div className="relative flex flex-col gap-3">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-white/5 text-slate-400">
-                  <Search className="w-5 h-5" />
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="p-3 rounded-xl" style={{ background: "var(--surface-soft)", border: "1px solid var(--border-subtle)" }}>
+                    <Search className="w-5 h-5 opacity-60" />
+                  </div>
+                  <input
+                    type="text"
+                    className="flex-1 bg-transparent border-none text-base focus:outline-none"
+                    placeholder="Describe tu incidente o consulta normativa..."
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && onExecute(query)}
+                    disabled={isProcessing}
+                  />
                 </div>
-                <input
-                  type="text"
-                  className="flex-1 bg-transparent border-none text-base focus:outline-none"
-                  placeholder="Describe tu incidente o consulta normativa..."
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && onExecute(query)}
-                />
                 <button
                   onClick={() => onExecute(query)}
-                  className="bg-primary text-on-primary px-5 py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.4em]"
+                  disabled={isProcessing}
+                  className={`px-5 py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.4em] ${isProcessing ? "bg-white/20 text-white/40" : "bg-primary text-black"}`}
                 >
-                  Ejecutar
+                  {isProcessing ? "Procesando" : "Ejecutar"}
                 </button>
               </div>
             </div>
@@ -221,20 +253,19 @@ export function DashboardView({
                 ? "Recibirás respuestas educativas con sugerencias y módulos de capacitación."
                 : "Obtendrás diagnósticos técnicos con checklists, riesgos y tiempos de ejecución."}
             </p>
+            {isProcessing && (
+              <p className="text-[10px] uppercase tracking-[0.3em] text-warning">Procesando consulta en el orquestador…</p>
+            )}
           </div>
+
+          {isProcessing && (
+            <div className="glass-card rounded-2xl p-8">
+              <HarnessMonitor status="processing" />
+            </div>
+          )}
         </motion.div>
       )}
 
-      {/* Processing State */}
-      {processingStatus === "processing" && (
-        <div className="flex flex-col items-center justify-center py-20">
-            <div className="bg-[#161B29]/40 border border-white/5 rounded-2xl p-10 backdrop-blur-3xl w-full max-w-xl shadow-2xl">
-                <HarnessMonitor status="processing" />
-            </div>
-        </div>
-      )}
-
-      {/* Result State */}
       {processingStatus === "complete" && resolution && (
         <div className="space-y-8 animate-in fade-in zoom-in-95 duration-700">
           {/* Page Title & Actions */}
@@ -312,6 +343,8 @@ export function DashboardView({
                     reasoning={resolution?.reasoning}
                     timings={resolution?.timings}
                     guideSuggestions={resolution?.guideSuggestions}
+                    educationArtifacts={resolution?.educationArtifacts}
+                    clientMode={resolution?.clientMode || clientMode}
                 />
             </div>
 
@@ -324,7 +357,6 @@ export function DashboardView({
         </div>
       )}
 
-      {/* Recommended White Papers Section - Only show when idle to keep results focused */}
       {processingStatus === "idle" && (
         <section className="space-y-6 pt-6 animate-in fade-in slide-in-from-bottom-4 duration-1000">
           <div className="flex items-center justify-between border-b border-white/5 pb-3">

@@ -1,4 +1,4 @@
-import { Bell, Mail, LogOut } from "lucide-react";
+import { Bell, Mail, LogOut, Menu } from "lucide-react";
 
 interface TopBarProps {
   user?: {
@@ -6,9 +6,10 @@ interface TopBarProps {
     company: string;
     activeAsset: string;
   };
+  onToggleSidebar?: () => void;
 }
 
-export function TopBar({ user }: TopBarProps) {
+export function TopBar({ user, onToggleSidebar }: TopBarProps) {
   const handleLogout = () => {
     localStorage.removeItem('isRegistered');
     localStorage.removeItem('userProfile');
@@ -20,6 +21,21 @@ export function TopBar({ user }: TopBarProps) {
 
   return (
     <header className="topbar-panel">
+      <div className="flex items-center gap-3">
+        {onToggleSidebar && (
+          <button
+            type="button"
+            onClick={onToggleSidebar}
+            className="lg:hidden p-2 rounded-lg border border-transparent text-inherit hover:border-white/20"
+            aria-label="Abrir navegación"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
+        <div className="hidden sm:flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] opacity-70">
+          <span>CEN Intelligence Hub</span>
+        </div>
+      </div>
       <div className="flex items-center gap-5">
         <div className="flex items-center gap-1">
             <button className="p-1.5 rounded-xl border border-transparent hover:border-slate-300/40 transition-colors relative">

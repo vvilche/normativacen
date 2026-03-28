@@ -106,6 +106,8 @@ export default function Home() {
       hallazgo: data.hallazgo || null,
       seoTags: data.seoTags || [],
       guideSuggestions: data.guideSuggestions || [],
+      educationArtifacts: data.educationArtifacts || null,
+      clientMode: data.clientMode || clientMode,
       protocol: "LangGraph-Engineering-Matrix",
       acciones: sanitizedActions,
       controls,

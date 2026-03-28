@@ -5,6 +5,7 @@ import { generateTechnicalReport } from '../../../lib/reportingEngine';
 import clientPromise, { resetConnectionStatus } from '../../../lib/rag/mongoClient';
 import crypto from 'crypto';
 import type { Collection, Document } from 'mongodb';
+import { getGuideSuggestions } from '@/lib/education/suggestions';
 
 type CachePayload = {
   role: string;
@@ -21,38 +22,11 @@ type CachePayload = {
   timings?: Record<string, number>;
   clientMode?: 'guide' | 'expert';
   guideSuggestions?: string[];
+  educationArtifacts?: string | null;
 };
 
 const MEMORY_CACHE_TTL = 1000 * 60 * 10; // 10 minutos
 const memoryCache = new Map<string, { expires: number; payload: CachePayload }>();
-
-const GUIDE_SUGGESTIONS: Record<string, string[]> = {
-  default: [
-    '¿Qué evidencias básicas exige el CEN para auditoría?',
-    '¿Cómo programo mi primera actualización PMUS?',
-    '¿Dónde encuentro el procedimiento EDAC vigente?'
-  ],
-  sitrAgent: [
-    '¿Qué parámetros monitorea SITR diariamente?',
-    '¿Cómo valido la latencia <500ms en mis enlaces?',
-    '¿Qué debo reportar al CDC si falla la telemetría?'
-  ],
-  procedimentalAgent: [
-    '¿Cuáles son los plazos SEC para PMUS 2026?',
-    '¿Qué documentos debo presentar al CEN para actualizaciones?',
-    '¿Cómo documento evidencias para EDAC?'
-  ],
-  consumoAgent: [
-    '¿Qué implicancias tiene un EDAC incompleto?',
-    '¿Cómo evidencio mis respuestas ante el CEN?',
-    '¿Qué checklist básico debo revisar cada mes?'
-  ],
-  bessAgent: [
-    '¿Qué normas CIP aplican a mi BESS?',
-    '¿Cómo monitoreo el FFR en tiempo real?',
-    '¿Qué debo reportar al CDC del CEN ante incidentes?'
-  ]
-};
 
 function deriveMetricsFromContent(content: string, agentType: string) {
   const checklistItems = (content.match(/^[\s\t]*[-*]\s+/gm) || []).length;
@@ -99,7 +73,7 @@ function deriveMetricsFromContent(content: string, agentType: string) {
 export const dynamic = 'force-dynamic';
 
 function appendGuideBlock(content: string, agentType: string) {
-  const suggestions = GUIDE_SUGGESTIONS[agentType] || GUIDE_SUGGESTIONS.default;
+  const suggestions = getGuideSuggestions(agentType);
   const lines = suggestions.map((s) => `- ${s}`);
   const block = `\n\n### Capacitación recomendada\n${lines.join('\n')}\n`;
   return { newContent: `${content}${block}`, suggestions };
@@ -161,7 +135,8 @@ export async function POST(req: Request) {
           backgroundAudit,
           createdAt: new Date(),
           timings: cacheEntry.payload.timings || {},
-          source: 'memory-cache'
+          source: 'memory-cache',
+          educationArtifacts: cacheEntry.payload.educationArtifacts || null
         }).catch((err) => console.warn('⚠️ No se pudo registrar log (mem):', err));
       }
       return NextResponse.json({
@@ -185,7 +160,8 @@ export async function POST(req: Request) {
             backgroundAudit,
             createdAt: new Date(),
             timings: cachedResult.payload.timings || {},
-            source: 'persistent-cache'
+            source: 'persistent-cache',
+            educationArtifacts: cachedResult.payload.educationArtifacts || null
           }).catch((err) => console.warn('⚠️ No se pudo registrar log (cache):', err));
         }
         return NextResponse.json({
@@ -225,8 +201,9 @@ export async function POST(req: Request) {
     
     const sources = ["Base RAG CEN", "Norma Técnica Resumen"];
     // El agentType lo tomamos del next_node del estado final
-    const agentType = (finalState as any).next_node || "sitrAgent";
+    const agentType = (finalState as any).lastAgentNode || "sitrAgent";
     const timings = (finalState as any).timings || {};
+    const educationArtifacts = (finalState as any).educationArtifacts || null;
     
     // Extracción de metadatos estructurados
     let metricsJson = null;
@@ -297,7 +274,8 @@ export async function POST(req: Request) {
       createdAt: new Date().toISOString(),
       timings,
       clientMode,
-      guideSuggestions
+      guideSuggestions,
+      educationArtifacts
     };
 
     // 4. Persistir en el Repositorio de Resoluciones (Caché)
@@ -336,7 +314,8 @@ export async function POST(req: Request) {
         backgroundAudit,
         createdAt: new Date(),
         timings,
-        source: 'fresh'
+        source: 'fresh',
+        educationArtifacts
       }).catch((err) => console.warn('⚠️ No se pudo registrar log:', err));
     }
 

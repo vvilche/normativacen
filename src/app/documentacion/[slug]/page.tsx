@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { EducationArtifactsPanel } from "@/components/EducationArtifactsPanel";
 
 interface ResolutionMeta {
   id?: string | null;
@@ -34,6 +35,7 @@ export default function DocumentacionPage() {
   const [actionPlan, setActionPlan] = useState<ActionItem[]>([]);
   const [guideSuggestions, setGuideSuggestions] = useState<string[]>([]);
   const [contentExpanded, setContentExpanded] = useState(false);
+  const [educationArtifacts, setEducationArtifacts] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -78,6 +80,7 @@ export default function DocumentacionPage() {
           });
           setActionPlan(sanitizedPlan);
           setGuideSuggestions(payload.guideSuggestions || []);
+          setEducationArtifacts(payload.educationArtifacts || null);
         } else {
           const res = await fetch(`/api/docs?slug=${slug}`);
           if (!res.ok) throw new Error("Documento no encontrado");
@@ -105,6 +108,7 @@ export default function DocumentacionPage() {
           setResolutionMeta({ clientMode: "guide" });
           setActionPlan([]);
           setGuideSuggestions([]);
+          setEducationArtifacts(null);
         }
       } catch (error) {
         console.error(error);
@@ -155,6 +159,23 @@ export default function DocumentacionPage() {
 
   const metricsEntries = Object.entries(metrics || {});
   const timingEntries = resolutionMeta.timings ? Object.entries(resolutionMeta.timings) : [];
+  const heroChips = [
+    isGuide ? "Centro educativo" : "Diagnóstico operativo",
+    resolutionMeta.id ? `ID ${resolutionMeta.id}` : null,
+    formattedDate,
+  ].filter(Boolean);
+  const heroCopy = highlight || "Optimice su operación con acceso directo a los procedimientos y anexos CEN.";
+  const educationPanelId = "education-panel";
+
+  const handleDownloadDossier = () => {
+    window.print();
+  };
+
+  const handleEducationScroll = () => {
+    if (!educationArtifacts) return;
+    const element = document.getElementById(educationPanelId);
+    element?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   return (
     <div className={`dossier-shell ${isGuide ? "theme-guide" : "theme-expert"}`}>
@@ -195,29 +216,51 @@ export default function DocumentacionPage() {
         <div className="dossier-content">
           <section className="hero-section">
             <div className="space-y-4">
-              <span className="text-sm uppercase tracking-[0.5em] opacity-80">
-                {isGuide ? "Centro Educativo" : "Diagnóstico Operativo"}
-              </span>
+              <div className="flex flex-wrap gap-2 text-[10px] font-black uppercase tracking-[0.35em] opacity-80">
+                {heroChips.map((chip) => (
+                  <span key={chip} className="px-2 py-1 rounded-full border border-white/20 bg-white/10">
+                    {chip}
+                  </span>
+                ))}
+              </div>
               <h1 className="text-4xl font-extrabold tracking-tight">{docTitle}</h1>
-              <p className="text-white/80 text-lg">
-                {highlight || "Optimice su operación con acceso directo a los procedimientos y anexos CEN."}
+              <p className="text-lg opacity-85">
+                {heroCopy}
               </p>
               <div className="flex flex-wrap gap-4 hero-actions">
-                <button className="bg-white text-primary">Auditar Instalaciones</button>
-                <button className="bg-white/20 border border-white/40 text-white">Dudas Generales</button>
+                <button className="primary" onClick={handleDownloadDossier}>
+                  Descargar dossier
+                </button>
+                <button className="secondary" onClick={handleEducationScroll} disabled={!educationArtifacts}>
+                  Plan educativo
+                </button>
               </div>
             </div>
-            <div className="bg-white/10 border border-white/20 rounded-xl p-6">
-              <h5 className="text-sm font-bold uppercase tracking-widest mb-4 text-white/80">Consultas sugeridas</h5>
-              <ul className="space-y-3">
+            <div
+              className="rounded-2xl p-6 space-y-3"
+              style={{ background: "var(--surface-soft)", border: "1px solid var(--border-subtle)" }}
+            >
+              <h5 className="text-sm font-bold uppercase tracking-widest mb-2 opacity-75">
+                {isGuide ? "Sugerencias" : "Hallazgo clave"}
+              </h5>
+              {highlight && (
+                <p className="text-sm opacity-80">{highlight}</p>
+              )}
+              <ul className="space-y-2 text-sm">
                 {suggestions.map((item) => (
-                  <li key={item} className="bg-white/10 p-3 rounded text-sm border border-white/10">
+                  <li key={item} className="rounded-lg px-3 py-2" style={{ background: "var(--surface-soft-alt)", border: "1px solid var(--border-subtle)" }}>
                     {item}
                   </li>
                 ))}
               </ul>
             </div>
           </section>
+
+          {educationArtifacts && (
+            <section id={educationPanelId}>
+              <EducationArtifactsPanel content={educationArtifacts} variant={isGuide ? "guide" : "expert"} />
+            </section>
+          )}
 
           <section className="metrics-grid">
             {metricsEntries.map(([label, value]) => (
