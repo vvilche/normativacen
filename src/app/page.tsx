@@ -85,6 +85,7 @@ export default function Home() {
       reasoning: data.content,
       hallazgo: data.hallazgo || null,
       seoTags: data.seoTags || [],
+      guideSuggestions: data.guideSuggestions || [],
       protocol: "LangGraph-Engineering-Matrix",
       acciones: data.resolution?.actionPlan || [],
       controls,

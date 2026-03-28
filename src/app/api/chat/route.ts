@@ -139,9 +139,11 @@ export async function POST(req: Request) {
 
     // 0. Verificar Caché (Repositorio de Resoluciones)
     let cacheCollection: Collection<Document> | null = null;
+    let logsCollection: Collection<Document> | null = null;
     try {
       const client = await clientPromise();
       cacheCollection = client.db("normativacen").collection("technical_resolutions");
+      logsCollection = client.db("normativacen").collection("prompt_logs");
     } catch (dbErr) {
       console.warn('⚠️ MongoDB no disponible para caché persistente:', dbErr);
     }
@@ -149,6 +151,19 @@ export async function POST(req: Request) {
     const cacheEntry = memoryCache.get(queryHash);
     if (cacheEntry && cacheEntry.expires > Date.now()) {
       console.log(`🚀 [CACHE HIT - MEM] Sirviendo resolución desde memoria: ${queryHash}`);
+      if (logsCollection) {
+        logsCollection.insertOne({
+          queryHash,
+          query: normalizedQuery,
+          clientMode: cacheEntry.payload.clientMode || clientMode,
+          agentType: cacheEntry.payload.agentType,
+          fastMode,
+          backgroundAudit,
+          createdAt: new Date(),
+          timings: cacheEntry.payload.timings || {},
+          source: 'memory-cache'
+        }).catch((err) => console.warn('⚠️ No se pudo registrar log (mem):', err));
+      }
       return NextResponse.json({
         ...cacheEntry.payload,
         isCached: true
@@ -160,6 +175,19 @@ export async function POST(req: Request) {
       if (cachedResult) {
         console.log(`🚀 [CACHE HIT] Sirviendo resolución desde el repositorio para hash: ${queryHash}`);
         memoryCache.set(queryHash, { expires: Date.now() + MEMORY_CACHE_TTL, payload: cachedResult.payload });
+        if (logsCollection) {
+          logsCollection.insertOne({
+            queryHash,
+            query: normalizedQuery,
+            clientMode: cachedResult.payload.clientMode || clientMode,
+            agentType: cachedResult.payload.agentType,
+            fastMode,
+            backgroundAudit,
+            createdAt: new Date(),
+            timings: cachedResult.payload.timings || {},
+            source: 'persistent-cache'
+          }).catch((err) => console.warn('⚠️ No se pudo registrar log (cache):', err));
+        }
         return NextResponse.json({
           ...cachedResult.payload,
           isCached: true
@@ -297,6 +325,20 @@ export async function POST(req: Request) {
       expires: Date.now() + MEMORY_CACHE_TTL,
       payload: responsePayload
     });
+
+    if (logsCollection) {
+      logsCollection.insertOne({
+        queryHash,
+        query: normalizedQuery,
+        clientMode,
+        agentType,
+        fastMode,
+        backgroundAudit,
+        createdAt: new Date(),
+        timings,
+        source: 'fresh'
+      }).catch((err) => console.warn('⚠️ No se pudo registrar log:', err));
+    }
 
     return NextResponse.json(responsePayload);
 

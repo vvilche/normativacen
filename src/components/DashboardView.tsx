@@ -219,6 +219,7 @@ export function DashboardView({
                     seoTags={resolution?.seoTags}
                     reasoning={resolution?.reasoning}
                     timings={resolution?.timings}
+                    guideSuggestions={resolution?.guideSuggestions}
                 />
             </div>
 

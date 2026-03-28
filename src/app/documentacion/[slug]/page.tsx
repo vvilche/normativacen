@@ -33,6 +33,7 @@ export default function WhitePaperPage() {
   const [resolutionMeta, setResolutionMeta] = useState<{ id?: string | null; timings?: Record<string, number> | null; createdAt?: string | null }>({});
   const [actionPlan, setActionPlan] = useState<Array<{ id: string; task: string; priority?: string }>>([]);
   const [isDynamic, setIsDynamic] = useState(false);
+  const [guideSuggestions, setGuideSuggestions] = useState<string[]>([]);
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -72,6 +73,7 @@ export default function WhitePaperPage() {
           setResolutionMeta({ id: payload.resolutionId, timings: payload.timings, createdAt: payload.createdAt });
           setActionPlan(payload.resolution?.actionPlan || []);
           setIsDynamic(true);
+          setGuideSuggestions(payload.guideSuggestions || []);
         } else {
           const res = await fetch(`/api/docs?slug=${slug}`);
           if (!res.ok) throw new Error('Documento no encontrado');
@@ -107,6 +109,7 @@ export default function WhitePaperPage() {
           setResolutionMeta({});
           setActionPlan([]);
           setIsDynamic(false);
+          setGuideSuggestions([]);
         }
       } catch (err) {
         console.error(err);
@@ -299,6 +302,17 @@ export default function WhitePaperPage() {
                     </div>
                   ))}
                 </div>
+              </section>
+            )}
+
+            {guideSuggestions.length > 0 && (
+              <section className="glass-card border border-white/5 rounded-xl p-4 space-y-2">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50">Capacitación recomendada</h3>
+                <ul className="space-y-1 text-sm text-white/70 list-disc list-inside">
+                  {guideSuggestions.map((item, idx) => (
+                    <li key={idx}>{item}</li>
+                  ))}
+                </ul>
               </section>
             )}
 

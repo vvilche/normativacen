@@ -38,6 +38,7 @@ interface ResolutionProps {
   seoTags?: string[];
   reasoning?: string;
   timings?: Record<string, number>;
+  guideSuggestions?: string[];
 }
 
 export function ResolutionCard({ 
@@ -51,7 +52,8 @@ export function ResolutionCard({
   seoTags = [],
   acciones = [],
   reasoning,
-  timings
+  timings,
+  guideSuggestions
 }: ResolutionProps) {
   
   return (
@@ -150,6 +152,17 @@ export function ResolutionCard({
                     <span className="font-black text-white">{(value / 1000).toFixed(2)}s</span>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {guideSuggestions && guideSuggestions.length > 0 && (
+              <div className="mt-6 bg-white/5 border border-white/5 rounded-xl p-4">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 mb-2">Capacitación recomendada</p>
+                <ul className="space-y-1 text-sm text-white/70 list-disc list-inside">
+                  {guideSuggestions.map((item, idx) => (
+                    <li key={idx}>{item}</li>
+                  ))}
+                </ul>
               </div>
             )}
           </div>
