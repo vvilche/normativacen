@@ -33,6 +33,7 @@ export default function DocumentacionPage() {
   const [resolutionMeta, setResolutionMeta] = useState<ResolutionMeta>({});
   const [actionPlan, setActionPlan] = useState<ActionItem[]>([]);
   const [guideSuggestions, setGuideSuggestions] = useState<string[]>([]);
+  const [contentExpanded, setContentExpanded] = useState(false);
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -240,11 +241,19 @@ export default function DocumentacionPage() {
           <section className="knowledge-section">
             <div className="knowledge-card">
               <h3 className="text-2xl font-bold mb-4">Base de Conocimiento</h3>
-              <article className="markdown-output">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {cleanContent || "# Documento no disponible"}
-                </ReactMarkdown>
-              </article>
+              <div className={contentExpanded ? "" : "scroll-panel mask-gradient-light"}>
+                <article className="markdown-output">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {cleanContent || "# Documento no disponible"}
+                  </ReactMarkdown>
+                </article>
+              </div>
+              <button
+                className="mt-4 text-xs font-bold uppercase tracking-[0.3em] text-primary"
+                onClick={() => setContentExpanded(!contentExpanded)}
+              >
+                {contentExpanded ? "Mostrar menos" : "Mostrar más"}
+              </button>
             </div>
             <div className="chat-card">
               <div className="flex items-center gap-3 mb-4">

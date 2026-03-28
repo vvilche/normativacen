@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useState } from "react";
 import { CheckCircle2, ShieldAlert, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
@@ -55,7 +56,7 @@ export function ResolutionCard({
   timings,
   guideSuggestions
 }: ResolutionProps) {
-  
+  const [expanded, setExpanded] = useState(false);
   return (
     <div className="w-full">
       <motion.div 
@@ -120,10 +121,18 @@ export function ResolutionCard({
                 {verdict}
             </p>
             {reasoning && (
-              <div className="markdown-output mt-4 text-[11px]">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {reasoning}
-                </ReactMarkdown>
+              <div className="mt-4">
+                <div className={cn("markdown-output text-[11px] transition-all", expanded ? "max-h-[1000px]" : "max-h-64 overflow-hidden mask-gradient") }>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {reasoning}
+                  </ReactMarkdown>
+                </div>
+                <button
+                  className="text-[10px] text-gold uppercase tracking-[0.3em] mt-3"
+                  onClick={() => setExpanded(!expanded)}
+                >
+                  {expanded ? "Mostrar menos" : "Mostrar más"}
+                </button>
               </div>
             )}
 

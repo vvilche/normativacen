@@ -369,3 +369,17 @@ h3, .h3 { font-family: var(--font-heading); font-size: 1.125rem; font-weight: 70
 .markdown-output tbody tr:nth-child(even) {
   background: rgba(255, 255, 255, 0.02);
 }
+
+.mask-gradient {
+  mask-image: linear-gradient(180deg, rgba(0,0,0,1) 70%, rgba(0,0,0,0));
+}
+
+.mask-gradient-light {
+  mask-image: linear-gradient(180deg, rgba(0,0,0,1) 80%, rgba(0,0,0,0));
+}
+
+.scroll-panel {
+  max-height: 22rem;
+  overflow-y: auto;
+  padding-right: 1rem;
+}
