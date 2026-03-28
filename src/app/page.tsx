@@ -66,11 +66,11 @@ export default function Home() {
     };
   }, [clientMode]);
 
-  const handleConsultar = () => {
+  const handleConsultar = (preQuery?: string) => {
     if (!isRegistered) {
       setIsModalOpen(true);
     } else {
-      startProcessing();
+      startProcessing(preQuery);
     }
   };
 
@@ -156,9 +156,13 @@ export default function Home() {
     }
   };
 
-  const startProcessing = async () => {
-    const executionQuery = query.trim();
+  const startProcessing = async (forcedQuery?: string) => {
+    const targetQuery = forcedQuery ?? query;
+    const executionQuery = targetQuery.trim();
     if (!executionQuery) return;
+    if (forcedQuery !== undefined) {
+      setQuery(forcedQuery);
+    }
     setProcessingStatus("processing");
     setIsAuditing(false);
     setAuditError(null);

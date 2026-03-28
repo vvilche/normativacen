@@ -29,7 +29,7 @@ interface DashboardViewProps {
   processingStatus: "idle" | "processing" | "complete";
   recommendedPapers: WhitePaper[];
   onReset: () => void;
-  onExecute: (query: string) => void;
+  onExecute: (query?: string) => void;
   query: string;
   setQuery: (q: string) => void;
   onTestSystem?: () => void;
@@ -123,10 +123,16 @@ export function DashboardView({
                 {heroCopy.subtitle}
               </p>
               <div className="flex flex-wrap gap-3 hero-actions">
-                <button className="bg-white text-primary px-6 py-3 rounded-xl font-bold uppercase tracking-[0.3em] text-xs">
+                <button
+                  className="bg-white text-primary px-6 py-3 rounded-xl font-bold uppercase tracking-[0.3em] text-xs"
+                  onClick={() => onExecute(prompts[0])}
+                >
                   {heroCopy.primaryCTA}
                 </button>
-                <button className="bg-white/20 border border-white/40 text-white px-6 py-3 rounded-xl font-bold uppercase tracking-[0.3em] text-xs">
+                <button
+                  className="bg-white/20 border border-white/40 text-white px-6 py-3 rounded-xl font-bold uppercase tracking-[0.3em] text-xs"
+                  onClick={() => onExecute(prompts[1] || prompts[0])}
+                >
                   {heroCopy.secondaryCTA}
                 </button>
               </div>
