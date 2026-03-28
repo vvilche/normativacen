@@ -64,6 +64,194 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+.dossier-shell {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+}
+
+.theme-guide {
+  background: #f4faff;
+  color: #0d1e25;
+}
+
+.theme-expert {
+  background: #050810;
+  color: #e2e2e5;
+}
+
+.dossier-sidebar {
+  width: 260px;
+  padding: 1.5rem 1rem;
+  background: rgba(231, 246, 255, 0.9);
+  border-right: 1px solid rgba(13, 30, 37, 0.08);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.theme-expert .dossier-sidebar {
+  background: rgba(5, 8, 16, 0.95);
+  border-color: rgba(234, 179, 8, 0.08);
+}
+
+.dossier-sidebar nav a {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  color: inherit;
+  opacity: 0.7;
+  text-decoration: none;
+}
+
+.dossier-sidebar nav a.active,
+.dossier-sidebar nav a:hover {
+  background: rgba(26, 35, 126, 0.1);
+  opacity: 1;
+}
+
+.theme-expert .dossier-sidebar nav a.active,
+.theme-expert .dossier-sidebar nav a:hover {
+  background: rgba(234, 179, 8, 0.1);
+}
+
+.dossier-main {
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.dossier-topbar {
+  position: sticky;
+  top: 0;
+  background: inherit;
+  border-bottom: 1px solid rgba(13, 30, 37, 0.08);
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  z-index: 20;
+}
+
+.theme-expert .dossier-topbar {
+  border-color: rgba(234, 179, 8, 0.08);
+}
+
+.dossier-content {
+  padding: 2rem;
+  max-width: 1200px;
+  width: 100%;
+}
+
+.hero-section {
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
+  background: linear-gradient(135deg, #1a237e, #283593);
+  color: #fff;
+  margin-bottom: 3rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-expert .hero-section {
+  background: linear-gradient(135deg, #050810, #111426);
+}
+
+.hero-actions button {
+  padding: 0.9rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+}
+
+.learning-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.learning-card {
+  border-radius: 1rem;
+  padding: 1.5rem;
+  background: var(--surface-container, #e7f6ff);
+  border: 1px solid rgba(13, 30, 37, 0.05);
+}
+
+.theme-expert .learning-card {
+  background: rgba(22, 27, 41, 0.6);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.knowledge-section {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.knowledge-card,
+.chat-card,
+.metrics-card {
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  background: #fff;
+  border: 1px solid rgba(12, 14, 16, 0.06);
+}
+
+.theme-expert .knowledge-card,
+.theme-expert .chat-card,
+.theme-expert .metrics-card {
+  background: rgba(22, 27, 41, 0.8);
+  border-color: rgba(255, 255, 255, 0.05);
+  color: #e2e2e5;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 1024px) {
+  .dossier-shell {
+    flex-direction: column;
+  }
+  .dossier-sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    overflow-x: auto;
+  }
+  .dossier-main {
+    margin-left: 0;
+  }
+  .dossier-content {
+    padding: 1.5rem;
+  }
+  .knowledge-section {
+    grid-template-columns: 1fr;
+  }
+}
+
 h1, .h1 { font-family: var(--font-heading); font-size: 2.5rem; font-weight: 900; letter-spacing: -0.05em; text-transform: uppercase; line-height: 0.9; }
 h2, .h2 { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; letter-spacing: -0.03em; text-transform: uppercase; }
 h3, .h3 { font-family: var(--font-heading); font-size: 1.125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }

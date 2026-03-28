@@ -1,338 +1,295 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from 'react';
-import ReactMarkdown from 'react-markdown';
-import { 
-  ArrowLeft, 
-  Loader2, 
-  ShieldCheck, 
-  Database, 
-  Clock,
-  Pin,
-  Activity,
-  Info
-} from 'lucide-react';
-import Link from 'next/link';
-import { useParams, useSearchParams } from 'next/navigation';
-import dynamic from 'next/dynamic';
+import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import Link from "next/link";
+import { useParams, useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
-// Isolate browser-only libraries
-const PDFButton = dynamic(() => import('@/components/PDFButton'), { ssr: false });
+interface ResolutionMeta {
+  id?: string | null;
+  timings?: Record<string, number> | null;
+  createdAt?: string | null;
+  clientMode?: "guide" | "expert";
+}
 
-export default function WhitePaperPage() {
+interface ActionItem {
+  id: string;
+  task: string;
+  priority?: string;
+}
+
+export default function DocumentacionPage() {
   const { slug } = useParams();
   const searchParams = useSearchParams();
-  const resolutionId = searchParams?.get('resolutionId');
+  const resolutionId = searchParams?.get("resolutionId");
+
   const [loading, setLoading] = useState(true);
   const [metrics, setMetrics] = useState<Record<string, string>>({});
-  const [highlight, setHighlight] = useState('');
-  const [cleanContent, setCleanContent] = useState('');
-  const [toc, setToc] = useState<string[]>([]);
-  const [mounted, setMounted] = useState(false);
-  const [docTitle, setDocTitle] = useState('Análisis Técnico y Normativo');
-  const [resolutionMeta, setResolutionMeta] = useState<{ id?: string | null; timings?: Record<string, number> | null; createdAt?: string | null }>({});
-  const [actionPlan, setActionPlan] = useState<Array<{ id: string; task: string; priority?: string }>>([]);
-  const [isDynamic, setIsDynamic] = useState(false);
+  const [highlight, setHighlight] = useState("");
+  const [cleanContent, setCleanContent] = useState("");
+  const [docTitle, setDocTitle] = useState("Gestión de Cumplimiento Normativo");
+  const [resolutionMeta, setResolutionMeta] = useState<ResolutionMeta>({});
+  const [actionPlan, setActionPlan] = useState<ActionItem[]>([]);
   const [guideSuggestions, setGuideSuggestions] = useState<string[]>([]);
-  const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setMounted(true);
     const fetchContent = async () => {
       try {
         if (resolutionId) {
           const res = await fetch(`/api/dossiers/${resolutionId}`);
-          if (!res.ok) throw new Error('Dossier no disponible');
+          if (!res.ok) throw new Error("Dossier no disponible");
           const data = await res.json();
           const payload = data.data || {};
 
-          const mdContent = payload.content || '# Dossier no disponible';
-          const tocMatches = mdContent.match(/^##\s+(.*)/gm);
-          if (tocMatches) {
-            const cleanTOC = tocMatches.map((m: string) => m.replace('##', '').trim());
-            setToc(Array.from(new Set(cleanTOC)));
-          }
-
+          const mdContent = payload.content || "# Dossier no disponible";
           const metricsRecord: Record<string, string> = {};
-          const metricArray = payload.resolution?.metrics || [];
-          metricArray.forEach((m: any) => {
-            if (m?.label && m?.value) {
-              metricsRecord[m.label] = m.value;
-            }
+          (payload.resolution?.metrics || []).forEach((m: any) => {
+            if (m?.label && m?.value) metricsRecord[m.label] = m.value;
           });
-          if (Object.keys(metricsRecord).length === 0 && payload.metrics) {
+          if (!Object.keys(metricsRecord).length && payload.metrics) {
             Object.entries(payload.metrics).forEach(([label, value]) => {
               metricsRecord[label] = String(value);
             });
           }
 
           setMetrics(metricsRecord);
-          setHighlight(payload.hallazgo || payload.resolution?.hallazgo || '');
+          setHighlight(payload.hallazgo || payload.resolution?.hallazgo || "");
           setCleanContent(mdContent.trim());
-          setDocTitle(payload.originalQuery || 'Dossier Técnico');
-          setResolutionMeta({ id: payload.resolutionId, timings: payload.timings, createdAt: payload.createdAt });
+          setDocTitle(payload.originalQuery || "Resolución Técnica");
+          setResolutionMeta({
+            id: payload.resolutionId,
+            timings: payload.timings,
+            createdAt: payload.createdAt,
+            clientMode: payload.clientMode,
+          });
           setActionPlan(payload.resolution?.actionPlan || []);
-          setIsDynamic(true);
           setGuideSuggestions(payload.guideSuggestions || []);
         } else {
           const res = await fetch(`/api/docs?slug=${slug}`);
-          if (!res.ok) throw new Error('Documento no encontrado');
+          if (!res.ok) throw new Error("Documento no encontrado");
           const data = await res.json();
-          
           let rawContent = data.content;
-          
-          // Extract METRICS_JSON
+
           const metricsMatch = rawContent.match(/\[METRICS_JSON\]\s*(\{[\s\S]*?\})/);
           if (metricsMatch) {
             try {
-          setMetrics(JSON.parse(metricsMatch[1]));
-              rawContent = rawContent.replace(metricsMatch[0], '');
-            } catch (e) { console.error('Error parsing metrics', e); }
+              setMetrics(JSON.parse(metricsMatch[1]));
+              rawContent = rawContent.replace(metricsMatch[0], "");
+            } catch (error) {
+              console.error("Error al parsear métricas", error);
+            }
           }
 
-          // Extract HALLAZGO_HIGHLIGHT
           const highlightMatch = rawContent.match(/\[HALLAZGO_HIGHLIGHT\]\s*(.*)/);
           if (highlightMatch) {
             setHighlight(highlightMatch[1].trim());
-            rawContent = rawContent.replace(highlightMatch[0], '');
-          }
-
-          // Extract TOC
-          const tocMatches = rawContent.match(/^##\s+(.*)/gm);
-          if (tocMatches) {
-            const cleanTOC = tocMatches.map((m: string) => m.replace('##', '').trim());
-            setToc(Array.from(new Set(cleanTOC)));
+            rawContent = rawContent.replace(highlightMatch[0], "");
           }
 
           setCleanContent(rawContent.trim());
-          setDocTitle('Análisis Técnico y Normativo');
-          setResolutionMeta({});
+          setDocTitle("Análisis Técnico y Normativo");
+          setResolutionMeta({ clientMode: "guide" });
           setActionPlan([]);
-          setIsDynamic(false);
           setGuideSuggestions([]);
         }
-      } catch (err) {
-        console.error(err);
+      } catch (error) {
+        console.error(error);
       } finally {
         setLoading(false);
       }
     };
+
     if (slug) fetchContent();
   }, [slug, resolutionId]);
 
-  if (!mounted || loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
-      <div className="flex flex-col items-center gap-4">
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-surface">
         <Loader2 className="w-12 h-12 animate-spin text-primary" />
-        <span className="text-xs font-mono text-muted-foreground uppercase tracking-[0.3em]">Resolviendo Metodología Tung...</span>
       </div>
-    </div>
-  );
+    );
+  }
 
   const formattedDate = resolutionMeta.createdAt
-    ? new Date(resolutionMeta.createdAt).toLocaleString('es-CL', { dateStyle: 'medium', timeStyle: 'short' })
-    : new Date().toLocaleDateString('es-CL');
+    ? new Date(resolutionMeta.createdAt).toLocaleString("es-CL", { dateStyle: "medium", timeStyle: "short" })
+    : new Date().toLocaleDateString("es-CL");
+  const isGuide = (resolutionMeta.clientMode || "guide") === "guide";
+
+  const navItems = [
+    { label: "Conceptos Básicos", active: isGuide },
+    { label: "Normas Técnicas" },
+    { label: "Implementación" },
+    { label: "Validación" },
+  ];
+
+  const suggestions = guideSuggestions.length
+    ? guideSuggestions
+    : [
+        "Revisar requisitos de NTSyCS para subestaciones",
+        "Validar protocolos del Anexo Técnico 4.1",
+        "Checklist de auditoría para SITR",
+      ];
+
+  const modules = (actionPlan.length ? actionPlan.slice(0, 3) : [
+    { id: "M1", task: "Intro a Estándares CEN" },
+    { id: "M2", task: "Cumplimiento Operativo" },
+    { id: "M3", task: "Anexos Técnicos" },
+  ]).map((item, index) => ({
+    ...item,
+    status: index === 0 ? "completado" : index === 1 ? "progreso" : "pendiente",
+  }));
+
+  const metricsEntries = Object.entries(metrics || {});
+  const timingEntries = resolutionMeta.timings ? Object.entries(resolutionMeta.timings) : [];
 
   return (
-    <div className="min-h-screen bg-[#050810] text-[#E9EEF5] font-body selection:bg-primary/20">
-      {/* ... (PDF Template unchanged for now) ... */}
-
-      <div className="flex min-h-screen">
-        {/* LEFT SIDEBAR - BRANDING & TOC */}
-        <aside className="hidden lg:flex w-72 bg-[#080B14] text-white flex-col sticky top-0 h-screen border-r border-white/5 shadow-2xl z-50">
-          <div className="p-6 border-b border-white/5 bg-black/20">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-5 h-5 rounded bg-primary flex items-center justify-center text-[10px] font-black italic">N</div>
-              <h1 className="text-xs font-heading font-black tracking-[0.2em] leading-tight uppercase">Conecta <br/> Ingeniería</h1>
-            </div>
-            <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.3em]">Technical White Paper</p>
+    <div className={`dossier-shell ${isGuide ? "theme-guide" : "theme-expert"}`}>
+      <aside className="dossier-sidebar">
+        <div>
+          <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mb-3 text-white font-black">
+            C
           </div>
+          <h2 className="text-sm font-bold uppercase tracking-[0.2em]">Hub Regulatorio</h2>
+          <p className="text-xs opacity-60 uppercase tracking-[0.2em]">Coordinador Eléctrico Nacional</p>
+        </div>
+        <nav className="flex-1 flex flex-col gap-2">
+          {navItems.map((item) => (
+            <a key={item.label} className={item.active ? "active" : ""}>
+              {item.label}
+            </a>
+          ))}
+        </nav>
+        <button className="btn-primary uppercase tracking-[0.3em]">Búsqueda Regulatoria</button>
+      </aside>
 
-          <nav className="flex-1 px-6 py-8 space-y-10 overflow-y-auto overflow-x-hidden">
+      <main className="dossier-main">
+        <header className="dossier-topbar">
+          <div className="flex items-center gap-3">
+            <Link href="/documentacion" className="text-xs font-bold uppercase tracking-[0.3em] opacity-70">
+              ← Biblioteca Técnica
+            </Link>
+            <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">
+              {formattedDate}
+            </span>
+          </div>
+          <div className="flex items-center gap-3 text-[11px] opacity-70">
+            <span>Soporte</span>
+            <span>Alertas</span>
+          </div>
+        </header>
+
+        <div className="dossier-content">
+          <section className="hero-section">
             <div className="space-y-4">
-              <h3 className="text-[10px] font-black text-primary/60 uppercase tracking-[0.3em] border-b border-primary/10 pb-2">Contenido</h3>
-              <ul className="space-y-2">
-                {['Resumen Ejecutivo', ...toc].map((item, idx) => (
-                  <li key={idx} className="group">
-                    <button className="text-[12px] font-medium text-white/40 group-hover:text-primary transition-all text-left leading-snug">
-                       {item}
-                    </button>
+              <span className="text-sm uppercase tracking-[0.5em] opacity-80">
+                {isGuide ? "Centro Educativo" : "Diagnóstico Operativo"}
+              </span>
+              <h1 className="text-4xl font-extrabold tracking-tight">{docTitle}</h1>
+              <p className="text-white/80 text-lg">
+                {highlight || "Optimice su operación con acceso directo a los procedimientos y anexos CEN."}
+              </p>
+              <div className="flex flex-wrap gap-4 hero-actions">
+                <button className="bg-white text-primary">Auditar Instalaciones</button>
+                <button className="bg-white/20 border border-white/40 text-white">Dudas Generales</button>
+              </div>
+            </div>
+            <div className="bg-white/10 border border-white/20 rounded-xl p-6">
+              <h5 className="text-sm font-bold uppercase tracking-widest mb-4 text-white/80">Consultas sugeridas</h5>
+              <ul className="space-y-3">
+                {suggestions.map((item) => (
+                  <li key={item} className="bg-white/10 p-3 rounded text-sm border border-white/10">
+                    {item}
                   </li>
                 ))}
               </ul>
             </div>
-            
-            <div className="pt-6 border-t border-white/5">
-              <div className="flex items-center gap-2 text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-4">
-                <ShieldCheck className="w-3 h-3 text-primary/50" /> Auditoría Interna
-              </div>
-              <p className="text-[10px] text-white/20 leading-relaxed italic font-medium pr-2">
-                &ldquo;Verificado contra Base Normativa CEN 2025. Auditoría técnica de cumplimiento activa.&rdquo;
-              </p>
-            </div>
-          </nav>
-        </aside>
+          </section>
 
-        {/* MAIN CONTENT WINDOW */}
-        <div className="flex-1 flex flex-col min-h-screen relative">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(45,108,223,0.08),transparent_50%)] pointer-events-none" />
-          
-          {/* TOP NAV */}
-          <header className="sticky top-0 z-40 bg-black/40 backdrop-blur-xl border-b border-white/5 px-8 py-3 flex items-center justify-between">
-            <Link href="/documentacion" className="flex items-center gap-2 text-[10px] font-black text-white/30 hover:text-primary transition-all group">
-              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" /> <span className="uppercase tracking-[0.2em]">Biblioteca Técnica</span>
-            </Link>
-            <div className="flex items-center gap-6">
-              <div className="hidden md:flex items-center gap-4 text-[9px] font-black uppercase tracking-widest text-white/20">
-                <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {formattedDate}</span>
-                <span className="px-2 py-0.5 rounded border border-success/30 text-success text-[8px] font-black">Confidencial</span>
+          <section className="metrics-grid">
+            {metricsEntries.map(([label, value]) => (
+              <div key={label} className="metrics-card">
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">{label}</span>
+                <p className="text-2xl font-black mt-1">{value}</p>
               </div>
-              <PDFButton printRef={printRef} slug={slug as string} />
-            </div>
-          </header>
+            ))}
+            {timingEntries.map(([label, value]) => (
+              <div key={label} className="metrics-card">
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">{label.replace(/_/g, " ")}</span>
+                <p className="text-2xl font-black mt-1">{(value / 1000).toFixed(2)}s</p>
+              </div>
+            ))}
+          </section>
 
-          {/* MAIN DOCUMENT BODY */}
-          <main className="max-w-4xl mx-auto w-full px-8 py-6 md:py-10 space-y-6 relative z-10">
-            
-            {/* HERO SECTION - ENGINEERING COCKPIT STYLE */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/5 pb-6">
-               <div className="space-y-1">
-                 <div className="flex items-center gap-2 text-[10px] font-bold text-primary/80 uppercase tracking-widest">
-                    <Database className="w-3 h-3" /> Normativa Vigente
-                 </div>
-                 <div className="flex flex-wrap gap-3 items-center">
-                   <h2 className="text-2xl font-heading font-bold text-white tracking-tight uppercase leading-snug">
-                      {docTitle}
-                   </h2>
-                   {isDynamic && (
-                     <span className="text-[9px] font-black uppercase tracking-[0.3em] text-gold bg-gold/10 border border-gold/30 px-2 py-0.5 rounded-full">
-                       Resolución Dinámica
-                     </span>
-                   )}
-                 </div>
-                 <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-medium">{resolutionMeta.id ? `Dossier ${resolutionMeta.id}` : 'Reporte de Auditoría Técnica 2025'}</p>
-               </div>
-              
-              {/* COMPACT HORIZONTAL METRIC BAR */}
-              {Object.keys(metrics).length > 0 && (
-                <div className="glass-card flex items-center divide-x divide-white/10 rounded-lg overflow-hidden border border-white/10">
-                  {Object.entries(metrics).map(([label, value], idx) => (
-                    <div key={idx} className="px-4 py-2 flex flex-col items-center justify-center min-w-[100px] hover:bg-white/5 transition-colors">
-                      <span className="text-[8px] font-black text-white/30 uppercase tracking-widest mb-0.5">{label}</span>
-                      <span className="text-sm font-black text-white tracking-tight">{value}</span>
-                    </div>
-                  ))}
+          <section className="learning-grid">
+            {modules.map((module) => (
+              <div key={module.id} className="learning-card">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-primary text-lg font-black">{module.id}</span>
+                  <span className="px-3 py-1 text-[10px] font-bold uppercase rounded-full" style={{ background: module.status === "completado" ? "#a3f69c" : module.status === "progreso" ? "#ffdeac" : "#d4e5ef" }}>
+                    {module.status === "completado" ? "Completado" : module.status === "progreso" ? "En Progreso" : "Pendiente"}
+                  </span>
+                </div>
+                <h4 className="text-lg font-bold mb-2">{module.task}</h4>
+                <p className="text-sm opacity-70">{module.priority || "Módulo del plan de acción"}</p>
+              </div>
+            ))}
+          </section>
+
+          <section className="knowledge-section">
+            <div className="knowledge-card">
+              <h3 className="text-2xl font-bold mb-4">Base de Conocimiento</h3>
+              <article className="markdown-output">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {cleanContent || "# Documento no disponible"}
+                </ReactMarkdown>
+              </article>
+            </div>
+            <div className="chat-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center">AI</div>
+                <div>
+                  <p className="font-bold">Asistente Técnico</p>
+                  <p className="text-[10px] text-primary uppercase tracking-[0.4em]">Soporte Normativo</p>
+                </div>
+              </div>
+              <p className="text-sm opacity-80 mb-4">{highlight || "Sin hallazgos críticos reportados."}</p>
+              {guideSuggestions.length > 0 && (
+                <div className="bg-white/10 rounded-lg p-3">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] mb-2">Siguiente paso</p>
+                  <ul className="space-y-1 text-sm">
+                    {guideSuggestions.map((item) => (
+                      <li key={item}>• {item}</li>
+                    ))}
+                  </ul>
                 </div>
               )}
             </div>
+          </section>
 
-            {/* CRITICAL FINDING CALLOUT - MINIMALIST */}
-            {highlight && (
-              <div className="glass-panel border-l-2 border-primary/50 bg-primary/5 rounded-r-lg p-4 flex gap-4 items-center">
-                <div className="bg-primary/20 text-primary p-2 rounded-md border border-primary/30 shrink-0">
-                  <Pin className="w-3.5 h-3.5" />
-                </div>
-                <div className="flex-1">
-                  <div className="text-[8px] font-black text-primary uppercase tracking-[0.2em] mb-0.5 italic">Hallazgo Crítico Detectado</div>
-                  <p className="text-xs font-bold text-white/90 leading-snug">
-                    {highlight}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* DOCUMENT CONTENT CONTEXT */}
-            <article className="prose prose-invert max-w-none 
-              prose-headings:font-heading prose-headings:font-bold prose-headings:tracking-tight prose-headings:uppercase
-              prose-h1:text-xl prose-h1:mb-6 prose-h1:text-white prose-h1:leading-snug
-              prose-h2:text-base prose-h2:mt-10 prose-h2:mb-4 prose-h2:text-primary prose-h2:leading-relaxed
-              prose-p:text-white/70 prose-p:text-sm prose-p:leading-loose prose-p:mb-6 prose-p:font-medium
-              prose-strong:text-white prose-strong:font-bold
-              prose-blockquote:border-l-2 prose-blockquote:border-primary prose-blockquote:bg-primary/5 prose-blockquote:p-6 prose-blockquote:rounded-r-lg prose-blockquote:italic
-              prose-table:border prose-table:border-white/5 prose-table:rounded-lg prose-table:overflow-hidden
-              prose-th:bg-white/5 prose-th:text-white/40 prose-th:p-3 prose-th:text-[9px] prose-th:uppercase prose-th:tracking-widest
-              prose-td:p-3 prose-td:text-[11px] prose-td:border-t prose-td:border-white/5 prose-td:text-white/50
-            ">
-              <ReactMarkdown
-                components={{
-                  h2: (props) => {
-                    const text = React.Children.toArray(props.children).join("");
-                    const match = text.match(/^(\d+)\.\s*(.*)/);
-                    if (match) {
-                      return (
-                        <h2 className={props.className}>
-                          <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-primary/20 text-primary text-[10px] shrink-0 border border-primary/30 mr-2">
-                            {match[1]}
-                          </span>
-                          <span>{match[2]}</span>
-                        </h2>
-                      );
-                    }
-                    return <h2 {...props} />;
-                  }
-                }}
-              >
-                {cleanContent || '# Documento no disponible'}
-              </ReactMarkdown>
-            </article>
-
-            {/* TIMINGS */}
-            {resolutionMeta.timings && Object.keys(resolutionMeta.timings).length > 0 && (
-              <section className="glass-card border border-white/5 rounded-xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {Object.entries(resolutionMeta.timings).map(([label, value]) => (
-                  <div key={label} className="flex items-center justify-between text-[11px] text-white/70">
-                    <span className="uppercase tracking-[0.3em] text-[8px] text-white/30">{label.replace(/_/g, ' ')}</span>
-                    <span className="font-black text-white">{(value / 1000).toFixed(2)}s</span>
+          {actionPlan.length > 0 && (
+            <section className="learning-card">
+              <h3 className="text-2xl font-bold mb-4">Plan de Acción</h3>
+              <div className="space-y-2">
+                {actionPlan.map((item) => (
+                  <div key={item.id} className="flex flex-col gap-1 border border-outline/20 rounded-lg p-3">
+                    <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.3em] opacity-60">
+                      <span>{item.id}</span>
+                      <span>{item.priority || "—"}</span>
+                    </div>
+                    <p className="text-sm">{item.task}</p>
                   </div>
                 ))}
-              </section>
-            )}
-
-            {actionPlan.length > 0 && (
-              <section className="glass-card border border-white/5 rounded-xl p-4 space-y-3">
-                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50">Plan de Acción</h3>
-                <div className="space-y-2">
-                  {actionPlan.map((item) => (
-                    <div key={item.id} className="flex flex-col gap-1 border border-white/5 rounded-lg p-3 bg-white/5">
-                      <div className="flex items-center justify-between text-[10px] text-white/40 uppercase tracking-[0.3em]">
-                        <span>{item.id}</span>
-                        <span>{item.priority || '—'}</span>
-                      </div>
-                      <p className="text-sm text-white/80 leading-snug">{item.task}</p>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {guideSuggestions.length > 0 && (
-              <section className="glass-card border border-white/5 rounded-xl p-4 space-y-2">
-                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50">Capacitación recomendada</h3>
-                <ul className="space-y-1 text-sm text-white/70 list-disc list-inside">
-                  {guideSuggestions.map((item, idx) => (
-                    <li key={idx}>{item}</li>
-                  ))}
-                </ul>
-              </section>
-            )}
-
-            {/* FOOTER */}
-            <div className="pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
-              <div className="flex items-center gap-2 text-[8px] font-black text-white/10 uppercase tracking-[0.4em]">
-                 REF: {slug}
               </div>
-              <div className="flex gap-2">
-                <button className="px-3 py-1 rounded bg-primary text-white text-[8px] font-black uppercase tracking-widest hover:brightness-110 transition-all flex items-center gap-2">
-                   <Activity className="w-2.5 h-2.5" /> Generar Auditoría
-                </button>
-                <button className="px-3 py-1 rounded bg-white/5 border border-white/10 text-white/40 text-[8px] font-black uppercase tracking-widest hover:text-white transition-all flex items-center gap-2">
-                   <Info className="w-2.5 h-2.5" /> Metadatos
-                </button>
-              </div>
-            </div>
-          </main>
+            </section>
+          )}
+
+          <footer className="mt-10 text-xs uppercase tracking-[0.3em] opacity-70">
+            REF: {slug}
+          </footer>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
