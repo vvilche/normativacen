@@ -40,6 +40,7 @@ interface DashboardViewProps {
   onExecute: (query: string) => void;
   query: string;
   setQuery: (q: string) => void;
+  onTestSystem?: () => void;
 }
 
 export function DashboardView({ 
@@ -50,7 +51,8 @@ export function DashboardView({
   onReset,
   onExecute,
   query,
-  setQuery
+  setQuery,
+  onTestSystem
 }: DashboardViewProps) {
 
   const defaultStats = {
@@ -122,9 +124,16 @@ export function DashboardView({
             <div className="flex items-center gap-3">
                 <div className="w-2 h-6 bg-gold rounded-full shadow-gold animate-pulse" />
                 <h2 className="text-xs font-bold text-white tracking-[0.2em] uppercase italic flex items-center gap-2">
-                    CEN Intelligence Hub <span className="text-slate-500 font-technical px-2 py-0.5 rounded bg-white/5 lowercase">v9.2.1</span>
+                    CEN Intelligence Hub <span className="text-slate-500 font-technical px-2 py-0.5 rounded bg-white/5 lowercase">v9.2.2</span>
                     <span className="text-[10px] text-gold animate-pulse shadow-gold">● LIVE</span>
                 </h2>
+                <div className="h-4 w-px bg-white/10 mx-2" />
+                <button 
+                  onClick={onTestSystem}
+                  className="flex items-center gap-1.5 px-2 py-1 rounded bg-accent/10 border border-accent/20 text-[9px] font-black text-accent uppercase tracking-widest hover:bg-accent/20 transition-all"
+                >
+                  <Activity className="w-3 h-3" /> Diagnóstico de Sistemas
+                </button>
             </div>
             <div className="flex items-center gap-5">
                 <button className="flex items-center gap-2 text-[9px] text-gray-500 font-black uppercase tracking-widest hover:text-white transition-colors group">

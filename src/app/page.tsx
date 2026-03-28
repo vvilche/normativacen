@@ -159,6 +159,16 @@ export default function Home() {
     }
   };
 
+  const handleTestSystem = async () => {
+    try {
+      const res = await fetch('/api/test-infra');
+      const data = await res.json();
+      alert(`DIAGNÓSTICO DE SISTEMA (v9.2.2):\n\nStatus: ${data.status}\n\nDetalles:\n- Google AI: ${data.diagnostics.google_ai}\n- Database: ${data.diagnostics.database}\n- Messaging: ${data.diagnostics.messaging}\n\nRecomendación: ${data.recommendation}`);
+    } catch (err) {
+      alert("Error crítico al ejecutar el diagnóstico. El servidor podría estar offline.");
+    }
+  };
+
   const getRecommendedPapers = () => {
     const q = query.toLowerCase();
     if (q.includes("pmu")) {
@@ -369,6 +379,7 @@ export default function Home() {
                             setQuery("");
                             setResolutionData(null);
                         }}
+                        onTestSystem={handleTestSystem}
                     />
             ) : (
                 <div className="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-6 animate-in zoom-in-95 duration-500">
