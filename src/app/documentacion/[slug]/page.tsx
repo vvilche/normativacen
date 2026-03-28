@@ -59,13 +59,24 @@ export default function DocumentacionPage() {
           setHighlight(payload.hallazgo || payload.resolution?.hallazgo || "");
           setCleanContent(mdContent.trim());
           setDocTitle(payload.originalQuery || "Resolución Técnica");
+          const sanitizedPlan = (payload.resolution?.actionPlan || [])
+            .map((item: ActionItem) => {
+              const cleanTask = typeof item.task === "string"
+                ? item.task
+                    .replace(/[\*`_]/g, "")
+                    .replace(/\s+/g, " ")
+                    .trim()
+                : "";
+              return { ...item, task: cleanTask };
+            })
+            .filter((item: ActionItem) => item.task && item.task !== "--" && item.task.length < 300);
           setResolutionMeta({
             id: payload.resolutionId,
             timings: payload.timings,
             createdAt: payload.createdAt,
             clientMode: payload.clientMode,
           });
-          setActionPlan(payload.resolution?.actionPlan || []);
+          setActionPlan(sanitizedPlan);
           setGuideSuggestions(payload.guideSuggestions || []);
         } else {
           const res = await fetch(`/api/docs?slug=${slug}`);

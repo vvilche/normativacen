@@ -72,6 +72,17 @@ export default function Home() {
       label: `${m.label}: ${m.value}`,
       status: m.status === "critical" || m.status === "warning" ? "FAIL" : "MET"
     }));
+    const sanitizedActions = (data.resolution?.actionPlan || []).map((item: any, index: number) => {
+      const cleanTask = typeof item.task === "string"
+        ? item.task.replace(/[\*`_]/g, "").replace(/\s+/g, " ").trim()
+        : '';
+      return {
+        id: item.id || `A${index + 1}`,
+        task: cleanTask,
+        priority: item.priority || 'Media',
+        deadline: item.deadline || '30 días'
+      };
+    }).filter((item: any) => item.task && item.task !== '--' && item.task.length < 280);
     const hasCritical = metrics.some((m: { status: string }) => m.status === "critical");
     const hasWarning = metrics.some((m: { status: string }) => m.status === "warning");
     const verdict = hasCritical ? "NO CUMPLE" : hasWarning ? "CUMPLE PARCIAL" : "CUMPLE";
@@ -87,7 +98,7 @@ export default function Home() {
       seoTags: data.seoTags || [],
       guideSuggestions: data.guideSuggestions || [],
       protocol: "LangGraph-Engineering-Matrix",
-      acciones: data.resolution?.actionPlan || [],
+      acciones: sanitizedActions,
       controls,
       kpis: {
         score,
