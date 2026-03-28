@@ -34,6 +34,32 @@ export interface AgentState {
 // LLM HELPER - Usando LangChain ChatGoogleGenerativeAI
 // -------------------------------------------------------
 const MODEL_ID = "gemini-2.5-flash";
+const ROUTER_KEYWORDS: Record<string, string[]> = {
+  SITR: ["sitr", "pmu", "phasor", "telemet", "iccp", "rtu", "scada", "latencia"],
+  CONSUMO: ["edac", "consumo", "cliente libre", "demanda", "carga"],
+  SSCC: ["sscc", "servicios complementarios", "csf", "cpaf"],
+  BESS: ["bess", "bateria", "batería", "almacenamiento", "gfm", "grid forming"],
+  CIBERSEG: ["ciber", "nerc", "cip", "firewall", "seguridad"],
+  PROCEDIMENTAL: ["proced", "tramite", "plazo", "anexo"],
+  GENERACION: ["generacion", "pmgd", "pmg", "unidad", "central"],
+  TRANSMISION: ["transmision", "stn", "linea", "subestacion", "snl"],
+  INFOTECNICA: ["info tecnica", "infotecnica", "placa", "impedancia", "ampacidad"]
+};
+
+function heuristicRoute(query: string): string | null {
+  const lower = query.toLowerCase();
+  for (const [code, keywords] of Object.entries(ROUTER_KEYWORDS)) {
+    if (keywords.some((keyword) => lower.includes(keyword))) {
+      return code;
+    }
+  }
+  return null;
+}
+
+function logDuration(label: string, startedAt: number) {
+  const duration = Date.now() - startedAt;
+  console.log(`⏱️ ${label}: ${duration}ms`);
+}
 
 async function callGemini(systemPrompt: string, userMessages: BaseMessage[], contextText?: string): Promise<string> {
   if (!process.env.GOOGLE_API_KEY) {
@@ -81,6 +107,12 @@ Responde SOLO el código.`;
 async function orchestratorRouter(state: AgentState): Promise<Partial<AgentState>> {
   const lastMessage = state.messages[state.messages.length - 1];
   const query = typeof lastMessage.content === "string" ? lastMessage.content : "";
+  const heuristic = heuristicRoute(query);
+  if (heuristic) {
+    console.log(`🔀 Router heurístico → ${heuristic.toLowerCase()}Agent`);
+    return { next_node: `${heuristic.toLowerCase()}Agent`, lastAgentNode: `${heuristic.toLowerCase()}Agent` };
+  }
+  const routerStart = Date.now();
 
   try {
     const model = new ChatGoogleGenerativeAI({
@@ -92,6 +124,7 @@ async function orchestratorRouter(state: AgentState): Promise<Partial<AgentState
       { role: "system", content: ROUTER_SYSTEM_PROMPT },
       { role: "user", content: query }
     ]);
+    logDuration("Router LLM", routerStart);
 
     const routeCode = (typeof response.content === 'string' ? response.content : "").trim().toUpperCase();
     
@@ -116,7 +149,9 @@ async function createAgentNode(systemPrompt: string, state: AgentState, agentTyp
   try {
     const retriever = await getRetriever();
     const lastUserMsg = state.messages[state.messages.length - 1].content as string;
-        const docs = await retriever.invoke(lastUserMsg);
+    const ragStart = Date.now();
+    const docs = await retriever.invoke(lastUserMsg);
+    logDuration(`${agentTypeName} · RAG`, ragStart);
     if (docs && docs.length > 0) {
       contextText = docs.map((d: { pageContent: string }) => d.pageContent).join("\n\n");
     }
@@ -135,7 +170,9 @@ async function createAgentNode(systemPrompt: string, state: AgentState, agentTyp
 
   const fullPrompt = systemPrompt + profileContext + retryInstructions;
 
+  const agentStart = Date.now();
   const draftResponse = await callGemini(fullPrompt, state.messages, contextText);
+  logDuration(`${agentTypeName} · LLM`, agentStart);
   
   return { 
     contextText, 
@@ -196,15 +233,31 @@ async function infotecnicaAgentNode(state: AgentState): Promise<Partial<AgentSta
 // -------------------------------------------------------
 // NODO: Auditoría de Calidad (Antialucinación)
 // -------------------------------------------------------
+function shouldBypassAuditor(state: AgentState) {
+  const lastUserMessage = getLastHumanMessage(state.messages);
+  const queryLength = typeof lastUserMessage?.content === "string" ? lastUserMessage.content.length : 0;
+  const draftLength = state.draftResponse?.length || 0;
+  const lowRiskAgent = ["procedimentalAgent", "infotecnicaAgent"].includes(state.lastAgentNode || "");
+  return (queryLength < 180 && draftLength < 1500) || lowRiskAgent;
+}
+
 async function qualityAuditorNode(state: AgentState): Promise<Partial<AgentState>> {
   const currentRevision = state.revisionCount || 0;
   console.log(`🛡️ Quality Auditor → Validando integridad técnica (Revisión #${currentRevision + 1})...`);
+  if (shouldBypassAuditor(state)) {
+    console.log("🛡️ Auditoría omitida por heurística de baja complejidad.");
+    return {
+      messages: [new AIMessage(state.draftResponse || "")],
+      next_node: "end"
+    };
+  }
   
   const auditorInput = [
     new HumanMessage(`REVISA ESTE BORRADOR:\n\n${state.draftResponse}`)
   ];
-
+  const auditorStart = Date.now();
   const feedback = await callGemini(QUALITY_AUDITOR_PROMPT, auditorInput, state.contextText);
+  logDuration("Auditor LLM", auditorStart);
   
   // Check for REJECTION logic (Limit to 1 revision to prevent timeouts on Netlify)
   if (feedback.includes('[RECHAZADO]') && currentRevision < 1) {
@@ -227,7 +280,28 @@ async function qualityAuditorNode(state: AgentState): Promise<Partial<AgentState
 // -------------------------------------------------------
 // COMPILACIÓN DEL GRAFO
 // -------------------------------------------------------
-export function buildOrchestratorGraph() {
+const agentNodes: Record<string, (state: AgentState) => Promise<Partial<AgentState>>> = {
+  sitrAgent: sitrAgentNode,
+  consumoAgent: consumoAgentNode,
+  ssccAgent: ssccAgentNode,
+  bessAgent: bessAgentNode,
+  cibersegAgent: cibersegAgentNode,
+  procedimentalAgent: procedimentalAgentNode,
+  generacionAgent: generacionAgentNode,
+  transmisionAgent: transmisionAgentNode,
+  infotecnicaAgent: infotecnicaAgentNode,
+};
+
+function buildFastPublisherNode(state: AgentState): Partial<AgentState> {
+  const content = state.draftResponse?.trim() || "[SIN_CONTENIDO]";
+  return {
+    messages: [new AIMessage(content)],
+    next_node: "end"
+  };
+}
+
+export function buildOrchestratorGraph(options: { enableAuditor?: boolean } = {}) {
+  const enableAuditor = options.enableAuditor ?? true;
   const workflow = new StateGraph<AgentState>({
     channels: {
       messages: {
@@ -261,16 +335,6 @@ export function buildOrchestratorGraph() {
     },
   })
     .addNode("router", orchestratorRouter)
-    .addNode("sitrAgent", sitrAgentNode)
-    .addNode("consumoAgent", consumoAgentNode)
-    .addNode("ssccAgent", ssccAgentNode)
-    .addNode("bessAgent", bessAgentNode)
-    .addNode("cibersegAgent", cibersegAgentNode)
-  .addNode("procedimentalAgent", procedimentalAgentNode)
-    .addNode("generacionAgent", generacionAgentNode)
-    .addNode("transmisionAgent", transmisionAgentNode)
-    .addNode("infotecnicaAgent", infotecnicaAgentNode)
-    .addNode("qualityAuditor", qualityAuditorNode)
     .addEdge(START, "router")
     .addConditionalEdges("router",
     (state: AgentState) => state.next_node || "sitrAgent",
@@ -285,31 +349,47 @@ export function buildOrchestratorGraph() {
       transmisionAgent: "transmisionAgent",
       infotecnicaAgent: "infotecnicaAgent",
     }
-  )
-    .addEdge("sitrAgent", "qualityAuditor")
-    .addEdge("consumoAgent", "qualityAuditor")
-    .addEdge("ssccAgent", "qualityAuditor")
-    .addEdge("bessAgent", "qualityAuditor")
-    .addEdge("cibersegAgent", "qualityAuditor")
-    .addEdge("procedimentalAgent", "qualityAuditor")
-    .addEdge("generacionAgent", "qualityAuditor")
-    .addEdge("transmisionAgent", "qualityAuditor")
-    .addEdge("infotecnicaAgent", "qualityAuditor")
-    .addConditionalEdges("qualityAuditor",
-    (state: AgentState) => state.next_node === "end" ? END : (state.next_node || END),
-    {
-      sitrAgent: "sitrAgent",
-      consumoAgent: "consumoAgent",
-      ssccAgent: "ssccAgent",
-      bessAgent: "bessAgent",
-      cibersegAgent: "cibersegAgent",
-      procedimentalAgent: "procedimentalAgent",
-      generacionAgent: "generacionAgent",
-      transmisionAgent: "transmisionAgent",
-      infotecnicaAgent: "infotecnicaAgent",
-      [END]: END
-    }
   );
 
+  Object.entries(agentNodes).forEach(([name, node]) => {
+    workflow.addNode(name, node);
+  });
+
+  if (enableAuditor) {
+    workflow.addNode("qualityAuditor", qualityAuditorNode);
+    Object.keys(agentNodes).forEach((name) => {
+      workflow.addEdge(name, "qualityAuditor");
+    });
+    workflow.addConditionalEdges("qualityAuditor",
+      (state: AgentState) => state.next_node === "end" ? END : (state.next_node || END),
+      {
+        sitrAgent: "sitrAgent",
+        consumoAgent: "consumoAgent",
+        ssccAgent: "ssccAgent",
+        bessAgent: "bessAgent",
+        cibersegAgent: "cibersegAgent",
+        procedimentalAgent: "procedimentalAgent",
+        generacionAgent: "generacionAgent",
+        transmisionAgent: "transmisionAgent",
+        infotecnicaAgent: "infotecnicaAgent",
+        [END]: END
+      }
+    );
+  } else {
+    workflow.addNode("fastPublisher", async (state) => buildFastPublisherNode(state));
+    Object.keys(agentNodes).forEach((name) => {
+      workflow.addEdge(name, "fastPublisher");
+    });
+    workflow.addEdge("fastPublisher", END);
+  }
+
   return workflow.compile();
+}
+function getLastHumanMessage(messages: BaseMessage[]) {
+  for (let i = messages.length - 1; i >= 0; i -= 1) {
+    if (messages[i]._getType() === "human") {
+      return messages[i];
+    }
+  }
+  return null;
 }

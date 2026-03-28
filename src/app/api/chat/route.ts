@@ -37,7 +37,7 @@ export async function POST(req: Request) {
   try {
     resetConnectionStatus();
     const body = await req.json();
-    const { messages, userProfile } = body;
+    const { messages, userProfile, fastMode = false } = body;
 
     if (!messages || !Array.isArray(messages)) {
       console.error('❌ Error: El historial de mensajes es inválido o no se proporcionó.');
@@ -90,7 +90,7 @@ export async function POST(req: Request) {
     console.log(`⚙️ [CACHE MISS] Iniciando orquestador para: "${userQuery.substring(0, 50)}..."`);
 
     // 1. Initializar el Grafo Multi-Agente
-    const app = buildOrchestratorGraph();
+    const app = buildOrchestratorGraph({ enableAuditor: !fastMode });
 
     /**
      * AQUÍ SE INICIALIZARÁ LANGGRAPH:
@@ -170,7 +170,7 @@ export async function POST(req: Request) {
       hallazgo,
       seoTags,
       agentType,
-      isClosedLoop: true
+      isClosedLoop: !fastMode
     };
 
     // 4. Persistir en el Repositorio de Resoluciones (Caché)

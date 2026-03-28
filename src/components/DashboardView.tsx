@@ -31,18 +31,22 @@ interface DashboardViewProps {
   query: string;
   setQuery: (q: string) => void;
   onTestSystem?: () => void;
+  fastMode: boolean;
+  setFastMode: (value: boolean) => void;
 }
 
 export function DashboardView({ 
   resolution, 
-  stats, 
+  stats,
   processingStatus,
   recommendedPapers, 
   onReset,
   onExecute,
   query,
   setQuery,
-  onTestSystem
+  onTestSystem,
+  fastMode,
+  setFastMode
 }: DashboardViewProps) {
 
   return (
@@ -64,7 +68,7 @@ export function DashboardView({
                 <p className="text-gray-400 text-sm font-medium">Activa el motor de razonamiento multi-agente para auditorías normativas del SEN.</p>
             </div>
             
-            <div className="relative group">
+            <div className="relative group space-y-3">
                 <div className="relative bg-[#161B29]/80 backdrop-blur-2xl border border-white/5 rounded-2xl p-2 shadow-2xl flex items-center transition-all focus-within:border-accent/30">
                     <div className="pl-4 pr-1 text-gray-700">
                         <Search className="w-5 h-5" />
@@ -83,6 +87,16 @@ export function DashboardView({
                     >
                         EJECUTAR <ChevronRight className="w-4 h-4" />
                     </button>
+                </div>
+                <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-gray-500 font-black">
+                  <span>Modo Rápido</span>
+                  <button
+                    type="button"
+                    onClick={() => setFastMode(!fastMode)}
+                    className={`flex items-center gap-2 px-3 py-1 rounded-full border text-[9px] tracking-widest transition-all ${fastMode ? 'bg-accent/10 border-accent/30 text-accent' : 'bg-white/5 border-white/10 text-white/50'}`}
+                  >
+                    {fastMode ? 'ON' : 'OFF'}
+                  </button>
                 </div>
             </div>
         </motion.div>

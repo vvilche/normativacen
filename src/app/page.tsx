@@ -35,6 +35,7 @@ export default function Home() {
   const [resolutionData, setResolutionData] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("Dashboard");
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | undefined>(undefined);
+  const [fastMode, setFastMode] = useState(true);
 
   useEffect(() => {
     const isTokenInCookie = document.cookie.includes('auth_token');
@@ -69,7 +70,8 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: [{ role: "user", content: query }],
-          userProfile
+          userProfile,
+          fastMode
         })
       });
       
@@ -377,6 +379,8 @@ export default function Home() {
                             setResolutionData(null);
                         }}
                         onTestSystem={handleTestSystem}
+                        fastMode={fastMode}
+                        setFastMode={setFastMode}
                     />
             ) : (
                 <div className="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-6 animate-in zoom-in-95 duration-500">
