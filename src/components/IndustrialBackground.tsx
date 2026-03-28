@@ -11,7 +11,6 @@ export function IndustrialBackground() {
   });
 
   const y1 = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
-  const y2 = useTransform(scrollYProgress, [0, 1], ["0%", "10%"]);
 
   return (
     <div ref={containerRef} className="fixed inset-0 -z-20 overflow-hidden bg-[#0B0F1A]">

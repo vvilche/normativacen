@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { Shield, Mail, Lock, Key, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { IndustrialBackground } from '@/components/IndustrialBackground';
 
 export default function LoginPage() {
   const [step, setStep] = useState<'auth' | 'otp'>('auth');

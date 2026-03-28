@@ -5,10 +5,8 @@ import { motion } from 'framer-motion';
 import { 
   ShieldCheck, 
   AlertTriangle, 
-  TrendingUp, 
   DollarSign, 
   Activity,
-  Zap,
   BarChart3,
   ShieldAlert
 } from 'lucide-react';

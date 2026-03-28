@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { FileText, Download, Share2, Printer, Mail, CheckCircle2, MoreHorizontal, ShieldAlert, Tag } from "lucide-react";
+import { CheckCircle2, ShieldAlert, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
 
@@ -66,6 +66,7 @@ export function ResolutionCard({
                 <div>
                     <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-0.5">Technical Compliance Overview</h3>
                     <p className="text-xs font-technical text-white/90">Agent: <span className="text-gold">NormativaCEN_Orchestrator_v2025</span> | ID: {id}</p>
+                    <p className="text-[9px] font-technical text-gold/70 uppercase tracking-widest">Tipo: {type}</p>
                 </div>
             </div>
             <div className="flex items-center gap-4">
@@ -90,7 +91,7 @@ export function ResolutionCard({
         
         <div className="flex flex-col md:flex-row gap-6">
           {/* Verdict Panel */}
-          <div className="flex-1 bg-white/5 border border-white/5 rounded-lg p-4 relative overflow-hidden group/verdict">
+            <div className="flex-1 bg-white/5 border border-white/5 rounded-lg p-4 relative overflow-hidden group/verdict">
             <div className="absolute top-0 right-0 p-2 opacity-20 group-hover/verdict:opacity-100 transition-opacity">
                 <div className={cn(
                     "w-8 h-8 rounded-full border flex items-center justify-center",
@@ -112,6 +113,11 @@ export function ResolutionCard({
             <p className="text-[13px] text-gray-300 leading-relaxed font-medium italic">
                 {verdict}
             </p>
+            {reasoning && (
+              <p className="text-[11px] text-gray-500 leading-relaxed mt-3">
+                {reasoning}
+              </p>
+            )}
 
             <div className="grid grid-cols-3 gap-4 mt-6 border-t border-white/5 pt-4">
                 <div>

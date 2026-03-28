@@ -42,6 +42,7 @@ export function FeedbackWidget({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          messageId,
           query,
           response,
           agentType,

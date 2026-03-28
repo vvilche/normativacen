@@ -3,8 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import {  FileText, 
-  Database, 
-  Pin, 
   Activity,
   User, 
   Bot, 
@@ -12,8 +10,7 @@ import {  FileText,
   Loader2, 
   Sparkles, 
   Check, 
-  Info,
-  ChevronRight
+  Info
 } from "lucide-react";
 import { FeedbackWidget } from "./FeedbackWidget";
 import { ReportExportButton } from "./ReportExportButton";

@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Book, Scale, ExternalLink, ChevronRight } from 'lucide-react';
+import { Book, Scale, ExternalLink } from 'lucide-react';
 
 const mockNorms = [
   { id: "NTSyCS-2025", title: "Norma Técnica de Seguridad y Calidad de Servicio", current: true, category: "SITR" },

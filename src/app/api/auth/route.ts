@@ -181,7 +181,7 @@ export async function POST(req: Request) {
           } else {
              console.log(`[AUTH-SIM-LOGIN] Simulación de envío de OTP para ${email}: ${otpCode}`);
           }
-        } catch (e) {
+        } catch {
           console.log(`[DEVELOPMENT FALLBACK] OTP Code: ${otpCode}`);
         }
 

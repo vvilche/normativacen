@@ -6,16 +6,10 @@ import {
   ArrowLeft, 
   Loader2, 
   ShieldCheck, 
-  Network, 
   Database, 
-  AlertTriangle, 
-  Fingerprint,
-  ChevronRight,
   Clock,
-  UserCheck,
   Pin,
   Activity,
-  Zap,
   Info
 } from 'lucide-react';
 import Link from 'next/link';
@@ -27,7 +21,6 @@ const PDFButton = dynamic(() => import('@/components/PDFButton'), { ssr: false }
 
 export default function WhitePaperPage() {
   const { slug } = useParams();
-  const [content, setContent] = useState('');
   const [loading, setLoading] = useState(true);
   const [metrics, setMetrics] = useState<Record<string, string>>({});
   const [highlight, setHighlight] = useState('');
@@ -69,7 +62,6 @@ export default function WhitePaperPage() {
           setToc(Array.from(new Set(cleanTOC)));
         }
 
-        setContent(data.content);
         setCleanContent(rawContent.trim());
       } catch (err) {
         console.error(err);
@@ -125,7 +117,7 @@ export default function WhitePaperPage() {
                 <ShieldCheck className="w-3 h-3 text-primary/50" /> Auditoría Interna
               </div>
               <p className="text-[10px] text-white/20 leading-relaxed italic font-medium pr-2">
-                "Verificado contra Base Normativa CEN 2025. Auditoría técnica de cumplimiento activa."
+                &ldquo;Verificado contra Base Normativa CEN 2025. Auditoría técnica de cumplimiento activa.&rdquo;
               </p>
             </div>
           </nav>
@@ -206,8 +198,8 @@ export default function WhitePaperPage() {
             ">
               <ReactMarkdown
                 components={{
-                  h2: ({node, ...props}) => {
-                    const text = props.children?.toString() || '';
+                  h2: (props) => {
+                    const text = React.Children.toArray(props.children).join("");
                     const match = text.match(/^(\d+)\.\s*(.*)/);
                     if (match) {
                       return (

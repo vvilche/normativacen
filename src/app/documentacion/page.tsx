@@ -1,9 +1,8 @@
 "use client";
 
 import React from 'react';
-import { BookOpen, ShieldCheck, Zap, Terminal, Cpu, ArrowRight, CheckCircle2, Lock, Download } from 'lucide-react';
+import { ShieldCheck, Zap, Terminal, ArrowRight, Lock } from 'lucide-react';
 import Link from 'next/link';
-import { IndustrialBackground } from '@/components/IndustrialBackground';
 
 const DocumentationPage = () => {
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);

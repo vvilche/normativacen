@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Shield, TrendingDown, Settings, Lock, CheckCircle2 } from "lucide-react";
+import { Shield, Settings } from "lucide-react";
 
 const steps = [
   { id: 1, label: "REQUEST_RECEIVED", agent: "Gateway", time: "08:41:01" },

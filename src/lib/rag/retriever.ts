@@ -60,7 +60,6 @@ export async function getRetriever() {
       console.log(`🔍 Buscando contexto para: "${query}"...`);
       
       try {
-        /* eslint-disable @typescript-eslint/no-explicit-any */
         // Opción 1: Búsqueda por Texto de MongoDB ($text)
         const cursor = collection.find(
           { $text: { $search: query } } as any,
@@ -82,7 +81,6 @@ export async function getRetriever() {
               { topic: { $regex: escapedQuery, $options: "i" } }
             ]
           } as any).limit(3).toArray();
-          /* eslint-enable @typescript-eslint/no-explicit-any */
           
           return regexResults.map((doc) => ({
             pageContent: doc.text || "",

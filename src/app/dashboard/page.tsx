@@ -1,21 +1,21 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ComplianceDashboard } from '../../components/ComplianceDashboard';
-import { Sparkles, ShieldCheck, ChevronLeft } from 'lucide-react';
+import { Sparkles, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
-import { IndustrialBackground } from '@/components/IndustrialBackground';
+
+interface StoredUserProfile {
+  email?: string;
+  name?: string;
+}
 
 export default function DashboardPage() {
-  const [userProfile, setUserProfile] = useState<any>(null);
-
-  useEffect(() => {
-    // Recuperar perfil de localStorage o sessionStorage
-    const savedProfile = localStorage.getItem('userProfile');
-    if (savedProfile) {
-      setUserProfile(JSON.parse(savedProfile));
-    }
-  }, []);
+  const [userProfile] = useState<StoredUserProfile | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const savedProfile = window.localStorage.getItem('userProfile');
+    return savedProfile ? JSON.parse(savedProfile) : null;
+  });
 
   return (
     <div className="min-h-screen text-slate-200 font-sans selection:bg-gold/30 relative overflow-hidden">

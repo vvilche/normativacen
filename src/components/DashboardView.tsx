@@ -1,23 +1,13 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import React from "react";
 import { 
   Sparkles, 
   ChevronRight, 
   Share2, 
-  Printer, 
-  Download, 
-  Mail,
-  ShieldCheck,
-  AlertTriangle,
   Activity,
-  Zap,
-  Search,
-  Cpu,
-  Database,
-  ShieldAlert,
-  DollarSign
+  Search
 } from "lucide-react";
 import { ResolutionCard } from "./ResolutionCard";
 import { WhitePaperCard } from "./WhitePaperCard";
@@ -54,15 +44,6 @@ export function DashboardView({
   setQuery,
   onTestSystem
 }: DashboardViewProps) {
-
-  const defaultStats = {
-    globalScore: 88.5,
-    totalAssets: 9,
-    criticalRisks: 3,
-    totalExposureUTA: 12500
-  };
-
-  const currentStats = stats || defaultStats;
 
   return (
     <div className="w-full space-y-8 pb-20">
@@ -134,6 +115,11 @@ export function DashboardView({
                 >
                   <Activity className="w-3 h-3" /> Diagnóstico de Sistemas
                 </button>
+                {stats && (
+                  <span className="text-[9px] text-white/60 font-technical uppercase tracking-widest">
+                    Score Global: {stats.globalScore}% · Activos: {stats.totalAssets}
+                  </span>
+                )}
             </div>
             <div className="flex items-center gap-5">
                 <button className="flex items-center gap-2 text-[9px] text-gray-500 font-black uppercase tracking-widest hover:text-white transition-colors group">
@@ -199,25 +185,5 @@ export function DashboardView({
         </section>
       )}
     </div>
-  );
-}
-
-function StatCard({ icon, label, value, sub, highlight = false }: any) {
-  return (
-    <motion.div 
-      whileHover={{ y: -4, scale: 1.02 }}
-      className={`p-5 rounded-2xl border backdrop-blur-md transition-all ${
-        highlight 
-          ? 'bg-red-500/5 border-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.1)]' 
-          : 'bg-[#161B29]/60 border-white/5 hover:border-gold/30'
-      }`}
-    >
-      <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center mb-4 border border-white/5 shadow-inner">
-        {icon}
-      </div>
-      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">{label}</p>
-      <h3 className="text-3xl font-bold text-white tracking-tight">{value}</h3>
-      <p className="text-[10px] text-gray-400 mt-2 font-technical">{sub}</p>
-    </motion.div>
   );
 }

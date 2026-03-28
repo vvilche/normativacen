@@ -11,20 +11,13 @@ export async function GET(req: Request) {
   if (!slug) return NextResponse.json({ error: 'Falta el slug' }, { status: 400 });
 
   try {
-    // 1. Try internal content first (Priority)
-    let filePath = path.join(process.cwd(), 'src', 'content', 'documentacion', `${slug}.md`);
-    
-    // 2. Fallback to external 'documentos'
-    if (!fs.existsSync(filePath)) {
-      filePath = path.join(process.cwd(), '..', 'documentos', `${slug}.md`);
-    }
-    
-    // 3. Fallback to external 'skills'
-    if (!fs.existsSync(filePath)) {
-      filePath = path.join(process.cwd(), '..', 'skills', `${slug}.md`);
-    }
+    const candidatePaths = [
+      path.join(process.cwd(), 'src', 'content', 'documentacion', `${slug}.md`),
+      path.join(process.cwd(), 'docs', `${slug}.md`)
+    ];
 
-    if (!fs.existsSync(filePath)) {
+    const filePath = candidatePaths.find((candidate) => fs.existsSync(candidate));
+    if (!filePath) {
       return NextResponse.json({ error: 'Documento no encontrado' }, { status: 404 });
     }
 

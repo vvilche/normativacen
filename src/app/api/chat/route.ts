@@ -4,6 +4,21 @@ import { HumanMessage, AIMessage } from '@langchain/core/messages';
 import { generateTechnicalReport } from '../../../lib/reportingEngine';
 import clientPromise, { resetConnectionStatus } from '../../../lib/rag/mongoClient';
 import crypto from 'crypto';
+import type { Collection, Document } from 'mongodb';
+
+type CachePayload = {
+  role: string;
+  content: string;
+  sources: string[];
+  resolution: unknown;
+  hallazgo: string | null;
+  seoTags: string[] | null;
+  agentType: string;
+  isClosedLoop: boolean;
+};
+
+const MEMORY_CACHE_TTL = 1000 * 60 * 10; // 10 minutos
+const memoryCache = new Map<string, { expires: number; payload: CachePayload }>();
 
 /**
  * ==========================================
@@ -43,16 +58,33 @@ export async function POST(req: Request) {
     const queryHash = crypto.createHash('md5').update(normalizedQuery).digest('hex');
 
     // 0. Verificar Caché (Repositorio de Resoluciones)
-    const client = await clientPromise();
-    const cacheCollection = client.db("normativacen").collection("technical_resolutions");
-    
-    const cachedResult = await cacheCollection.findOne({ queryHash });
-    if (cachedResult) {
-      console.log(`🚀 [CACHE HIT] Sirviendo resolución desde el repositorio para hash: ${queryHash}`);
+    let cacheCollection: Collection<Document> | null = null;
+    try {
+      const client = await clientPromise();
+      cacheCollection = client.db("normativacen").collection("technical_resolutions");
+    } catch (dbErr) {
+      console.warn('⚠️ MongoDB no disponible para caché persistente:', dbErr);
+    }
+
+    const cacheEntry = memoryCache.get(queryHash);
+    if (cacheEntry && cacheEntry.expires > Date.now()) {
+      console.log(`🚀 [CACHE HIT - MEM] Sirviendo resolución desde memoria: ${queryHash}`);
       return NextResponse.json({
-        ...cachedResult.payload,
+        ...cacheEntry.payload,
         isCached: true
       });
+    }
+
+    if (cacheCollection) {
+      const cachedResult = await cacheCollection.findOne({ queryHash });
+      if (cachedResult) {
+        console.log(`🚀 [CACHE HIT] Sirviendo resolución desde el repositorio para hash: ${queryHash}`);
+        memoryCache.set(queryHash, { expires: Date.now() + MEMORY_CACHE_TTL, payload: cachedResult.payload });
+        return NextResponse.json({
+          ...cachedResult.payload,
+          isCached: true
+        });
+      }
     }
 
     console.log(`⚙️ [CACHE MISS] Iniciando orquestador para: "${userQuery.substring(0, 50)}..."`);
@@ -130,7 +162,7 @@ export async function POST(req: Request) {
 
     console.log(`✅ Respuesta exitosa: ${agentType} | Metrics: ${!!metricsJson}`);
 
-    const responsePayload = {
+    const responsePayload: CachePayload = {
       role: 'assistant',
       content: cleanContent,
       sources,
@@ -143,22 +175,29 @@ export async function POST(req: Request) {
 
     // 4. Persistir en el Repositorio de Resoluciones (Caché)
     try {
-      await cacheCollection.updateOne(
-        { queryHash },
-        { 
-          $set: { 
-            queryHash,
-            originalQuery: normalizedQuery,
-            payload: responsePayload,
-            createdAt: new Date()
-          } 
-        },
-        { upsert: true }
-      );
-      console.log(`💾 [CACHE STORE] Resolución guardada en el repositorio: ${queryHash}`);
+      if (cacheCollection) {
+        await cacheCollection.updateOne(
+          { queryHash },
+          { 
+            $set: { 
+              queryHash,
+              originalQuery: normalizedQuery,
+              payload: responsePayload,
+              createdAt: new Date()
+            } 
+          },
+          { upsert: true }
+        );
+        console.log(`💾 [CACHE STORE] Resolución guardada en el repositorio: ${queryHash}`);
+      }
     } catch (cacheErr) {
       console.warn('⚠️ Error guardando en caché:', cacheErr);
     }
+
+    memoryCache.set(queryHash, {
+      expires: Date.now() + MEMORY_CACHE_TTL,
+      payload: responsePayload
+    });
 
     return NextResponse.json(responsePayload);
 

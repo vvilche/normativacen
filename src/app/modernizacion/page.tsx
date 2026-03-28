@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { Cpu, RefreshCcw, ShieldCheck, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
-import { IndustrialBackground } from '@/components/IndustrialBackground';
 
 const ModernizationPage = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -26,7 +25,7 @@ const ModernizationPage = () => {
           
           <div className="space-y-3">
             <h2 className="text-3xl font-heading font-black text-white italic uppercase tracking-tighter">Solicitud Procesada</h2>
-            <p className="text-gold text-xs font-black uppercase tracking-widest italic">"{installation}"</p>
+            <p className="text-gold text-xs font-black uppercase tracking-widest italic">&ldquo;{installation}&rdquo;</p>
           </div>
           
           <div className="bg-black/40 rounded-3xl p-6 border border-white/5 text-left space-y-4">

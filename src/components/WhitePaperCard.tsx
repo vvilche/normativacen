@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { FileText, Download, ChevronRight, Sparkles } from "lucide-react";
+import { Download } from "lucide-react";
 import { WhitePaper } from "@/lib/data/whitePapers";
 import Link from "next/link";
 

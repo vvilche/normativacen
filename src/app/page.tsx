@@ -1,19 +1,16 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Search, Zap, ChevronRight, ShieldCheck, Database, Server, FileText } from "lucide-react";
+import { Zap, ChevronRight, ShieldCheck, Database, FileText } from "lucide-react";
 import { useState, useEffect } from "react";
 import { LeadGenModal } from "@/components/LeadGenModal";
-import { HarnessMonitor } from "@/components/HarnessMonitor";
 import { DashboardView } from "@/components/DashboardView";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { WhitePaperCard } from "@/components/WhitePaperCard";
 import { whitePapers } from "@/lib/data/whitePapers";
-import { getResolutionByQuery } from "@/lib/resolutionEngine";
-import { IndustrialBackground } from "@/components/IndustrialBackground";
 import { ResolutionsView } from "@/components/ResolutionsView";
 import { NormsView } from "@/components/NormsView";
-import { Code, Cpu, Activity, Layers, Globe, PenTool } from "lucide-react";
+import { Cpu, Activity, Layers, Globe, PenTool } from "lucide-react";
 
 interface UserProfile {
   name: string;
@@ -164,7 +161,7 @@ export default function Home() {
       const res = await fetch('/api/test-infra');
       const data = await res.json();
       alert(`DIAGNÓSTICO DE SISTEMA (v9.2.2):\n\nStatus: ${data.status}\n\nDetalles:\n- Google AI: ${data.diagnostics.google_ai}\n- Database: ${data.diagnostics.database}\n- Messaging: ${data.diagnostics.messaging}\n\nRecomendación: ${data.recommendation}`);
-    } catch (err) {
+    } catch {
       alert("Error crítico al ejecutar el diagnóstico. El servidor podría estar offline.");
     }
   };
