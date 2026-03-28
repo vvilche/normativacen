@@ -36,29 +36,72 @@ export interface AgentState {
 const MODEL_ID = "gemini-2.5-flash";
 const ROUTER_KEYWORDS: Record<string, string[]> = {
   SITR: ["sitr", "pmu", "phasor", "telemet", "iccp", "rtu", "scada", "latencia"],
-  CONSUMO: ["edac", "consumo", "cliente libre", "demanda", "carga"],
+  CONSUMO: ["edac", "consumo", "cliente libre", "demanda", "carga", "relé", "rele", "frecuencia"],
   SSCC: ["sscc", "servicios complementarios", "csf", "cpaf"],
   BESS: ["bess", "bateria", "batería", "almacenamiento", "gfm", "grid forming"],
   CIBERSEG: ["ciber", "nerc", "cip", "firewall", "seguridad"],
-  PROCEDIMENTAL: ["proced", "tramite", "plazo", "anexo"],
+  PROCEDIMENTAL: ["proced", "tramite", "trámite", "plazo", "anexo", "sec", "pmus", "permiso"],
   GENERACION: ["generacion", "pmgd", "pmg", "unidad", "central"],
   TRANSMISION: ["transmision", "stn", "linea", "subestacion", "snl"],
   INFOTECNICA: ["info tecnica", "infotecnica", "placa", "impedancia", "ampacidad"]
 };
 
+const ROUTER_PRIORITY: Record<string, number> = {
+  PROCEDIMENTAL: 1,
+  CONSUMO: 2,
+  SITR: 3,
+  SSCC: 4,
+  BESS: 5,
+  CIBERSEG: 6,
+  GENERACION: 7,
+  TRANSMISION: 8,
+  INFOTECNICA: 9,
+};
+
+function normalizeText(input: string) {
+  return input
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
 function heuristicRoute(query: string): string | null {
-  const lower = query.toLowerCase();
+  const lower = normalizeText(query);
+  let bestCode: string | null = null;
+  let bestScore = 0;
   for (const [code, keywords] of Object.entries(ROUTER_KEYWORDS)) {
-    if (keywords.some((keyword) => lower.includes(keyword))) {
-      return code;
+    const score = keywords.reduce((acc, keyword) => (
+      lower.includes(normalizeText(keyword)) ? acc + 1 : acc
+    ), 0);
+    if (score > 0) {
+      if (
+        score > bestScore ||
+        (score === bestScore && code !== bestCode && (ROUTER_PRIORITY[code] || 99) < (ROUTER_PRIORITY[bestCode || ""] || 99))
+      ) {
+        bestScore = score;
+        bestCode = code;
+      }
     }
   }
-  return null;
+  return bestCode;
 }
 
 function logDuration(label: string, startedAt: number) {
   const duration = Date.now() - startedAt;
   console.log(`⏱️ ${label}: ${duration}ms`);
+}
+
+function mergeDraftWithFeedback(draft: string | undefined, feedback: string) {
+  const sanitized = feedback
+    .replace(/\[(APROBADO|RECHAZADO)\]/g, "")
+    .trim();
+  if (!draft) {
+    return sanitized;
+  }
+  if (!sanitized) {
+    return draft;
+  }
+  return `${draft}\n\n[AUDITORÍA]\n${sanitized}`;
 }
 
 async function callGemini(systemPrompt: string, userMessages: BaseMessage[], contextText?: string): Promise<string> {
@@ -258,7 +301,7 @@ async function qualityAuditorNode(state: AgentState): Promise<Partial<AgentState
   const auditorStart = Date.now();
   const feedback = await callGemini(QUALITY_AUDITOR_PROMPT, auditorInput, state.contextText);
   logDuration("Auditor LLM", auditorStart);
-  
+
   // Check for REJECTION logic (Limit to 1 revision to prevent timeouts on Netlify)
   if (feedback.includes('[RECHAZADO]') && currentRevision < 1) {
     console.log("❌ Auditoría FALLIDA. Solicitando re-elaboración al especialista...");
@@ -271,8 +314,9 @@ async function qualityAuditorNode(state: AgentState): Promise<Partial<AgentState
 
   // Si pasa o alcanzó el límite de reintentos
   console.log("✅ Auditoría APROBADA (o límite de revisiones alcanzado).");
+  const merged = mergeDraftWithFeedback(state.draftResponse, feedback);
   return { 
-    messages: [new AIMessage(feedback)],
+    messages: [new AIMessage(merged)],
     next_node: "end" 
   };
 }

@@ -5,6 +5,22 @@ import { HumanMessage } from "@langchain/core/messages";
 // Cargar variables de entorno desde .env.local
 dotenv.config({ path: ".env.local" });
 
+function parseArgs() {
+  const args = process.argv.slice(2);
+  const parsed: { prompt?: string; mode?: "fast" | "full" } = {};
+  args.forEach((arg) => {
+    if (arg.startsWith("--prompt=")) {
+      parsed.prompt = arg.replace("--prompt=", "");
+    } else if (arg.startsWith("--mode=")) {
+      const value = arg.replace("--mode=", "").toLowerCase();
+      if (value === "fast" || value === "full") {
+        parsed.mode = value;
+      }
+    }
+  });
+  return parsed;
+}
+
 async function testRealPrompt() {
   console.log("🧪 INICIANDO TEST INTERNO CON PROMPT REAL...\n");
 
@@ -13,8 +29,10 @@ async function testRealPrompt() {
     process.exit(1);
   }
 
-  // 1. Definir una consulta real de ingeniería
-  const query = "Necesito el procedimiento técnico para habilitar una planta PMGD de 9MW con medición sincrofasorial (PMU) según la NTSyCS.";
+  const { prompt, mode } = parseArgs();
+  const query = prompt || "Necesito el procedimiento técnico para habilitar una planta PMGD de 9MW con medición sincrofasorial (PMU) según la NTSyCS.";
+  const executionMode: "fast" | "full" = mode || "full";
+
   const userProfile = {
     name: "Victor Vilche",
     role: "Ingeniero Eléctrico",
@@ -23,12 +41,13 @@ async function testRealPrompt() {
   };
 
   console.log(`📝 Query: "${query}"`);
+  console.log(`⚙️ Modo: ${executionMode.toUpperCase()}`);
   console.log(`👤 Perfil: ${userProfile.coordinadoType}\n`);
 
   try {
     // 2. Construir el Grafo
     console.log("⚙️  Construyendo Grafo de Orquestación...");
-    const app = buildOrchestratorGraph();
+    const app = buildOrchestratorGraph({ enableAuditor: executionMode !== "fast" });
 
     // 3. Invocar
     console.log("🤖 Invocando Agentes Multi-Dominio (Gemini 2.5 Flash + RAG)...");
