@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { CheckCircle2, ShieldAlert, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const ReportExportButton = dynamic(() => import("./ReportExportButton").then(mod => mod.ReportExportButton), { 
   ssr: false,
@@ -114,9 +116,11 @@ export function ResolutionCard({
                 {verdict}
             </p>
             {reasoning && (
-              <p className="text-[11px] text-gray-500 leading-relaxed mt-3">
-                {reasoning}
-              </p>
+              <div className="markdown-output mt-4 text-[11px]">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {reasoning}
+                </ReactMarkdown>
+              </div>
             )}
 
             <div className="grid grid-cols-3 gap-4 mt-6 border-t border-white/5 pt-4">

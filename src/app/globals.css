@@ -126,3 +126,58 @@ h3, .h3 { font-family: var(--font-heading); font-size: 1.125rem; font-weight: 70
 .bg-gold { background-color: var(--gold); }
 .border-gold { border-color: var(--gold); }
 .shadow-gold { box-shadow: 0 0 20px rgba(234, 179, 8, 0.2); }
+
+.markdown-output {
+  font-family: var(--font-body), sans-serif;
+  color: #cbd5f5;
+  line-height: 1.6;
+}
+
+.markdown-output h2,
+.markdown-output h3,
+.markdown-output h4 {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.75rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #f8fafc;
+}
+
+.markdown-output p {
+  margin-bottom: 0.75rem;
+  color: rgba(226, 232, 240, 0.85);
+}
+
+.markdown-output ul,
+.markdown-output ol {
+  padding-left: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.markdown-output table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.7rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.markdown-output th,
+.markdown-output td {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.45rem 0.5rem;
+  text-align: left;
+}
+
+.markdown-output th {
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 0.65rem;
+  color: var(--gold);
+  background: rgba(234, 179, 8, 0.08);
+}
+
+.markdown-output tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
