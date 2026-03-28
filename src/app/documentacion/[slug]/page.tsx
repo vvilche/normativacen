@@ -13,7 +13,7 @@ import {
   Info
 } from 'lucide-react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 
 // Isolate browser-only libraries
@@ -21,48 +21,87 @@ const PDFButton = dynamic(() => import('@/components/PDFButton'), { ssr: false }
 
 export default function WhitePaperPage() {
   const { slug } = useParams();
+  const searchParams = useSearchParams();
+  const resolutionId = searchParams?.get('resolutionId');
   const [loading, setLoading] = useState(true);
   const [metrics, setMetrics] = useState<Record<string, string>>({});
   const [highlight, setHighlight] = useState('');
   const [cleanContent, setCleanContent] = useState('');
   const [toc, setToc] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
+  const [docTitle, setDocTitle] = useState('Análisis Técnico y Normativo');
+  const [resolutionMeta, setResolutionMeta] = useState<{ id?: string | null; timings?: Record<string, number> | null }>({});
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
     const fetchContent = async () => {
       try {
-        const res = await fetch(`/api/docs?slug=${slug}`);
-        if (!res.ok) throw new Error('Documento no encontrado');
-        const data = await res.json();
-        
-        let rawContent = data.content;
-        
-        // Extract METRICS_JSON
-        const metricsMatch = rawContent.match(/\[METRICS_JSON\]\s*(\{[\s\S]*?\})/);
-        if (metricsMatch) {
-          try {
-            setMetrics(JSON.parse(metricsMatch[1]));
-            rawContent = rawContent.replace(metricsMatch[0], '');
-          } catch (e) { console.error('Error parsing metrics', e); }
-        }
+        if (resolutionId) {
+          const res = await fetch(`/api/dossiers/${resolutionId}`);
+          if (!res.ok) throw new Error('Dossier no disponible');
+          const data = await res.json();
+          const payload = data.data || {};
 
-        // Extract HALLAZGO_HIGHLIGHT
-        const highlightMatch = rawContent.match(/\[HALLAZGO_HIGHLIGHT\]\s*(.*)/);
-        if (highlightMatch) {
-          setHighlight(highlightMatch[1].trim());
-          rawContent = rawContent.replace(highlightMatch[0], '');
-        }
+          const mdContent = payload.content || '# Dossier no disponible';
+          const tocMatches = mdContent.match(/^##\s+(.*)/gm);
+          if (tocMatches) {
+            const cleanTOC = tocMatches.map((m: string) => m.replace('##', '').trim());
+            setToc(Array.from(new Set(cleanTOC)));
+          }
 
-        // Extract TOC
-        const tocMatches = rawContent.match(/^##\s+(.*)/gm);
-        if (tocMatches) {
-          const cleanTOC = tocMatches.map((m: string) => m.replace('##', '').trim());
-          setToc(Array.from(new Set(cleanTOC)));
-        }
+          const metricsRecord: Record<string, string> = {};
+          const metricArray = payload.resolution?.metrics || [];
+          metricArray.forEach((m: any) => {
+            if (m?.label && m?.value) {
+              metricsRecord[m.label] = m.value;
+            }
+          });
+          if (Object.keys(metricsRecord).length === 0 && payload.metrics) {
+            Object.entries(payload.metrics).forEach(([label, value]) => {
+              metricsRecord[label] = String(value);
+            });
+          }
 
-        setCleanContent(rawContent.trim());
+          setMetrics(metricsRecord);
+          setHighlight(payload.hallazgo || payload.resolution?.hallazgo || '');
+          setCleanContent(mdContent.trim());
+          setDocTitle(payload.originalQuery || 'Dossier Técnico');
+          setResolutionMeta({ id: payload.resolutionId, timings: payload.timings });
+        } else {
+          const res = await fetch(`/api/docs?slug=${slug}`);
+          if (!res.ok) throw new Error('Documento no encontrado');
+          const data = await res.json();
+          
+          let rawContent = data.content;
+          
+          // Extract METRICS_JSON
+          const metricsMatch = rawContent.match(/\[METRICS_JSON\]\s*(\{[\s\S]*?\})/);
+          if (metricsMatch) {
+            try {
+              setMetrics(JSON.parse(metricsMatch[1]));
+              rawContent = rawContent.replace(metricsMatch[0], '');
+            } catch (e) { console.error('Error parsing metrics', e); }
+          }
+
+          // Extract HALLAZGO_HIGHLIGHT
+          const highlightMatch = rawContent.match(/\[HALLAZGO_HIGHLIGHT\]\s*(.*)/);
+          if (highlightMatch) {
+            setHighlight(highlightMatch[1].trim());
+            rawContent = rawContent.replace(highlightMatch[0], '');
+          }
+
+          // Extract TOC
+          const tocMatches = rawContent.match(/^##\s+(.*)/gm);
+          if (tocMatches) {
+            const cleanTOC = tocMatches.map((m: string) => m.replace('##', '').trim());
+            setToc(Array.from(new Set(cleanTOC)));
+          }
+
+          setCleanContent(rawContent.trim());
+          setDocTitle('Análisis Técnico y Normativo');
+          setResolutionMeta({});
+        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -70,7 +109,7 @@ export default function WhitePaperPage() {
       }
     };
     if (slug) fetchContent();
-  }, [slug]);
+  }, [slug, resolutionId]);
 
   if (!mounted || loading) return (
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
@@ -146,15 +185,15 @@ export default function WhitePaperPage() {
             
             {/* HERO SECTION - ENGINEERING COCKPIT STYLE */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/5 pb-6">
-              <div className="space-y-1">
+               <div className="space-y-1">
                  <div className="flex items-center gap-2 text-[10px] font-bold text-primary/80 uppercase tracking-widest">
                     <Database className="w-3 h-3" /> Normativa Vigente
                  </div>
                  <h2 className="text-2xl font-heading font-bold text-white tracking-tight uppercase leading-snug">
-                    Análisis Técnico <span className="text-primary">y Normativo</span>
+                    {docTitle}
                  </h2>
-                 <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-medium">Reporte de Auditoría Técnica 2025</p>
-              </div>
+                 <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-medium">{resolutionMeta.id ? `Dossier ${resolutionMeta.id}` : 'Reporte de Auditoría Técnica 2025'}</p>
+               </div>
               
               {/* COMPACT HORIZONTAL METRIC BAR */}
               {Object.keys(metrics).length > 0 && (
@@ -218,6 +257,18 @@ export default function WhitePaperPage() {
                 {cleanContent || '# Documento no disponible'}
               </ReactMarkdown>
             </article>
+
+            {/* TIMINGS */}
+            {resolutionMeta.timings && Object.keys(resolutionMeta.timings).length > 0 && (
+              <section className="glass-card border border-white/5 rounded-xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {Object.entries(resolutionMeta.timings).map(([label, value]) => (
+                  <div key={label} className="flex items-center justify-between text-[11px] text-white/70">
+                    <span className="uppercase tracking-[0.3em] text-[8px] text-white/30">{label.replace(/_/g, ' ')}</span>
+                    <span className="font-black text-white">{(value / 1000).toFixed(2)}s</span>
+                  </div>
+                ))}
+              </section>
+            )}
 
             {/* FOOTER */}
             <div className="pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">

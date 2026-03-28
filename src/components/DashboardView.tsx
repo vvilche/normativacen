@@ -148,7 +148,7 @@ export function DashboardView({
                 </button>
                 {resolution?.resolutionId && (
                   <Link
-                    href={`/documentacion/dossier/${resolution.resolutionId}`}
+                    href={`/documentacion/dossier?resolutionId=${resolution.resolutionId}`}
                     target="_blank"
                     className="flex items-center gap-2 text-[9px] text-accent font-black uppercase tracking-[0.3em] border border-accent/30 px-3 py-1 rounded-lg hover:bg-accent/10 transition-all"
                   >
