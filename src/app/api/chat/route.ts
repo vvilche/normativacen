@@ -15,6 +15,9 @@ type CachePayload = {
   seoTags: string[] | null;
   agentType: string;
   isClosedLoop: boolean;
+  resolutionId: string;
+  originalQuery?: string;
+  createdAt?: string;
 };
 
 const MEMORY_CACHE_TTL = 1000 * 60 * 10; // 10 minutos
@@ -162,6 +165,8 @@ export async function POST(req: Request) {
 
     console.log(`✅ Respuesta exitosa: ${agentType} | Metrics: ${!!metricsJson}`);
 
+    const resolutionId = queryHash;
+
     const responsePayload: CachePayload = {
       role: 'assistant',
       content: cleanContent,
@@ -170,7 +175,10 @@ export async function POST(req: Request) {
       hallazgo,
       seoTags,
       agentType,
-      isClosedLoop: !fastMode
+      isClosedLoop: !fastMode,
+      resolutionId,
+      originalQuery: userQuery,
+      createdAt: new Date().toISOString()
     };
 
     // 4. Persistir en el Repositorio de Resoluciones (Caché)

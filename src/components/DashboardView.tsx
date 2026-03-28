@@ -14,6 +14,7 @@ import { ResolutionCard } from "./ResolutionCard";
 import { WhitePaperCard } from "./WhitePaperCard";
 import { HarnessMonitor } from "./HarnessMonitor";
 import { WhitePaper } from "@/lib/data/whitePapers";
+import Link from "next/link";
 
 interface DashboardStats {
   globalScore: number;
@@ -145,6 +146,16 @@ export function DashboardView({
                     <Share2 className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
                     <span>Compartir</span>
                 </button>
+                {resolution?.resolutionId && (
+                  <Link
+                    href={`/documentacion/dossier/${resolution.resolutionId}`}
+                    target="_blank"
+                    className="flex items-center gap-2 text-[9px] text-accent font-black uppercase tracking-[0.3em] border border-accent/30 px-3 py-1 rounded-lg hover:bg-accent/10 transition-all"
+                  >
+                    Dossier Técnico
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </Link>
+                )}
                 <div className="h-4 w-px bg-white/10" />
                 <button 
                     onClick={onReset}

@@ -77,7 +77,8 @@ export default function Home() {
     const score = hasCritical ? 40 : hasWarning ? 72 : 95;
 
     return {
-      id: `RES-${Date.now()}`,
+      id: data.resolutionId || `RES-${Date.now()}`,
+      resolutionId: data.resolutionId,
       verdict,
       reasoning: data.content,
       hallazgo: data.hallazgo || null,

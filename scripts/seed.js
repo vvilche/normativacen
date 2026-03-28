@@ -8,22 +8,22 @@ const NORMATIVA_DATA = [
   {
     topic: "EDAC",
     text: "Los Esquemas de Desconexión de Carga (EDAC) del Sistema Eléctrico Nacional de Chile deben operar en un máximo de 200 milisegundos para asegurar la estabilidad de la red en contingencias extremas.",
-    metadata: { source: "NTSyCS 2024, Art. 5.2" }
+    metadata: { source: "NTSyCS 2024, Art. 5.2", agentType: "consumoAgent" }
   },
   {
     topic: "SITR",
     text: "El estándar SITR (Sistema de Información de Tiempo Real) exige una disponibilidad del 99.8% mensual para los enlaces de comunicación entre los Coordinados y el CEN.",
-    metadata: { source: "Anexo Técnico SITR v2.1" }
+    metadata: { source: "Anexo Técnico SITR v2.1", agentType: "sitrAgent" }
   },
   {
     topic: "SITR",
     text: "Las redundancias en subestaciones SITR deben contar con hardware duplicado y rutas de comunicación físicamente independientes hacia los centros de despacho.",
-    metadata: { source: "NTSyCS, Cap. Comunicaciones" }
+    metadata: { source: "NTSyCS, Cap. Comunicaciones", agentType: "sitrAgent" }
   },
   {
     topic: "General",
     text: "El Coordinador Eléctrico Nacional (CEN) es el organismo encargado de la operación del sistema eléctrico entre Arica y Chiloé.",
-    metadata: { source: "Ley General de Servicios Eléctricos" }
+    metadata: { source: "Ley General de Servicios Eléctricos", agentType: "general" }
   }
 ];
 

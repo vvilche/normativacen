@@ -190,7 +190,7 @@ async function orchestratorRouter(state: AgentState): Promise<Partial<AgentState
 async function createAgentNode(systemPrompt: string, state: AgentState, agentTypeName: string): Promise<Partial<AgentState>> {
   let contextText = "No se pudo recuperar contexto normativo adicional.";
   try {
-    const retriever = await getRetriever();
+    const retriever = await getRetriever(agentTypeName);
     const lastUserMsg = state.messages[state.messages.length - 1].content as string;
     const ragStart = Date.now();
     const docs = await retriever.invoke(lastUserMsg);

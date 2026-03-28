@@ -1,4 +1,4 @@
-import { MongoClient, Document } from "mongodb";
+import { MongoClient, Document, Filter } from "mongodb";
 import clientPromise, { getConnectionStatus, setConnectionFailed } from "./mongoClient";
 
 const CONNECT_TIMEOUT = Number(process.env.MONGO_CONNECT_TIMEOUT_MS || 12000);
@@ -35,7 +35,7 @@ function createMockRetriever() {
   };
 }
 
-export async function getRetriever() {
+export async function getRetriever(agentType?: string) {
   if (getConnectionStatus()) {
     console.log("💡 [MOCK RAG] Saltando intento de conexión (fallo previo registrado).");
     return createMockRetriever();
@@ -68,13 +68,26 @@ export async function getRetriever() {
       console.log(`🔍 Buscando contexto para: "${query}"...`);
       
       try {
-        // Opción 1: Búsqueda por Texto de MongoDB ($text)
-        const cursor = collection.find(
-          { $text: { $search: query } } as any,
-          { score: { $meta: "textScore" } } as any
-        ).sort({ score: { $meta: "textScore" } } as any).limit(3);
+        const buildFilter = (useAgentFilter: boolean): Filter<RagDocument> => {
+          const filter: Filter<RagDocument> = { $text: { $search: query } } as Filter<RagDocument>;
+          if (useAgentFilter && agentType) {
+            filter["metadata.agentType"] = agentType;
+          }
+          return filter;
+        };
 
-        const results = await cursor.toArray();
+        const runTextSearch = async (filter: Filter<RagDocument>) => {
+          return collection
+            .find(filter, { score: { $meta: "textScore" } } as any)
+            .sort({ score: { $meta: "textScore" } } as any)
+            .limit(3)
+            .toArray();
+        };
+
+        let results = await runTextSearch(buildFilter(true));
+        if (results.length === 0 && agentType) {
+          results = await runTextSearch(buildFilter(false));
+        }
         
         // Opción 2: Fallback a Regex si no hay resultados por $text
         if (results.length === 0) {
@@ -82,13 +95,24 @@ export async function getRetriever() {
           
           // Escapar caracteres especiales para el regex
           const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          
-          const regexResults = await collection.find({
-            $or: [
-              { text: { $regex: escapedQuery, $options: "i" } },
-              { topic: { $regex: escapedQuery, $options: "i" } }
-            ]
-          } as any).limit(3).toArray();
+
+          const buildRegexFilter = (useAgentFilter: boolean): Filter<RagDocument> => {
+            const base: Filter<RagDocument> = {
+              $or: [
+                { text: { $regex: escapedQuery, $options: "i" } },
+                { topic: { $regex: escapedQuery, $options: "i" } }
+              ]
+            };
+            if (useAgentFilter && agentType) {
+              (base as any)["metadata.agentType"] = agentType;
+            }
+            return base;
+          };
+
+          let regexResults = await collection.find(buildRegexFilter(true)).limit(3).toArray();
+          if (regexResults.length === 0 && agentType) {
+            regexResults = await collection.find(buildRegexFilter(false)).limit(3).toArray();
+          }
           
           return regexResults.map((doc) => ({
             pageContent: doc.text || "",
