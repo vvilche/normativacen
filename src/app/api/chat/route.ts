@@ -18,10 +18,42 @@ type CachePayload = {
   resolutionId: string;
   originalQuery?: string;
   createdAt?: string;
+  timings?: Record<string, number>;
 };
 
 const MEMORY_CACHE_TTL = 1000 * 60 * 10; // 10 minutos
 const memoryCache = new Map<string, { expires: number; payload: CachePayload }>();
+
+function deriveMetricsFromContent(content: string, agentType: string) {
+  const checklistItems = (content.match(/^[\s\t]*[-*]\s+/gm) || []).length;
+  const phaseItems = (content.match(/fase\s+\d+/gi) || []).length;
+  const riskMentions = (content.match(/riesg/gi) || []).length;
+
+  const metrics = [
+    {
+      label: "Checklist",
+      value: checklistItems ? `${checklistItems} ítems` : "N/A",
+      status: checklistItems >= 5 ? "success" : "info",
+    },
+    {
+      label: "Fases",
+      value: phaseItems ? `${phaseItems}` : "1",
+      status: phaseItems >= 3 ? "success" : "warning",
+    },
+    {
+      label: "Riesgos",
+      value: riskMentions ? `${riskMentions}` : "0",
+      status: riskMentions > 0 ? "warning" : "success",
+    },
+    {
+      label: "Agente",
+      value: agentType.replace("Agent", ""),
+      status: "info",
+    },
+  ];
+
+  return { metrics };
+}
 
 /**
  * ==========================================
@@ -121,6 +153,7 @@ export async function POST(req: Request) {
     const sources = ["Base RAG CEN", "Norma Técnica Resumen"];
     // El agentType lo tomamos del next_node del estado final
     const agentType = (finalState as any).next_node || "sitrAgent";
+    const timings = (finalState as any).timings || {};
     
     // Extracción de metadatos estructurados
     let metricsJson = null;
@@ -138,6 +171,10 @@ export async function POST(req: Request) {
       } catch (e) {
         console.warn('⚠️ Error al parsear METRICS_JSON (formato inválido):', e);
       }
+    }
+
+    if (!metricsJson || !metricsJson.metrics || metricsJson.metrics.length === 0) {
+      metricsJson = deriveMetricsFromContent(cleanContent, agentType);
     }
 
     // Parseo [HALLAZGO_HIGHLIGHT]
@@ -178,7 +215,8 @@ export async function POST(req: Request) {
       isClosedLoop: !fastMode,
       resolutionId,
       originalQuery: userQuery,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      timings
     };
 
     // 4. Persistir en el Repositorio de Resoluciones (Caché)

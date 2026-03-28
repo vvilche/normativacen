@@ -96,7 +96,8 @@ export default function Home() {
         { id: 1, agent: "Orquestador Tung", action: "Clasificando perfil de Coordinado", status: "complete" },
         { id: 2, agent: "Motor RAG", action: "Explorando base de datos normativa", status: "complete" },
         { id: 3, agent: "Especialista CEN", action: "Analizando evidencia normativa", status: "complete" }
-      ]
+      ],
+      timings: data.timings || {}
     };
   };
 

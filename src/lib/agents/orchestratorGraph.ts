@@ -28,6 +28,7 @@ export interface AgentState {
   draftResponse?: string;
   revisionCount?: number; // Tracker for self-correction loops
   lastAgentNode?: string; // Remember which agent drafted the response
+  timings?: Record<string, number>;
 }
 
 // -------------------------------------------------------
@@ -152,8 +153,9 @@ async function orchestratorRouter(state: AgentState): Promise<Partial<AgentState
   const query = typeof lastMessage.content === "string" ? lastMessage.content : "";
   const heuristic = heuristicRoute(query);
   if (heuristic) {
+    const timingKey = `${heuristic.toLowerCase()}_routerMs`;
     console.log(`🔀 Router heurístico → ${heuristic.toLowerCase()}Agent`);
-    return { next_node: `${heuristic.toLowerCase()}Agent`, lastAgentNode: `${heuristic.toLowerCase()}Agent` };
+    return { next_node: `${heuristic.toLowerCase()}Agent`, lastAgentNode: `${heuristic.toLowerCase()}Agent`, timings: { [timingKey]: 0 } };
   }
   const routerStart = Date.now();
 
@@ -167,6 +169,7 @@ async function orchestratorRouter(state: AgentState): Promise<Partial<AgentState
       { role: "system", content: ROUTER_SYSTEM_PROMPT },
       { role: "user", content: query }
     ]);
+    const routerDuration = Date.now() - routerStart;
     logDuration("Router LLM", routerStart);
 
     const routeCode = (typeof response.content === 'string' ? response.content : "").trim().toUpperCase();
@@ -177,7 +180,7 @@ async function orchestratorRouter(state: AgentState): Promise<Partial<AgentState
 
     const next_node = `${validatedCode.toLowerCase()}Agent`;
     console.log(`🔀 Router LLM → ${next_node}`);
-    return { next_node, lastAgentNode: next_node };
+    return { next_node, lastAgentNode: next_node, timings: { routerMs: routerDuration } };
   } catch (err) {
     console.warn("⚠️ Router LLM falló, usando fallback SITR:", err);
     return { next_node: "sitrAgent", lastAgentNode: "sitrAgent" };
@@ -189,11 +192,13 @@ async function orchestratorRouter(state: AgentState): Promise<Partial<AgentState
 // -------------------------------------------------------
 async function createAgentNode(systemPrompt: string, state: AgentState, agentTypeName: string): Promise<Partial<AgentState>> {
   let contextText = "No se pudo recuperar contexto normativo adicional.";
+  let ragDuration = 0;
   try {
     const retriever = await getRetriever(agentTypeName);
     const lastUserMsg = state.messages[state.messages.length - 1].content as string;
     const ragStart = Date.now();
     const docs = await retriever.invoke(lastUserMsg);
+    ragDuration = Date.now() - ragStart;
     logDuration(`${agentTypeName} · RAG`, ragStart);
     if (docs && docs.length > 0) {
       contextText = docs.map((d: { pageContent: string }) => d.pageContent).join("\n\n");
@@ -215,12 +220,17 @@ async function createAgentNode(systemPrompt: string, state: AgentState, agentTyp
 
   const agentStart = Date.now();
   const draftResponse = await callGemini(fullPrompt, state.messages, contextText);
+  const llmDuration = Date.now() - agentStart;
   logDuration(`${agentTypeName} · LLM`, agentStart);
   
   return { 
     contextText, 
     draftResponse,
-    lastAgentNode: agentTypeName // Guardar quién hizo el último borrador
+    lastAgentNode: agentTypeName,
+    timings: {
+      [`${agentTypeName}_ragMs`]: ragDuration,
+      [`${agentTypeName}_llmMs`]: llmDuration
+    }
   };
 }
 
@@ -291,7 +301,8 @@ async function qualityAuditorNode(state: AgentState): Promise<Partial<AgentState
     console.log("🛡️ Auditoría omitida por heurística de baja complejidad.");
     return {
       messages: [new AIMessage(state.draftResponse || "")],
-      next_node: "end"
+      next_node: "end",
+      timings: { auditorMs: 0 }
     };
   }
   
@@ -300,6 +311,7 @@ async function qualityAuditorNode(state: AgentState): Promise<Partial<AgentState
   ];
   const auditorStart = Date.now();
   const feedback = await callGemini(QUALITY_AUDITOR_PROMPT, auditorInput, state.contextText);
+  const auditorDuration = Date.now() - auditorStart;
   logDuration("Auditor LLM", auditorStart);
 
   // Check for REJECTION logic (Limit to 1 revision to prevent timeouts on Netlify)
@@ -308,7 +320,8 @@ async function qualityAuditorNode(state: AgentState): Promise<Partial<AgentState
     return {
       messages: [new AIMessage(feedback)],
       revisionCount: currentRevision + 1,
-      next_node: state.lastAgentNode // Enviar de vuelta al agente que falló
+      next_node: state.lastAgentNode, // Enviar de vuelta al agente que falló
+      timings: { auditorMs: auditorDuration }
     };
   }
 
@@ -317,7 +330,8 @@ async function qualityAuditorNode(state: AgentState): Promise<Partial<AgentState
   const merged = mergeDraftWithFeedback(state.draftResponse, feedback);
   return { 
     messages: [new AIMessage(merged)],
-    next_node: "end" 
+    next_node: "end",
+    timings: { auditorMs: auditorDuration }
   };
 }
 
@@ -389,6 +403,10 @@ export function buildOrchestratorGraph(options: { enableAuditor?: boolean } = {}
       lastAgentNode: {
                 value: (prev, next) => next || prev,
         default: () => "",
+      },
+      timings: {
+                value: (prev, next) => ({ ...(prev || {}), ...(next || {}) }),
+        default: () => ({}),
       },
     },
   })

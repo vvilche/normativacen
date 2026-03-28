@@ -190,6 +190,7 @@ export function DashboardView({
                     hallazgo={resolution?.hallazgo}
                     seoTags={resolution?.seoTags}
                     reasoning={resolution?.reasoning}
+                    timings={resolution?.timings}
                 />
             </div>
 

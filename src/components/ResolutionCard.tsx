@@ -37,6 +37,7 @@ interface ResolutionProps {
   hallazgo?: string;
   seoTags?: string[];
   reasoning?: string;
+  timings?: Record<string, number>;
 }
 
 export function ResolutionCard({ 
@@ -49,7 +50,8 @@ export function ResolutionCard({
   hallazgo,
   seoTags = [],
   acciones = [],
-  reasoning
+  reasoning,
+  timings
 }: ResolutionProps) {
   
   return (
@@ -140,6 +142,16 @@ export function ResolutionCard({
                     )}>{kpis.score}</span>
                 </div>
             </div>
+            {timings && Object.keys(timings).length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4 text-[9px] text-white/50">
+                {Object.entries(timings).map(([label, value]) => (
+                  <div key={label} className="bg-white/5 border border-white/5 rounded-lg p-2">
+                    <span className="block uppercase tracking-[0.2em] text-[8px] text-white/30">{label.replace(/_/g, " ")}</span>
+                    <span className="font-black text-white">{(value / 1000).toFixed(2)}s</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Controls Mini List */}
