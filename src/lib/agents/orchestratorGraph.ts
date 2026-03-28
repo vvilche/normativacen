@@ -395,7 +395,7 @@ export function buildOrchestratorGraph(options: { enableAuditor?: boolean } = {}
     .addConditionalEdges(
       "router",
       (state: AgentState) => state.next_node || "sitrAgent",
-      agentEdgeMap
+      agentEdgeMap as Record<string, string>
     );
 
   Object.entries(agentNodes).forEach(([name, node]) => {
@@ -412,7 +412,7 @@ export function buildOrchestratorGraph(options: { enableAuditor?: boolean } = {}
       {
         ...agentEdgeMap,
         [END]: END
-      }
+      } as Record<string, string>
     );
   } else {
     workflow.addNode("fastPublisher", async (state) => buildFastPublisherNode(state));
