@@ -8,7 +8,6 @@ import { MongoClient } from "mongodb";
  * Se reutiliza la misma instancia en funciones serverless.
  */
 
-const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/conecta_mock";
 const options = {
   serverSelectionTimeoutMS: 5000, // No esperar más de 5 segundos
   connectTimeoutMS: 5000,
@@ -42,6 +41,7 @@ export function getClientPromise(): Promise<MongoClient> {
     console.warn("⚠️ MONGODB_URI no encontrada. Usando mock local.");
   }
 
+  const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/conecta_mock";
   const client = new MongoClient(uri, options);
 
   if (process.env.NODE_ENV === "development") {

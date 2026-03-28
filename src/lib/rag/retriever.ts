@@ -1,6 +1,8 @@
 import { MongoClient, Document } from "mongodb";
 import clientPromise, { getConnectionStatus, setConnectionFailed } from "./mongoClient";
 
+const CONNECT_TIMEOUT = Number(process.env.MONGO_CONNECT_TIMEOUT_MS || 12000);
+
 interface RagDocument extends Document {
   text?: string;
   topic?: string;
@@ -41,11 +43,17 @@ export async function getRetriever() {
 
   let client: MongoClient;
   try {
-    // Timeout de 5s para no bloquear el orquestador si MongoDB es inalcanzable
-    const timeoutPromise = new Promise<never>((_, reject) => 
-      setTimeout(() => reject(new Error("Timeout conectando a MongoDB")), 5000)
-    );
-    client = await Promise.race([clientPromise(), timeoutPromise]);
+    let timeoutId: NodeJS.Timeout;
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(() => reject(new Error("Timeout conectando a MongoDB")), CONNECT_TIMEOUT);
+    });
+    client = await Promise.race([
+      clientPromise().then((mongoClient) => {
+        clearTimeout(timeoutId);
+        return mongoClient;
+      }),
+      timeoutPromise,
+    ]);
   } catch (err) {
     console.warn("⚠️ MongoDB inalcanzable, usando Retriever Simulado:", err);
     setConnectionFailed();
