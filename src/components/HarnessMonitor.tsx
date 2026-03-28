@@ -20,9 +20,35 @@ export function HarnessMonitor({ status = "idle" }: { status?: "idle" | "process
             <Settings className="w-3 h-3 animate-spin-slow" />
             <span>Multi-Agent Traceability</span>
         </div>
-        <h3 className="text-xl font-heading font-black text-white italic tracking-tighter uppercase">
+        <h3 className="text-xl font-heading font-black text-white italic tracking-tighter uppercase mb-6">
             {status === "processing" ? "Orquestando Resolución..." : "Trazabilidad de Inferencia"}
         </h3>
+
+        {/* Industrial Progress Bar */}
+        <div className="w-full h-4 bg-[#161B29] border border-white/5 rounded-full overflow-hidden p-1 relative">
+            <div className="absolute inset-0 flex justify-between px-1">
+                {[0, 1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="w-[15%] h-full border-r border-white/5 last:border-none" />
+                ))}
+            </div>
+            <motion.div 
+                initial={{ width: 0 }}
+                animate={{ 
+                    width: status === "complete" ? "100%" : 
+                           status === "processing" ? "60%" : "0%" 
+                }}
+                className="h-full bg-gradient-to-r from-gold/40 via-gold to-gold/40 rounded-full relative shadow-gold"
+                transition={{ duration: 1.5, ease: "circOut" }}
+            >
+                {status === "processing" && (
+                    <motion.div 
+                        animate={{ x: ["-100%", "200%"] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                        className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-30"
+                    />
+                )}
+            </motion.div>
+        </div>
       </div>
 
       <div className="relative space-y-6">

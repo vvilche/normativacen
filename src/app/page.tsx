@@ -123,12 +123,12 @@ export default function Home() {
     } catch (error: any) {
       console.error("Error en procesamiento IA:", error);
       const errorMessage = error.message || "Error desconocido en el Orquestador";
-      const technicalDetails = error.details || "";
+      const technicalDetails = error.stack?.substring(0, 100) || ""; // Basic stack trace hint
       
       setResolutionData({
         id: "INFRA-ERROR",
         verdict: `ERROR TÉCNICO: ${errorMessage}`,
-        reasoning: `Se detectó un fallo crítico en el nodo de inferencia. Posible causa: ${errorMessage}. ${technicalDetails ? `Detalles: ${technicalDetails}` : "Verifica variables de entorno (GOOGLE_API_KEY, MONGODB_URI) en Netlify."}`,
+        reasoning: `Se detectó un fallo crítico en el nodo de inferencia. ${errorMessage.includes('GOOGLE_API_KEY') ? 'FALTA CONFIGURACIÓN: Revisa las variables de entorno.' : `Detalle: ${errorMessage}`}`,
         protocol: "System-Diagnostic",
         controls: [],
         kpis: { 

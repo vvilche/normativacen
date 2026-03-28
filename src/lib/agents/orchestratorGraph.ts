@@ -36,6 +36,10 @@ export interface AgentState {
 const MODEL_ID = "gemini-2.5-flash";
 
 async function callGemini(systemPrompt: string, userMessages: BaseMessage[], contextText?: string): Promise<string> {
+  if (!process.env.GOOGLE_API_KEY) {
+    throw new Error("GOOGLE_API_KEY_MISSING: No se detectó la clave de API de Google en el entorno. Configúrala en el panel de Netlify.");
+  }
+
   const model = new ChatGoogleGenerativeAI({
     model: MODEL_ID,
     apiKey: process.env.GOOGLE_API_KEY,
