@@ -37,7 +37,7 @@ export async function POST(req: Request) {
   try {
     resetConnectionStatus();
     const body = await req.json();
-    const { messages, userProfile, fastMode = false } = body;
+    const { messages, userProfile, fastMode = false, backgroundAudit = false } = body;
 
     if (!messages || !Array.isArray(messages)) {
       console.error('❌ Error: El historial de mensajes es inválido o no se proporcionó.');
@@ -87,7 +87,7 @@ export async function POST(req: Request) {
       }
     }
 
-    console.log(`⚙️ [CACHE MISS] Iniciando orquestador para: "${userQuery.substring(0, 50)}..."`);
+    console.log(`⚙️ [CACHE MISS] Iniciando orquestador${backgroundAudit ? " (background audit)" : ""} para: "${userQuery.substring(0, 50)}..."`);
 
     // 1. Initializar el Grafo Multi-Agente
     const app = buildOrchestratorGraph({ enableAuditor: !fastMode });

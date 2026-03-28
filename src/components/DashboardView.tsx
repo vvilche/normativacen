@@ -7,7 +7,8 @@ import {
   ChevronRight, 
   Share2, 
   Activity,
-  Search
+  Search,
+  Loader2
 } from "lucide-react";
 import { ResolutionCard } from "./ResolutionCard";
 import { WhitePaperCard } from "./WhitePaperCard";
@@ -33,6 +34,8 @@ interface DashboardViewProps {
   onTestSystem?: () => void;
   fastMode: boolean;
   setFastMode: (value: boolean) => void;
+  isAuditing: boolean;
+  auditError?: string | null;
 }
 
 export function DashboardView({ 
@@ -46,7 +49,9 @@ export function DashboardView({
   setQuery,
   onTestSystem,
   fastMode,
-  setFastMode
+  setFastMode,
+  isAuditing,
+  auditError
 }: DashboardViewProps) {
 
   return (
@@ -149,6 +154,14 @@ export function DashboardView({
                     <ChevronRight className="w-3.5 h-3.5 animate-bounce-x" />
                 </button>
             </div>
+            {isAuditing && (
+              <div className="mt-3 flex items-center gap-2 text-[10px] text-accent font-black uppercase tracking-[0.25em]">
+                <Loader2 className="w-3.5 h-3.5 animate-spin" /> Auditoría profunda en curso...
+              </div>
+            )}
+            {auditError && (
+              <p className="mt-2 text-[10px] text-red-400 uppercase tracking-[0.2em]">{auditError}</p>
+            )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">

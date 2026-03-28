@@ -36,6 +36,8 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("Dashboard");
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | undefined>(undefined);
   const [fastMode, setFastMode] = useState(true);
+  const [isAuditing, setIsAuditing] = useState(false);
+  const [auditError, setAuditError] = useState<string | null>(null);
 
   useEffect(() => {
     const isTokenInCookie = document.cookie.includes('auth_token');
@@ -61,15 +63,86 @@ export default function Home() {
     }
   };
 
+  const buildResolutionFromResponse = (data: any) => {
+    const metrics = data.resolution?.metrics || [];
+    const controls = metrics.map((m: { label: string; value: string; status: string }, i: number) => ({
+      id: `T.${i + 1}`,
+      label: `${m.label}: ${m.value}`,
+      status: m.status === "critical" || m.status === "warning" ? "FAIL" : "MET"
+    }));
+    const hasCritical = metrics.some((m: { status: string }) => m.status === "critical");
+    const hasWarning = metrics.some((m: { status: string }) => m.status === "warning");
+    const verdict = hasCritical ? "NO CUMPLE" : hasWarning ? "CUMPLE PARCIAL" : "CUMPLE";
+    const risk = hasCritical ? "Crítico" : hasWarning ? "Alto" : "Bajo";
+    const score = hasCritical ? 40 : hasWarning ? 72 : 95;
+
+    return {
+      id: `RES-${Date.now()}`,
+      verdict,
+      reasoning: data.content,
+      hallazgo: data.hallazgo || null,
+      seoTags: data.seoTags || [],
+      protocol: "LangGraph-Engineering-Matrix",
+      acciones: data.resolution?.actionPlan || [],
+      controls,
+      kpis: {
+        score,
+        risk,
+        latency: "2.4s",
+        protocol: "NTSyCS 2025"
+      },
+      steps: [
+        { id: 1, agent: "Orquestador Tung", action: "Clasificando perfil de Coordinado", status: "complete" },
+        { id: 2, agent: "Motor RAG", action: "Explorando base de datos normativa", status: "complete" },
+        { id: 3, agent: "Especialista CEN", action: "Analizando evidencia normativa", status: "complete" }
+      ]
+    };
+  };
+
+  const runBackgroundAudit = async (originalQuery: string) => {
+    if (!userProfile) return;
+    setIsAuditing(true);
+    setAuditError(null);
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [{ role: "user", content: originalQuery }],
+          userProfile,
+          fastMode: false,
+          backgroundAudit: true
+        })
+      });
+
+      if (!response.ok) {
+        const errorPayload = await response.json().catch(() => ({ error: "Auditoría fallida" }));
+        throw new Error(errorPayload.error || "Auditoría fallida");
+      }
+
+      const auditedData = await response.json();
+      setResolutionData(buildResolutionFromResponse(auditedData));
+    } catch (err: any) {
+      console.error("Error en auditoría de fondo:", err);
+      setAuditError(err.message || "Auditoría no disponible");
+    } finally {
+      setIsAuditing(false);
+    }
+  };
+
   const startProcessing = async () => {
+    const executionQuery = query.trim();
+    if (!executionQuery) return;
     setProcessingStatus("processing");
+    setIsAuditing(false);
+    setAuditError(null);
     
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: [{ role: "user", content: query }],
+          messages: [{ role: "user", content: executionQuery }],
           userProfile,
           fastMode
         })
@@ -94,44 +167,10 @@ export default function Home() {
       const data = await response.json();
       
       if (response.ok) {
-        // Mapeo de formato estructurado: metrics[], hallazgo, seoTags
-        const metrics = data.resolution?.metrics || [];
-        
-        // Generar controles desde las métricas Tung (cada métrica es un control)
-        const controls = metrics.map((m: { label: string; value: string; status: string }, i: number) => ({
-          id: `T.${i + 1}`,
-          label: `${m.label}: ${m.value}`,
-          status: m.status === "critical" || m.status === "warning" ? "FAIL" : "MET"
-        }));
-
-        // Determinar verdict y risk desde las métricas
-        const hasCritical = metrics.some((m: { status: string }) => m.status === "critical");
-        const hasWarning = metrics.some((m: { status: string }) => m.status === "warning");
-        const verdict = hasCritical ? "NO CUMPLE" : hasWarning ? "CUMPLE PARCIAL" : "CUMPLE";
-        const risk = hasCritical ? "Crítico" : hasWarning ? "Alto" : "Bajo";
-        const score = hasCritical ? 40 : hasWarning ? 72 : 95;
-
-        setResolutionData({
-          id: `RES-${Date.now()}`,
-          verdict,
-          reasoning: data.content,
-          hallazgo: data.hallazgo || null,
-          seoTags: data.seoTags || [],
-          protocol: "LangGraph-Engineering-Matrix",
-          acciones: data.resolution?.actionPlan || [],
-          controls,
-          kpis: {
-            score,
-            risk,
-            latency: "2.4s",
-            protocol: "NTSyCS 2025"
-          },
-          steps: [
-            { id: 1, agent: "Orquestador Tung", action: "Clasificando perfil de Coordinado", status: "complete" },
-            { id: 2, agent: "Motor RAG", action: "Explorando base de datos normativa", status: "complete" },
-            { id: 3, agent: "Especialista CEN", action: "Analizando evidencia normativa", status: "complete" }
-          ]
-        });
+        setResolutionData(buildResolutionFromResponse(data));
+        if (fastMode) {
+          runBackgroundAudit(executionQuery);
+        }
       } else {
         throw new Error(data.error);
       }
@@ -381,6 +420,8 @@ export default function Home() {
                         onTestSystem={handleTestSystem}
                         fastMode={fastMode}
                         setFastMode={setFastMode}
+                        isAuditing={isAuditing}
+                        auditError={auditError}
                     />
             ) : (
                 <div className="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-6 animate-in zoom-in-95 duration-500">
