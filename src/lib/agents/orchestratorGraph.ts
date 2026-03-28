@@ -336,6 +336,18 @@ const agentNodes: Record<string, (state: AgentState) => Promise<Partial<AgentSta
   infotecnicaAgent: infotecnicaAgentNode,
 };
 
+const agentEdgeMap: Record<string, string> = {
+  sitrAgent: "sitrAgent",
+  consumoAgent: "consumoAgent",
+  ssccAgent: "ssccAgent",
+  bessAgent: "bessAgent",
+  cibersegAgent: "cibersegAgent",
+  procedimentalAgent: "procedimentalAgent",
+  generacionAgent: "generacionAgent",
+  transmisionAgent: "transmisionAgent",
+  infotecnicaAgent: "infotecnicaAgent",
+};
+
 function buildFastPublisherNode(state: AgentState): Partial<AgentState> {
   const content = state.draftResponse?.trim() || "[SIN_CONTENIDO]";
   return {
@@ -380,20 +392,11 @@ export function buildOrchestratorGraph(options: { enableAuditor?: boolean } = {}
   })
     .addNode("router", orchestratorRouter)
     .addEdge(START, "router")
-    .addConditionalEdges("router",
-    (state: AgentState) => state.next_node || "sitrAgent",
-    {
-      sitrAgent: "sitrAgent",
-      consumoAgent: "consumoAgent",
-      ssccAgent: "ssccAgent",
-      bessAgent: "bessAgent",
-      cibersegAgent: "cibersegAgent",
-      procedimentalAgent: "procedimentalAgent",
-      generacionAgent: "generacionAgent",
-      transmisionAgent: "transmisionAgent",
-      infotecnicaAgent: "infotecnicaAgent",
-    }
-  );
+    .addConditionalEdges(
+      "router",
+      (state: AgentState) => state.next_node || "sitrAgent",
+      agentEdgeMap
+    );
 
   Object.entries(agentNodes).forEach(([name, node]) => {
     workflow.addNode(name, node);
@@ -407,15 +410,7 @@ export function buildOrchestratorGraph(options: { enableAuditor?: boolean } = {}
     workflow.addConditionalEdges("qualityAuditor",
       (state: AgentState) => state.next_node === "end" ? END : (state.next_node || END),
       {
-        sitrAgent: "sitrAgent",
-        consumoAgent: "consumoAgent",
-        ssccAgent: "ssccAgent",
-        bessAgent: "bessAgent",
-        cibersegAgent: "cibersegAgent",
-        procedimentalAgent: "procedimentalAgent",
-        generacionAgent: "generacionAgent",
-        transmisionAgent: "transmisionAgent",
-        infotecnicaAgent: "infotecnicaAgent",
+        ...agentEdgeMap,
         [END]: END
       }
     );
