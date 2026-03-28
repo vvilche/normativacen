@@ -12,12 +12,12 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children, user, activeTab, setActiveTab }: DashboardLayoutProps) {
   return (
-    <div className="flex min-h-screen bg-[#0B0F1A] text-white font-sans">
+    <div className="flex min-h-screen font-sans transition-colors">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      <div className="flex-1 ml-64 flex flex-col min-h-screen">
+      <div className="flex-1 ml-64 flex flex-col min-h-screen bg-transparent">
         <TopBar user={user} />
-        <main className="flex-1 p-10 overflow-auto">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 p-6 md:p-10 overflow-auto">
+          <div className="max-w-7xl mx-auto space-y-6">
             {children}
           </div>
         </main>

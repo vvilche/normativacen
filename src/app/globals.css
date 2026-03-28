@@ -74,6 +74,86 @@ body.theme-expert {
   color: #e2e2e5;
 }
 
+.sidebar-panel {
+  width: 16rem;
+  min-height: 100vh;
+  border-right: 1px solid rgba(13,30,37,0.08);
+  background: rgba(231, 246, 255, 0.95);
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1rem;
+  gap: 1rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 40;
+}
+
+body.theme-expert .sidebar-panel {
+  background: rgba(5, 8, 16, 0.95);
+  border-color: rgba(234,179,8,0.08);
+  color: #e2e2e5;
+}
+
+.sidebar-panel nav a {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.9rem;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: inherit;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+}
+
+.sidebar-panel nav a.active,
+.sidebar-panel nav a:hover {
+  background: rgba(26, 35, 126, 0.1);
+  opacity: 1;
+}
+
+body.theme-expert .sidebar-panel nav a.active,
+body.theme-expert .sidebar-panel nav a:hover {
+  background: rgba(234,179,8,0.12);
+}
+
+.search-panel {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(84,93,109,0.2);
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+}
+
+body.theme-guide .search-panel {
+  background: #ffffff;
+  border-color: rgba(13,30,37,0.08);
+}
+
+.topbar-panel {
+  height: 3.75rem;
+  border-bottom: 1px solid rgba(13,30,37,0.08);
+  background: rgba(244,250,255,0.9);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  backdrop-filter: blur(12px);
+}
+
+body.theme-expert .topbar-panel {
+  background: rgba(5,8,16,0.85);
+  border-color: rgba(234,179,8,0.08);
+  color: #e2e2e5;
+}
+
 .dossier-shell {
   display: flex;
   min-height: 100vh;

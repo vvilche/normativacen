@@ -59,6 +59,46 @@ export function DashboardView({
   setClientMode
 }: DashboardViewProps) {
 
+  const guidePrompts = [
+    "¿Qué es el SITR y qué debo reportar al CEN?",
+    "Pasos básicos para actualizar el PMUS 2026",
+    "Checklist EDAC mínimo antes de una auditoría"
+  ];
+
+  const expertPrompts = [
+    "Mi GPS no está estampando la hora. ¿Qué consecuencias tengo?",
+    "El enlace SITR supera 500ms. ¿Cómo normalizo rápido?",
+    "Plan inmediato para BESS 20MW con CIP-013 y FFR <200ms"
+  ];
+
+  const guideModules = [
+    { title: "Intro a Estándares CEN", description: "Marco regulatorio fundamental del CEN.", status: "completado" },
+    { title: "Cumplimiento Operativo", description: "Cómo reportar telemetría en tiempo real.", status: "progreso" },
+    { title: "Anexos Técnicos", description: "Requisitos específicos de transmisión/distribución.", status: "pendiente" },
+  ];
+
+  const expertModules = [
+    { title: "Plan de Respuesta SITR", description: "Remediaciones para telemetría lenta.", status: "progreso" },
+    { title: "FFR & PMU Upgrades", description: "Parámetros críticos para evitar multas.", status: "pendiente" },
+    { title: "Auditoría PMUS", description: "Documentación previa y flujos SEC.", status: "completado" },
+  ];
+
+  const prompts = clientMode === "guide" ? guidePrompts : expertPrompts;
+  const modules = clientMode === "guide" ? guideModules : expertModules;
+  const heroCopy = clientMode === "guide"
+    ? {
+        title: "Centro Educativo NormativaCEN",
+        subtitle: "Optimiza tu operación con rutas de aprendizaje y respuestas explicativas basadas en la normativa vigente.",
+        primaryCTA: "Iniciar Capacitación",
+        secondaryCTA: "Dudas Generales",
+      }
+    : {
+        title: "Inteligencia Operativa Normativa",
+        subtitle: "Activa el orquestador multi-agente para diagnosticar incidentes y evitar multas en minutos.",
+        primaryCTA: "Auditar Instalaciones",
+        secondaryCTA: "Reportar Incidente",
+      };
+
   return (
     <div className="w-full space-y-8 pb-20">
       
@@ -66,70 +106,116 @@ export function DashboardView({
 
       {/* Search / Command Bar - Integrated into the Hub */}
       {processingStatus === "idle" && (
-        <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-4xl mx-auto py-12"
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-8"
         >
-            <div className="text-center mb-8 space-y-2">
-                <h2 className="text-3xl font-heading font-bold text-white italic tracking-tight uppercase font-technical">
-                    Orquestador de <span className="text-gold underline decoration-gold/20 underline-offset-8">Cumplimiento</span>
-                </h2>
-                <p className="text-gray-400 text-sm font-medium">Activa el motor de razonamiento multi-agente para auditorías normativas del SEN.</p>
+          <section className="hero-section">
+            <div className="space-y-4">
+              <span className="text-sm uppercase tracking-[0.5em] opacity-80">
+                {clientMode === "guide" ? "Modo Guía" : "Modo Operativo"}
+              </span>
+              <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
+                {heroCopy.title}
+              </h2>
+              <p className="text-white/80 text-base md:text-lg max-w-2xl">
+                {heroCopy.subtitle}
+              </p>
+              <div className="flex flex-wrap gap-3 hero-actions">
+                <button className="bg-white text-primary px-6 py-3 rounded-xl font-bold uppercase tracking-[0.3em] text-xs">
+                  {heroCopy.primaryCTA}
+                </button>
+                <button className="bg-white/20 border border-white/40 text-white px-6 py-3 rounded-xl font-bold uppercase tracking-[0.3em] text-xs">
+                  {heroCopy.secondaryCTA}
+                </button>
+              </div>
             </div>
-            
-            <div className="relative group space-y-3">
-                <div className="relative bg-[#161B29]/80 backdrop-blur-2xl border border-white/5 rounded-2xl p-2 shadow-2xl flex items-center transition-all focus-within:border-accent/30">
-                    <div className="pl-4 pr-1 text-gray-700">
-                        <Search className="w-5 h-5" />
-                    </div>
-                    <input
-                        type="text"
-                        className="w-full bg-transparent border-none text-white text-lg focus:outline-none placeholder-slate-500 py-4 font-semibold px-2"
-                        placeholder="Consultar SITR para BESS..."
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && onExecute(query)}
-                    />
-                    <button 
-                        onClick={() => onExecute(query)}
-                        className="bg-gold hover:bg-gold/90 text-black font-black py-3 px-8 rounded-xl transition-all flex items-center gap-2 shadow-gold hover:scale-[1.02] active:scale-[0.98] uppercase tracking-widest text-[11px]"
-                    >
-                        EJECUTAR <ChevronRight className="w-4 h-4" />
-                    </button>
-                </div>
-                <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-gray-500 font-black">
-                  <span>Modo Rápido</span>
-                  <button
-                    type="button"
-                    onClick={() => setFastMode(!fastMode)}
-                    className={`flex items-center gap-2 px-3 py-1 rounded-full border text-[9px] tracking-widest transition-all ${fastMode ? 'bg-accent/10 border-accent/30 text-accent' : 'bg-white/5 border-white/10 text-white/50'}`}
-                  >
-                    {fastMode ? 'ON' : 'OFF'}
-                  </button>
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-[10px] uppercase tracking-[0.2em] font-black">
-                  <button
-                    type="button"
-                    onClick={() => setClientMode("guide")}
-                    className={`rounded-2xl border px-4 py-3 text-left transition-all ${clientMode === 'guide' ? 'bg-white/10 border-gold text-white shadow-gold' : 'bg-white/5 border-white/10 text-white/40'}`}
-                  >
-                    <span className="block text-[9px] text-white/50">Modo</span>
-                    Exploratorio
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setClientMode("expert")}
-                    className={`rounded-2xl border px-4 py-3 text-left transition-all ${clientMode === 'expert' ? 'bg-white/10 border-gold text-white shadow-gold' : 'bg-white/5 border-white/10 text-white/40'}`}
-                  >
-                    <span className="block text-[9px] text-white/50">Modo</span>
-                    Operativo
-                  </button>
-                </div>
-                <p className="text-[10px] text-white/40 font-medium">
-                  {clientMode === 'guide' ? 'Recibirás respuestas educativas, con sugerencias y capacitación.' : 'Obtendrás diagnósticos técnicos, checklists y consecuencias normativas.'}
-                </p>
+            <div className="bg-white/10 border border-white/20 rounded-2xl p-6">
+              <h5 className="text-sm font-bold uppercase tracking-[0.4em] mb-4 text-white/80">
+                Consultas sugeridas
+              </h5>
+              <ul className="space-y-3 text-sm">
+                {prompts.map((item, idx) => (
+                  <li key={idx} className="bg-white/10 border border-white/15 rounded-lg p-3">
+                    “{item}”
+                  </li>
+                ))}
+              </ul>
             </div>
+          </section>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {modules.map((module) => (
+              <div key={module.title} className="learning-card">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-xs font-bold uppercase tracking-[0.3em] opacity-60">
+                    {module.status.toUpperCase()}
+                  </span>
+                  <div className="w-2 h-2 rounded-full" style={{ background: module.status === "completado" ? "#10B981" : module.status === "progreso" ? "#FFBA38" : "#CBD5F5" }} />
+                </div>
+                <h4 className="text-lg font-bold mb-1">{module.title}</h4>
+                <p className="text-sm opacity-70">{module.description}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="search-panel space-y-4">
+            <div className="relative flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl bg-white/5 text-slate-400">
+                  <Search className="w-5 h-5" />
+                </div>
+                <input
+                  type="text"
+                  className="flex-1 bg-transparent border-none text-base focus:outline-none"
+                  placeholder="Describe tu incidente o consulta normativa..."
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && onExecute(query)}
+                />
+                <button
+                  onClick={() => onExecute(query)}
+                  className="bg-primary text-on-primary px-5 py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.4em]"
+                >
+                  Ejecutar
+                </button>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-4 text-[10px] uppercase tracking-[0.3em] font-black">
+              <div className="flex items-center gap-2">
+                <span>Modo Rápido</span>
+                <button
+                  type="button"
+                  onClick={() => setFastMode(!fastMode)}
+                  className={`px-3 py-1 rounded-full border text-[9px] tracking-[0.3em] ${fastMode ? "bg-primary/10 border-primary text-primary" : "border-slate-300 text-slate-500"}`}
+                >
+                  {fastMode ? "ON" : "OFF"}
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setClientMode("guide")}
+                  className={`px-4 py-2 rounded-full border ${clientMode === "guide" ? "bg-primary text-white" : "border-slate-300 text-slate-500"}`}
+                >
+                  Exploratorio
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setClientMode("expert")}
+                  className={`px-4 py-2 rounded-full border ${clientMode === "expert" ? "bg-primary text-white" : "border-slate-300 text-slate-500"}`}
+                >
+                  Operativo
+                </button>
+              </div>
+            </div>
+            <p className="text-[11px] opacity-70">
+              {clientMode === "guide"
+                ? "Recibirás respuestas educativas con sugerencias y módulos de capacitación."
+                : "Obtendrás diagnósticos técnicos con checklists, riesgos y tiempos de ejecución."}
+            </p>
+          </div>
         </motion.div>
       )}
 
