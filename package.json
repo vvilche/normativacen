@@ -6,9 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "test": "vitest run",
-    "screenshots": "npm run build && playwright test --config=playwright.screenshots.config.ts"
+    "lint": "eslint"
   },
   "dependencies": {
     "@google/genai": "^1.46.0",
@@ -45,9 +43,5 @@
     "tailwindcss": "^4",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.58.2",
-    "vitest": "^4.1.2"
   }
 }

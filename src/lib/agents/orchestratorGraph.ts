@@ -11,10 +11,8 @@ import {
   PROCEDIMENTAL_AGENT_PROMPT,
   GENERACION_AGENT_PROMPT,
   TRANSMISION_AGENT_PROMPT,
-  INFOTECNICA_AGENT_PROMPT,
-  EDUCATION_AGENT_PROMPT
+  INFOTECNICA_AGENT_PROMPT
 } from "./prompts";
-import { getGuideSuggestions } from "@/lib/education/suggestions";
 import { getRetriever } from "../rag/retriever";
 
 /**
@@ -31,7 +29,6 @@ export interface AgentState {
   revisionCount?: number; // Tracker for self-correction loops
   lastAgentNode?: string; // Remember which agent drafted the response
   timings?: Record<string, number>;
-  educationArtifacts?: string;
 }
 
 // -------------------------------------------------------
@@ -240,33 +237,6 @@ async function createAgentNode(systemPrompt: string, state: AgentState, agentTyp
   };
 }
 
-async function educationAgentNode(state: AgentState): Promise<Partial<AgentState>> {
-  const finalMessage = state.messages[state.messages.length - 1];
-  const baseContent = typeof finalMessage?.content === "string" ? finalMessage.content : JSON.stringify(finalMessage?.content || "");
-  const lastHuman = getLastHumanMessage(state.messages);
-  const userQuery = typeof lastHuman?.content === "string" ? lastHuman.content : "";
-  const mode = state.userProfile?.clientMode || "guide";
-  const profileContext = JSON.stringify(state.userProfile || {});
-  const suggestions = getGuideSuggestions(state.lastAgentNode || null).join("\n- ");
-  const educationPrompt = `${EDUCATION_AGENT_PROMPT}\n[MODO_ACTUAL]: ${mode}\n[PERFIL_COORDINADO]: ${profileContext}\n[CONSULTA_ORIGINAL]: ${userQuery}\n[SUGERENCIAS_BASE]\n- ${suggestions}\n[RESPUESTA_TECNICA]\n${baseContent}`;
-  const educationInput = [
-    new HumanMessage(`Consulta del usuario:\n${userQuery}\n\nRespuesta técnica aprobada:\n${baseContent}`)
-  ];
-  const educationStart = Date.now();
-  const educationArtifacts = await callGemini(
-    educationPrompt,
-    educationInput,
-    state.contextText
-  );
-  const educationDuration = Date.now() - educationStart;
-
-  return {
-    educationArtifacts,
-    next_node: "end",
-    timings: { educationAgentMs: educationDuration }
-  };
-}
-
 // -------------------------------------------------------
 // NODOS DE AGENTES (9 agentes especializados)
 // -------------------------------------------------------
@@ -400,7 +370,8 @@ const agentNodes: Record<AgentNodeName, (state: AgentState) => Promise<Partial<A
 function buildFastPublisherNode(state: AgentState): Partial<AgentState> {
   const content = state.draftResponse?.trim() || "[SIN_CONTENIDO]";
   return {
-    messages: [new AIMessage(content)]
+    messages: [new AIMessage(content)],
+    next_node: "end"
   };
 }
 
@@ -440,10 +411,6 @@ export function buildOrchestratorGraph(options: { enableAuditor?: boolean } = {}
                 value: (prev, next) => ({ ...(prev || {}), ...(next || {}) }),
         default: () => ({}),
       },
-      educationArtifacts: {
-                value: (prev, next) => next || prev,
-        default: () => "",
-      },
     },
   })
     .addNode("router", orchestratorRouter)
@@ -458,32 +425,21 @@ export function buildOrchestratorGraph(options: { enableAuditor?: boolean } = {}
     workflow.addNode(name, agentNodes[name]);
   });
 
-  workflow.addNode("educationAgent", educationAgentNode);
-  (workflow as any).addEdge("educationAgent", END);
-
   if (enableAuditor) {
     workflow.addNode("qualityAuditor", qualityAuditorNode);
     AGENT_NODE_NAMES.forEach((name) => {
       (workflow as any).addEdge(name, "qualityAuditor");
     });
     (workflow as any).addConditionalEdges("qualityAuditor",
-      (state: AgentState) => {
-        if (state.next_node === "end") {
-          return state.userProfile?.clientMode === "guide" ? "educationAgent" : END;
-        }
-        return state.next_node || END;
-      },
-      [...AGENT_NODE_NAMES, "educationAgent", END]
+      (state: AgentState) => state.next_node === "end" ? END : (state.next_node || END),
+      [...AGENT_NODE_NAMES, END]
     );
   } else {
     workflow.addNode("fastPublisher", async (state) => buildFastPublisherNode(state));
     AGENT_NODE_NAMES.forEach((name) => {
       (workflow as any).addEdge(name, "fastPublisher");
     });
-    (workflow as any).addConditionalEdges("fastPublisher",
-      (state: AgentState) => state.userProfile?.clientMode === "guide" ? "educationAgent" : END,
-      ["educationAgent", END]
-    );
+    (workflow as any).addEdge("fastPublisher", END);
   }
 
   return workflow.compile();

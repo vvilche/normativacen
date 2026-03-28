@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { EducationArtifactsPanel } from "@/components/EducationArtifactsPanel";
 
 const ReportExportButton = dynamic(() => import("./ReportExportButton").then(mod => mod.ReportExportButton), { 
   ssr: false,
@@ -41,8 +40,6 @@ interface ResolutionProps {
   reasoning?: string;
   timings?: Record<string, number>;
   guideSuggestions?: string[];
-  educationArtifacts?: string | null;
-  clientMode?: "guide" | "expert";
 }
 
 export function ResolutionCard({ 
@@ -57,9 +54,7 @@ export function ResolutionCard({
   acciones = [],
   reasoning,
   timings,
-  guideSuggestions,
-  educationArtifacts,
-  clientMode = "guide"
+  guideSuggestions
 }: ResolutionProps) {
   const [expanded, setExpanded] = useState(false);
   return (
@@ -177,12 +172,6 @@ export function ResolutionCard({
                     <li key={idx}>{item}</li>
                   ))}
                 </ul>
-              </div>
-            )}
-
-            {educationArtifacts && (
-              <div className="mt-6">
-                <EducationArtifactsPanel content={educationArtifacts} variant={clientMode} />
               </div>
             )}
           </div>
