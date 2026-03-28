@@ -324,7 +324,21 @@ async function qualityAuditorNode(state: AgentState): Promise<Partial<AgentState
 // -------------------------------------------------------
 // COMPILACIÓN DEL GRAFO
 // -------------------------------------------------------
-const agentNodes: Record<string, (state: AgentState) => Promise<Partial<AgentState>>> = {
+const AGENT_NODE_NAMES = [
+  "sitrAgent",
+  "consumoAgent",
+  "ssccAgent",
+  "bessAgent",
+  "cibersegAgent",
+  "procedimentalAgent",
+  "generacionAgent",
+  "transmisionAgent",
+  "infotecnicaAgent",
+] as const;
+
+type AgentNodeName = typeof AGENT_NODE_NAMES[number];
+
+const agentNodes: Record<AgentNodeName, (state: AgentState) => Promise<Partial<AgentState>>> = {
   sitrAgent: sitrAgentNode,
   consumoAgent: consumoAgentNode,
   ssccAgent: ssccAgentNode,
@@ -334,18 +348,6 @@ const agentNodes: Record<string, (state: AgentState) => Promise<Partial<AgentSta
   generacionAgent: generacionAgentNode,
   transmisionAgent: transmisionAgentNode,
   infotecnicaAgent: infotecnicaAgentNode,
-};
-
-const agentEdgeMap: Record<string, string> = {
-  sitrAgent: "sitrAgent",
-  consumoAgent: "consumoAgent",
-  ssccAgent: "ssccAgent",
-  bessAgent: "bessAgent",
-  cibersegAgent: "cibersegAgent",
-  procedimentalAgent: "procedimentalAgent",
-  generacionAgent: "generacionAgent",
-  transmisionAgent: "transmisionAgent",
-  infotecnicaAgent: "infotecnicaAgent",
 };
 
 function buildFastPublisherNode(state: AgentState): Partial<AgentState> {
@@ -395,28 +397,25 @@ export function buildOrchestratorGraph(options: { enableAuditor?: boolean } = {}
     .addConditionalEdges(
       "router",
       (state: AgentState) => state.next_node || "sitrAgent",
-      agentEdgeMap as Record<string, string>
+      AGENT_NODE_NAMES
     );
 
-  Object.entries(agentNodes).forEach(([name, node]) => {
-    workflow.addNode(name, node);
+  AGENT_NODE_NAMES.forEach((name) => {
+    workflow.addNode(name, agentNodes[name]);
   });
 
   if (enableAuditor) {
     workflow.addNode("qualityAuditor", qualityAuditorNode);
-    Object.keys(agentNodes).forEach((name) => {
+    AGENT_NODE_NAMES.forEach((name) => {
       workflow.addEdge(name, "qualityAuditor");
     });
     workflow.addConditionalEdges("qualityAuditor",
       (state: AgentState) => state.next_node === "end" ? END : (state.next_node || END),
-      {
-        ...agentEdgeMap,
-        [END]: END
-      } as Record<string, string>
+      [...AGENT_NODE_NAMES, END] as const
     );
   } else {
     workflow.addNode("fastPublisher", async (state) => buildFastPublisherNode(state));
-    Object.keys(agentNodes).forEach((name) => {
+    AGENT_NODE_NAMES.forEach((name) => {
       workflow.addEdge(name, "fastPublisher");
     });
     workflow.addEdge("fastPublisher", END);
