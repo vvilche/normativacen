@@ -57,6 +57,15 @@ export default function Home() {
       .catch(err => console.error("Error fetching dashboard stats:", err));
   }, []);
 
+  useEffect(() => {
+    const className = clientMode === 'guide' ? 'theme-guide' : 'theme-expert';
+    document.body.classList.remove('theme-guide', 'theme-expert');
+    document.body.classList.add(className);
+    return () => {
+      document.body.classList.remove('theme-guide', 'theme-expert');
+    };
+  }, [clientMode]);
+
   const handleConsultar = () => {
     if (!isRegistered) {
       setIsModalOpen(true);
