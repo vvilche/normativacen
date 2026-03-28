@@ -39,6 +39,7 @@ export default function Home() {
   const [isAuditing, setIsAuditing] = useState(false);
   const [auditError, setAuditError] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [clientMode, setClientMode] = useState<'guide' | 'expert'>('guide');
 
   useEffect(() => {
     const isTokenInCookie = document.cookie.includes('auth_token');
@@ -114,7 +115,8 @@ export default function Home() {
           messages: [{ role: "user", content: originalQuery }],
           userProfile,
           fastMode: false,
-          backgroundAudit: true
+          backgroundAudit: true,
+          clientMode
         })
       });
 
@@ -148,6 +150,7 @@ export default function Home() {
         body: JSON.stringify({
           messages: [{ role: "user", content: executionQuery }],
           userProfile,
+          clientMode,
           fastMode
         })
       });
@@ -427,6 +430,8 @@ export default function Home() {
                         setFastMode={setFastMode}
                         isAuditing={isAuditing}
                         auditError={auditError}
+                        clientMode={clientMode}
+                        setClientMode={setClientMode}
                     />
             ) : (
                 <div className="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-6 animate-in zoom-in-95 duration-500">

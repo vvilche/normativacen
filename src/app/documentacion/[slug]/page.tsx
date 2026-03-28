@@ -30,7 +30,9 @@ export default function WhitePaperPage() {
   const [toc, setToc] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
   const [docTitle, setDocTitle] = useState('Análisis Técnico y Normativo');
-  const [resolutionMeta, setResolutionMeta] = useState<{ id?: string | null; timings?: Record<string, number> | null }>({});
+  const [resolutionMeta, setResolutionMeta] = useState<{ id?: string | null; timings?: Record<string, number> | null; createdAt?: string | null }>({});
+  const [actionPlan, setActionPlan] = useState<Array<{ id: string; task: string; priority?: string }>>([]);
+  const [isDynamic, setIsDynamic] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -67,7 +69,9 @@ export default function WhitePaperPage() {
           setHighlight(payload.hallazgo || payload.resolution?.hallazgo || '');
           setCleanContent(mdContent.trim());
           setDocTitle(payload.originalQuery || 'Dossier Técnico');
-          setResolutionMeta({ id: payload.resolutionId, timings: payload.timings });
+          setResolutionMeta({ id: payload.resolutionId, timings: payload.timings, createdAt: payload.createdAt });
+          setActionPlan(payload.resolution?.actionPlan || []);
+          setIsDynamic(true);
         } else {
           const res = await fetch(`/api/docs?slug=${slug}`);
           if (!res.ok) throw new Error('Documento no encontrado');
@@ -79,7 +83,7 @@ export default function WhitePaperPage() {
           const metricsMatch = rawContent.match(/\[METRICS_JSON\]\s*(\{[\s\S]*?\})/);
           if (metricsMatch) {
             try {
-              setMetrics(JSON.parse(metricsMatch[1]));
+          setMetrics(JSON.parse(metricsMatch[1]));
               rawContent = rawContent.replace(metricsMatch[0], '');
             } catch (e) { console.error('Error parsing metrics', e); }
           }
@@ -101,6 +105,8 @@ export default function WhitePaperPage() {
           setCleanContent(rawContent.trim());
           setDocTitle('Análisis Técnico y Normativo');
           setResolutionMeta({});
+          setActionPlan([]);
+          setIsDynamic(false);
         }
       } catch (err) {
         console.error(err);
@@ -120,7 +126,9 @@ export default function WhitePaperPage() {
     </div>
   );
 
-  const formattedDate = new Date().toLocaleDateString('es-CL');
+  const formattedDate = resolutionMeta.createdAt
+    ? new Date(resolutionMeta.createdAt).toLocaleString('es-CL', { dateStyle: 'medium', timeStyle: 'short' })
+    : new Date().toLocaleDateString('es-CL');
 
   return (
     <div className="min-h-screen bg-[#050810] text-[#E9EEF5] font-body selection:bg-primary/20">
@@ -189,9 +197,16 @@ export default function WhitePaperPage() {
                  <div className="flex items-center gap-2 text-[10px] font-bold text-primary/80 uppercase tracking-widest">
                     <Database className="w-3 h-3" /> Normativa Vigente
                  </div>
-                 <h2 className="text-2xl font-heading font-bold text-white tracking-tight uppercase leading-snug">
-                    {docTitle}
-                 </h2>
+                 <div className="flex flex-wrap gap-3 items-center">
+                   <h2 className="text-2xl font-heading font-bold text-white tracking-tight uppercase leading-snug">
+                      {docTitle}
+                   </h2>
+                   {isDynamic && (
+                     <span className="text-[9px] font-black uppercase tracking-[0.3em] text-gold bg-gold/10 border border-gold/30 px-2 py-0.5 rounded-full">
+                       Resolución Dinámica
+                     </span>
+                   )}
+                 </div>
                  <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-medium">{resolutionMeta.id ? `Dossier ${resolutionMeta.id}` : 'Reporte de Auditoría Técnica 2025'}</p>
                </div>
               
@@ -267,6 +282,23 @@ export default function WhitePaperPage() {
                     <span className="font-black text-white">{(value / 1000).toFixed(2)}s</span>
                   </div>
                 ))}
+              </section>
+            )}
+
+            {actionPlan.length > 0 && (
+              <section className="glass-card border border-white/5 rounded-xl p-4 space-y-3">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50">Plan de Acción</h3>
+                <div className="space-y-2">
+                  {actionPlan.map((item) => (
+                    <div key={item.id} className="flex flex-col gap-1 border border-white/5 rounded-lg p-3 bg-white/5">
+                      <div className="flex items-center justify-between text-[10px] text-white/40 uppercase tracking-[0.3em]">
+                        <span>{item.id}</span>
+                        <span>{item.priority || '—'}</span>
+                      </div>
+                      <p className="text-sm text-white/80 leading-snug">{item.task}</p>
+                    </div>
+                  ))}
+                </div>
               </section>
             )}
 

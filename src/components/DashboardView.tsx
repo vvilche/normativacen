@@ -37,6 +37,8 @@ interface DashboardViewProps {
   setFastMode: (value: boolean) => void;
   isAuditing: boolean;
   auditError?: string | null;
+  clientMode: "guide" | "expert";
+  setClientMode: (mode: "guide" | "expert") => void;
 }
 
 export function DashboardView({ 
@@ -52,7 +54,9 @@ export function DashboardView({
   fastMode,
   setFastMode,
   isAuditing,
-  auditError
+  auditError,
+  clientMode,
+  setClientMode
 }: DashboardViewProps) {
 
   return (
@@ -104,6 +108,27 @@ export function DashboardView({
                     {fastMode ? 'ON' : 'OFF'}
                   </button>
                 </div>
+                <div className="grid grid-cols-2 gap-2 text-[10px] uppercase tracking-[0.2em] font-black">
+                  <button
+                    type="button"
+                    onClick={() => setClientMode("guide")}
+                    className={`rounded-2xl border px-4 py-3 text-left transition-all ${clientMode === 'guide' ? 'bg-white/10 border-gold text-white shadow-gold' : 'bg-white/5 border-white/10 text-white/40'}`}
+                  >
+                    <span className="block text-[9px] text-white/50">Modo</span>
+                    Exploratorio
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setClientMode("expert")}
+                    className={`rounded-2xl border px-4 py-3 text-left transition-all ${clientMode === 'expert' ? 'bg-white/10 border-gold text-white shadow-gold' : 'bg-white/5 border-white/10 text-white/40'}`}
+                  >
+                    <span className="block text-[9px] text-white/50">Modo</span>
+                    Operativo
+                  </button>
+                </div>
+                <p className="text-[10px] text-white/40 font-medium">
+                  {clientMode === 'guide' ? 'Recibirás respuestas educativas, con sugerencias y capacitación.' : 'Obtendrás diagnósticos técnicos, checklists y consecuencias normativas.'}
+                </p>
             </div>
         </motion.div>
       )}
@@ -140,6 +165,9 @@ export function DashboardView({
                     Score Global: {stats.globalScore}% · Activos: {stats.totalAssets}
                   </span>
                 )}
+                <span className={`text-[9px] font-black uppercase tracking-[0.3em] px-2 py-0.5 rounded ${clientMode === 'guide' ? 'bg-white/5 text-white/70 border border-white/10' : 'bg-gold/10 text-gold border border-gold/20'}`}>
+                  {clientMode === 'guide' ? 'Modo Guía' : 'Modo Operativo'}
+                </span>
             </div>
             <div className="flex items-center gap-5">
                 <button className="flex items-center gap-2 text-[9px] text-gray-500 font-black uppercase tracking-widest hover:text-white transition-colors group">

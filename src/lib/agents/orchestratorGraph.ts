@@ -22,7 +22,7 @@ import { getRetriever } from "../rag/retriever";
  */
 export interface AgentState {
   messages: BaseMessage[];
-  userProfile: { company?: string; [key: string]: unknown } | null;
+  userProfile: ({ company?: string; clientMode?: 'guide' | 'expert'; [key: string]: unknown }) | null;
   next_node?: string;
   contextText?: string;
   draftResponse?: string;
@@ -208,6 +208,9 @@ async function createAgentNode(systemPrompt: string, state: AgentState, agentTyp
   }
 
   const profileContext = "\n\nPerfil del Coordinado: " + JSON.stringify(state.userProfile);
+  const modeInstructions = state.userProfile?.clientMode === 'guide'
+    ? "\n\n[MODO GUÍA]: Responde con tono educativo, explica fundamentos, ofrece sugerencias de siguientes preguntas y módulos de capacitación. Evita jerga innecesaria."
+    : "\n\n[MODO EXPERTO]: Usuario operativo requiere diagnóstico puntual, consecuencias normativas y plan de acción detallado con responsables y plazos.";
   
   // Si esto es un re-intento, incluimos las observaciones del auditor en el prompt
   const isRetry = (state.revisionCount || 0) > 0;
@@ -216,7 +219,7 @@ async function createAgentNode(systemPrompt: string, state: AgentState, agentTyp
        OBSERVACIONES: ${state.messages[state.messages.length - 1].content}`
     : "";
 
-  const fullPrompt = systemPrompt + profileContext + retryInstructions;
+  const fullPrompt = systemPrompt + modeInstructions + profileContext + retryInstructions;
 
   const agentStart = Date.now();
   const draftResponse = await callGemini(fullPrompt, state.messages, contextText);

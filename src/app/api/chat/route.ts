@@ -19,10 +19,40 @@ type CachePayload = {
   originalQuery?: string;
   createdAt?: string;
   timings?: Record<string, number>;
+  clientMode?: 'guide' | 'expert';
+  guideSuggestions?: string[];
 };
 
 const MEMORY_CACHE_TTL = 1000 * 60 * 10; // 10 minutos
 const memoryCache = new Map<string, { expires: number; payload: CachePayload }>();
+
+const GUIDE_SUGGESTIONS: Record<string, string[]> = {
+  default: [
+    '¿Qué evidencias básicas exige el CEN para auditoría?',
+    '¿Cómo programo mi primera actualización PMUS?',
+    '¿Dónde encuentro el procedimiento EDAC vigente?'
+  ],
+  sitrAgent: [
+    '¿Qué parámetros monitorea SITR diariamente?',
+    '¿Cómo valido la latencia <500ms en mis enlaces?',
+    '¿Qué debo reportar al CDC si falla la telemetría?'
+  ],
+  procedimentalAgent: [
+    '¿Cuáles son los plazos SEC para PMUS 2026?',
+    '¿Qué documentos debo presentar al CEN para actualizaciones?',
+    '¿Cómo documento evidencias para EDAC?'
+  ],
+  consumoAgent: [
+    '¿Qué implicancias tiene un EDAC incompleto?',
+    '¿Cómo evidencio mis respuestas ante el CEN?',
+    '¿Qué checklist básico debo revisar cada mes?'
+  ],
+  bessAgent: [
+    '¿Qué normas CIP aplican a mi BESS?',
+    '¿Cómo monitoreo el FFR en tiempo real?',
+    '¿Qué debo reportar al CDC del CEN ante incidentes?'
+  ]
+};
 
 function deriveMetricsFromContent(content: string, agentType: string) {
   const checklistItems = (content.match(/^[\s\t]*[-*]\s+/gm) || []).length;
@@ -68,6 +98,13 @@ function deriveMetricsFromContent(content: string, agentType: string) {
 // Force dynamic execution for API routes
 export const dynamic = 'force-dynamic';
 
+function appendGuideBlock(content: string, agentType: string) {
+  const suggestions = GUIDE_SUGGESTIONS[agentType] || GUIDE_SUGGESTIONS.default;
+  const lines = suggestions.map((s) => `- ${s}`);
+  const block = `\n\n### Capacitación recomendada\n${lines.join('\n')}\n`;
+  return { newContent: `${content}${block}`, suggestions };
+}
+
 export async function POST(req: Request) {
   try {
     if (!process.env.GOOGLE_API_KEY) {
@@ -78,7 +115,7 @@ export async function POST(req: Request) {
     }
     resetConnectionStatus();
     const body = await req.json();
-    const { messages, userProfile, fastMode = false, backgroundAudit = false } = body;
+    const { messages, userProfile, fastMode = false, backgroundAudit = false, clientMode = 'guide' } = body;
 
     if (!messages || !Array.isArray(messages)) {
       console.error('❌ Error: El historial de mensajes es inválido o no se proporcionó.');
@@ -89,6 +126,8 @@ export async function POST(req: Request) {
       console.error('❌ Error: El perfil de usuario es inválido o no se proporcionó.');
       return NextResponse.json({ error: 'El perfil de usuario es inválido' }, { status: 400 });
     }
+
+    const enrichedProfile = { ...userProfile, clientMode };
 
     const lcMessages = messages.map((m: any) => 
       m.role === 'user' ? new HumanMessage(m.content) : new AIMessage(m.content)
@@ -147,7 +186,7 @@ export async function POST(req: Request) {
     // 2. Invocar LangGraph con el Estado Inicial (Context Engineering)
     const initialState = {
       messages: lcMessages,
-      userProfile: userProfile || {}
+      userProfile: enrichedProfile
     };
 
     const finalState = await app.invoke(initialState);
@@ -198,6 +237,12 @@ export async function POST(req: Request) {
     }
 
     cleanContent = cleanContent.trim();
+    let guideSuggestions: string[] | undefined;
+    if (clientMode === 'guide') {
+      const { newContent, suggestions } = appendGuideBlock(cleanContent, agentType);
+      cleanContent = newContent;
+      guideSuggestions = suggestions;
+    }
 
     // 3. Generar Reporte Técnico (Valor Agregado)
     const technicalReport = generateTechnicalReport(
@@ -222,7 +267,9 @@ export async function POST(req: Request) {
       resolutionId,
       originalQuery: userQuery,
       createdAt: new Date().toISOString(),
-      timings
+      timings,
+      clientMode,
+      guideSuggestions
     };
 
     // 4. Persistir en el Repositorio de Resoluciones (Caché)
