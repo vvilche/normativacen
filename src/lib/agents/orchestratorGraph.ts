@@ -418,7 +418,7 @@ export function buildOrchestratorGraph(options: { enableAuditor?: boolean } = {}
     AGENT_NODE_NAMES.forEach((name) => {
       (workflow as any).addEdge(name, "fastPublisher");
     });
-    workflow.addEdge("fastPublisher", END);
+    (workflow as any).addEdge("fastPublisher", END);
   }
 
   return workflow.compile();
