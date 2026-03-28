@@ -407,16 +407,16 @@ export function buildOrchestratorGraph(options: { enableAuditor?: boolean } = {}
   if (enableAuditor) {
     workflow.addNode("qualityAuditor", qualityAuditorNode);
     AGENT_NODE_NAMES.forEach((name) => {
-      workflow.addEdge(name as any, "qualityAuditor");
+      (workflow as any).addEdge(name, "qualityAuditor");
     });
-    workflow.addConditionalEdges("qualityAuditor",
+    (workflow as any).addConditionalEdges("qualityAuditor",
       (state: AgentState) => state.next_node === "end" ? END : (state.next_node || END),
-      [...AGENT_NODE_NAMES, END] as any
+      [...AGENT_NODE_NAMES, END]
     );
   } else {
     workflow.addNode("fastPublisher", async (state) => buildFastPublisherNode(state));
     AGENT_NODE_NAMES.forEach((name) => {
-      workflow.addEdge(name as any, "fastPublisher");
+      (workflow as any).addEdge(name, "fastPublisher");
     });
     workflow.addEdge("fastPublisher", END);
   }
