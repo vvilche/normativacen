@@ -176,23 +176,7 @@ export function ResolutionCard({
             )}
           </div>
 
-          {/* Controls Mini List */}
-          <div className="w-full md:w-64 space-y-2">
-            <div className="text-[8px] text-gray-700 font-black uppercase tracking-[0.2em] mb-3">Compliance Controls</div>
-            {controls.map(ctrl => (
-                <div key={ctrl.id} className="flex items-center justify-between text-[10px] bg-white/5 p-2 px-3 rounded border border-transparent hover:border-white/5 hover:bg-white/10 transition-all font-technical">
-                    <span className="text-gray-500">{ctrl.id}</span>
-                    <div className="flex items-center gap-2">
-                        <span className="text-white/60 text-[9px] uppercase tracking-tighter truncate max-w-[80px]">{ctrl.label}</span>
-                        <div className={cn(
-                            "w-1.5 h-1.5 rounded-full shadow-[0_0_5px]",
-                            ctrl.status === "MET" ? "bg-success shadow-success/50" : "bg-danger shadow-danger/50"
-                        )} />
-                    </div>
-                </div>
-            ))}
-            
-          </div>
+          {/* Controls removed per feedback */}
         </div>
 
         <div className="mt-8 border-t border-white/5 pt-6">

@@ -230,14 +230,16 @@ export function DashboardView({
                     aria-label="Describe tu incidente o consulta normativa"
                   />
                 </div>
-                <button
-                  onClick={() => onExecute(query)}
-                  className="bg-primary text-on-primary px-5 py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.4em] disabled:opacity-40 disabled:cursor-not-allowed"
-                  disabled={!canExecute}
-                  aria-disabled={!canExecute}
-                >
-                  Ejecutar
-                </button>
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => onExecute(query)}
+                    className="bg-primary text-on-primary px-5 py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.4em] disabled:opacity-40 disabled:cursor-not-allowed"
+                    disabled={!canExecute}
+                    aria-disabled={!canExecute}
+                  >
+                    Ejecutar
+                  </button>
+                </div>
               </div>
             </div>
             <div className="flex flex-wrap gap-4 text-[10px] uppercase tracking-[0.3em] font-black">
