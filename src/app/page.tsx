@@ -120,16 +120,23 @@ export default function Home() {
       } else {
         throw new Error(data.error);
       }
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error("Error en procesamiento IA:", error);
-      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
+      const errorMessage = error.message || "Error desconocido en el Orquestador";
+      const technicalDetails = error.details || "";
+      
       setResolutionData({
-        id: "error",
-        verdict: "ERROR",
-        reasoning: `Hubo un problema al procesar la solicitud: ${errorMessage}. Verifica el Orquestador.`,
-        protocol: "Error-Handler",
+        id: "INFRA-ERROR",
+        verdict: `ERROR TÉCNICO: ${errorMessage}`,
+        reasoning: `Se detectó un fallo crítico en el nodo de inferencia. Posible causa: ${errorMessage}. ${technicalDetails ? `Detalles: ${technicalDetails}` : "Verifica variables de entorno (GOOGLE_API_KEY, MONGODB_URI) en Netlify."}`,
+        protocol: "System-Diagnostic",
         controls: [],
-        kpis: { score: 0, risk: "Alto", latency: "0s", protocol: "N/A" },
+        kpis: { 
+          score: 0, 
+          risk: "CRÍTICO", 
+          latency: "0s", 
+          protocol: "N/A" 
+        },
         steps: []
       });
     } finally {
