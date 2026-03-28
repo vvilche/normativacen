@@ -252,7 +252,7 @@ export default function DocumentacionPage() {
           <section className="knowledge-section">
             <div className="knowledge-card">
               <h3 className="text-2xl font-bold mb-4">Base de Conocimiento</h3>
-              <div className={contentExpanded ? "" : "scroll-panel mask-gradient-light"}>
+              <div className={contentExpanded ? "" : "scroll-panel clamped"}>
                 <article className="markdown-output">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {cleanContent || "# Documento no disponible"}

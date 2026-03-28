@@ -122,7 +122,7 @@ export function ResolutionCard({
             </p>
             {reasoning && (
               <div className="mt-4">
-                <div className={cn("markdown-output text-[11px] transition-all", expanded ? "max-h-[1000px]" : "max-h-64 overflow-hidden mask-gradient") }>
+                <div className={cn("markdown-output text-[11px] transition-all", expanded ? "" : "clamped") }>
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {reasoning}
                   </ReactMarkdown>
