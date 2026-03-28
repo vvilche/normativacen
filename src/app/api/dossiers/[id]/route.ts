@@ -3,8 +3,10 @@ import clientPromise from "@/lib/rag/mongoClient";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(_req: NextRequest, context: { params: { id: string } }) {
-  const { id } = context.params || {};
+type RouteContext = { params: Promise<{ id: string }> };
+
+export async function GET(_req: NextRequest, context: RouteContext) {
+  const { id } = await context.params;
   if (!id) {
     return NextResponse.json({ error: "Falta el identificador del dossier" }, { status: 400 });
   }
