@@ -2,10 +2,9 @@
 
 import { motion } from "framer-motion";
 import React from "react";
-import { 
-  Sparkles, 
-  ChevronRight, 
-  Share2, 
+import {
+  Sparkles,
+  ChevronRight,
   Activity,
   Search,
   Loader2
@@ -59,6 +58,7 @@ export function DashboardView({
   setClientMode
 }: DashboardViewProps) {
 
+  const isGuide = clientMode === "guide";
   const guidePrompts = [
     "¿Qué es el SITR y qué debo reportar al CEN?",
     "Pasos básicos para actualizar el PMUS 2026",
@@ -99,6 +99,25 @@ export function DashboardView({
         secondaryCTA: "Reportar Incidente",
       };
 
+  const statusToProgress: Record<string, number> = {
+    completado: 100,
+    progreso: 55,
+    pendiente: 25,
+  };
+
+  const heroMetrics = stats
+    ? [
+        { label: "Score Global", value: `${stats.globalScore}%` },
+        { label: "Activos", value: `${stats.totalAssets}` },
+        { label: "Riesgos Críticos", value: `${stats.criticalRisks}` },
+      ]
+    : [
+        { label: "Score Global", value: "--" },
+        { label: "Activos", value: "--" },
+      ];
+
+  const canExecute = query.trim().length > 0;
+
   return (
     <div className="w-full space-y-8 pb-20">
       
@@ -111,39 +130,55 @@ export function DashboardView({
           animate={{ opacity: 1, y: 0 }}
           className="space-y-8"
         >
-          <section className="hero-section">
+          <section className="hero-section" data-mode={clientMode}>
             <div className="space-y-4">
-              <span className="text-sm uppercase tracking-[0.5em] opacity-80">
-                {clientMode === "guide" ? "Modo Guía" : "Modo Operativo"}
-              </span>
+              <div className="flex flex-wrap gap-2 items-center">
+                <span className="hero-pill">
+                  {clientMode === "guide" ? "Modo Guía" : "Modo Operativo"}
+                </span>
+                <span className="hero-pill" style={{ borderStyle: "dashed" }}>
+                  {processingStatus === "idle" ? "Listo para ejecutar" : "Procesando"}
+                </span>
+              </div>
               <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
                 {heroCopy.title}
               </h2>
-              <p className="text-white/80 text-base md:text-lg max-w-2xl">
+              <p className="text-base md:text-lg max-w-2xl opacity-80">
                 {heroCopy.subtitle}
               </p>
               <div className="flex flex-wrap gap-3 hero-actions">
                 <button
-                  className="bg-white text-primary px-6 py-3 rounded-xl font-bold uppercase tracking-[0.3em] text-xs"
+                  className="primary"
                   onClick={() => onExecute(prompts[0])}
                 >
                   {heroCopy.primaryCTA}
                 </button>
                 <button
-                  className="bg-white/20 border border-white/40 text-white px-6 py-3 rounded-xl font-bold uppercase tracking-[0.3em] text-xs"
+                  className="secondary"
                   onClick={() => onExecute(prompts[1] || prompts[0])}
                 >
                   {heroCopy.secondaryCTA}
                 </button>
               </div>
+              <div className="hero-metrics">
+                {heroMetrics.map((metric) => (
+                  <div key={metric.label} className="metric-chip">
+                    <span>{metric.label}</span>
+                    <strong>{metric.value}</strong>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="bg-white/10 border border-white/20 rounded-2xl p-6">
-              <h5 className="text-sm font-bold uppercase tracking-[0.4em] mb-4 text-white/80">
+            <div className={`rounded-2xl p-6 ${isGuide ? "bg-white border border-[rgba(13,30,37,0.12)] text-slate-900" : "bg-white/10 border border-white/20"}`}>
+              <h5 className="text-sm font-bold uppercase tracking-[0.4em] mb-4 opacity-80">
                 Consultas sugeridas
               </h5>
               <ul className="space-y-3 text-sm">
                 {prompts.map((item, idx) => (
-                  <li key={idx} className="bg-white/10 border border-white/15 rounded-lg p-3">
+                  <li
+                    key={idx}
+                    className={`rounded-lg p-3 ${isGuide ? "bg-[rgba(13,30,37,0.04)] border border-[rgba(13,30,37,0.08)]" : "bg-white/10 border border-white/15"}`}
+                  >
                     “{item}”
                   </li>
                 ))}
@@ -153,36 +188,53 @@ export function DashboardView({
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {modules.map((module) => (
-              <div key={module.title} className="learning-card">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs font-bold uppercase tracking-[0.3em] opacity-60">
-                    {module.status.toUpperCase()}
+              <div key={module.title} className="learning-card" data-mode={clientMode}>
+                <div className="flex items-center justify-between">
+                  <h4 className="text-lg font-bold">{module.title}</h4>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-60">
+                    {module.status}
                   </span>
-                  <div className="w-2 h-2 rounded-full" style={{ background: module.status === "completado" ? "#10B981" : module.status === "progreso" ? "#FFBA38" : "#CBD5F5" }} />
                 </div>
-                <h4 className="text-lg font-bold mb-1">{module.title}</h4>
-                <p className="text-sm opacity-70">{module.description}</p>
+                <p className="text-sm opacity-80">{module.description}</p>
+                <div className="module-progress">
+                  <span style={{ width: `${statusToProgress[module.status] ?? 40}%` }} />
+                </div>
+                <div className="module-footer">
+                  <span>
+                    {module.status === "completado" ? "Listo" : module.status === "progreso" ? "En curso" : "Pendiente"}
+                  </span>
+                  <span>Ver módulo</span>
+                </div>
               </div>
             ))}
           </div>
 
-          <div className="search-panel space-y-4">
+          <div className="search-panel space-y-4" data-mode={clientMode}>
             <div className="relative flex flex-col gap-3">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-white/5 text-slate-400">
-                  <Search className="w-5 h-5" />
+              <label htmlFor="dashboard-query" className="sr-only">
+                Describe tu incidente o consulta normativa
+              </label>
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 rounded-xl bg-white/5 text-slate-400">
+                    <Search className="w-5 h-5" />
+                  </div>
+                  <input
+                    type="text"
+                    id="dashboard-query"
+                    className="flex-1 bg-transparent border-none text-base focus:outline-none"
+                    placeholder="Describe tu incidente o consulta normativa..."
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && onExecute(query)}
+                    aria-label="Describe tu incidente o consulta normativa"
+                  />
                 </div>
-                <input
-                  type="text"
-                  className="flex-1 bg-transparent border-none text-base focus:outline-none"
-                  placeholder="Describe tu incidente o consulta normativa..."
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && onExecute(query)}
-                />
                 <button
                   onClick={() => onExecute(query)}
-                  className="bg-primary text-on-primary px-5 py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.4em]"
+                  className="bg-primary text-on-primary px-5 py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.4em] disabled:opacity-40 disabled:cursor-not-allowed"
+                  disabled={!canExecute}
+                  aria-disabled={!canExecute}
                 >
                   Ejecutar
                 </button>
@@ -195,6 +247,7 @@ export function DashboardView({
                   type="button"
                   onClick={() => setFastMode(!fastMode)}
                   className={`px-3 py-1 rounded-full border text-[9px] tracking-[0.3em] ${fastMode ? "bg-primary/10 border-primary text-primary" : "border-slate-300 text-slate-500"}`}
+                  aria-pressed={fastMode}
                 >
                   {fastMode ? "ON" : "OFF"}
                 </button>
@@ -204,6 +257,7 @@ export function DashboardView({
                   type="button"
                   onClick={() => setClientMode("guide")}
                   className={`px-4 py-2 rounded-full border ${clientMode === "guide" ? "bg-primary text-white" : "border-slate-300 text-slate-500"}`}
+                  aria-pressed={clientMode === "guide"}
                 >
                   Exploratorio
                 </button>
@@ -211,6 +265,7 @@ export function DashboardView({
                   type="button"
                   onClick={() => setClientMode("expert")}
                   className={`px-4 py-2 rounded-full border ${clientMode === "expert" ? "bg-primary text-white" : "border-slate-300 text-slate-500"}`}
+                  aria-pressed={clientMode === "expert"}
                 >
                   Operativo
                 </button>
@@ -238,89 +293,73 @@ export function DashboardView({
       {processingStatus === "complete" && resolution && (
         <div className="space-y-8 animate-in fade-in zoom-in-95 duration-700">
           {/* Page Title & Actions */}
-          <div className="flex justify-between items-center bg-white/5 p-4 py-3 rounded-xl border border-white/5 backdrop-blur-md">
-            <div className="flex items-center gap-3">
-                <div className="w-2 h-6 bg-gold rounded-full shadow-gold animate-pulse" />
-                <h2 className="text-xs font-bold text-white tracking-[0.2em] uppercase italic flex items-center gap-2">
-                    CEN Intelligence Hub <span className="text-slate-500 font-technical px-2 py-0.5 rounded bg-white/5 lowercase">v9.2.2</span>
-                    <span className="text-[10px] text-gold animate-pulse shadow-gold">● LIVE</span>
-                </h2>
-                <div className="h-4 w-px bg-white/10 mx-2" />
-                <button 
-                  onClick={onTestSystem}
-                  className="flex items-center gap-1.5 px-2 py-1 rounded bg-accent/10 border border-accent/20 text-[9px] font-black text-accent uppercase tracking-widest hover:bg-accent/20 transition-all"
-                >
-                  <Activity className="w-3 h-3" /> Diagnóstico de Sistemas
-                </button>
-                {stats && (
-                  <span className="text-[9px] text-white/60 font-technical uppercase tracking-widest">
-                    Score Global: {stats.globalScore}% · Activos: {stats.totalAssets}
-                  </span>
-                )}
-                <span className={`text-[9px] font-black uppercase tracking-[0.3em] px-2 py-0.5 rounded ${clientMode === 'guide' ? 'bg-white/5 text-white/70 border border-white/10' : 'bg-gold/10 text-gold border border-gold/20'}`}>
-                  {clientMode === 'guide' ? 'Modo Guía' : 'Modo Operativo'}
+          <div className="dashboard-header" data-mode={clientMode}>
+            <div className="flex flex-wrap items-center gap-3">
+              <h2 className="text-xs font-black uppercase tracking-[0.3em]">
+                Resolución generada
+              </h2>
+              <span className="hero-pill" style={{ borderStyle: "dashed" }}>
+                {clientMode === "guide" ? "Modo Guía" : "Modo Operativo"}
+              </span>
+              {stats && (
+                <span className="text-[10px] uppercase tracking-[0.2em] opacity-70">
+                  Score: {stats.globalScore}% · Activos: {stats.totalAssets}
                 </span>
+              )}
             </div>
-            <div className="flex items-center gap-5">
-                <button className="flex items-center gap-2 text-[9px] text-gray-500 font-black uppercase tracking-widest hover:text-white transition-colors group">
-                    <Share2 className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
-                    <span>Compartir</span>
-                </button>
-                {resolution?.resolutionId && (
-                  <Link
-                    href={`/documentacion/dossier?resolutionId=${resolution.resolutionId}`}
-                    target="_blank"
-                    className="flex items-center gap-2 text-[9px] text-accent font-black uppercase tracking-[0.3em] border border-accent/30 px-3 py-1 rounded-lg hover:bg-accent/10 transition-all"
-                  >
-                    Dossier Técnico
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </Link>
-                )}
-                <div className="h-4 w-px bg-white/10" />
-                <button 
-                    onClick={onReset}
-                    className="flex items-center gap-2 text-[9px] text-gold font-black uppercase tracking-[0.3em] hover:brightness-125 transition-all"
+            <div className="flex flex-wrap items-center gap-3 mt-3">
+              <button
+                onClick={onTestSystem}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-[0.25em] bg-accent/10 text-accent border border-accent/20"
+              >
+                <Activity className="w-3.5 h-3.5" /> Diagnóstico de Sistemas
+              </button>
+              {resolution?.resolutionId && (
+                <Link
+                  href={`/documentacion/dossier?resolutionId=${resolution.resolutionId}`}
+                  target="_blank"
+                  className="flex items-center gap-2 text-[9px] text-accent font-black uppercase tracking-[0.3em] border border-accent/30 px-3 py-1 rounded-lg hover:bg-accent/10 transition-all"
                 >
-                    NUEVA CONSULTA
-                    <ChevronRight className="w-3.5 h-3.5 animate-bounce-x" />
-                </button>
-            </div>
-            {isAuditing && (
-              <div className="mt-3 flex items-center gap-2 text-[10px] text-accent font-black uppercase tracking-[0.25em]">
-                <Loader2 className="w-3.5 h-3.5 animate-spin" /> Auditoría profunda en curso...
-              </div>
-            )}
-            {auditError && (
-              <p className="mt-2 text-[10px] text-red-400 uppercase tracking-[0.2em]">{auditError}</p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <div className="lg:col-span-9 space-y-6">
-                <ResolutionCard 
-                    antecedentes={resolution?.antecedentes}
-                    acciones={resolution?.acciones}
-                    confianza={resolution?.confianza}
-                    id={resolution?.id}
-                    date={resolution?.date}
-                    type={resolution?.type}
-                    verdict={resolution?.verdict}
-                    controls={resolution?.controls}
-                    kpis={resolution?.kpis}
-                    hallazgo={resolution?.hallazgo}
-                    seoTags={resolution?.seoTags}
-                    reasoning={resolution?.reasoning}
-                    timings={resolution?.timings}
-                    guideSuggestions={resolution?.guideSuggestions}
-                />
-            </div>
-
-            <div className="lg:col-span-3 bg-[#161B29]/30 border border-white/5 rounded-2xl p-6 backdrop-blur-xl shadow-xl relative overflow-hidden group opacity-60 hover:opacity-100 transition-opacity">
-                <div className="absolute inset-0 bg-gold/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <h4 className="text-[8px] font-bold text-gray-500 uppercase tracking-widest mb-4">Trazabilidad Multi-Agente</h4>
-                <HarnessMonitor status="complete" />
+                  Dossier Técnico
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+              )}
+              <button
+                onClick={onReset}
+                className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.3em] text-gold"
+              >
+                Nueva consulta
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+              {isAuditing && (
+                <span className="flex items-center gap-2 text-[10px] text-accent font-black uppercase tracking-[0.25em]">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Auditoría en curso
+                </span>
+              )}
+              {auditError && (
+                <span className="text-[10px] text-red-500 uppercase tracking-[0.25em]">
+                  {auditError}
+                </span>
+              )}
             </div>
           </div>
+
+          <ResolutionCard
+            antecedentes={resolution?.antecedentes}
+            acciones={resolution?.acciones}
+            confianza={resolution?.confianza}
+            id={resolution?.id}
+            date={resolution?.date}
+            type={resolution?.type}
+            verdict={resolution?.verdict}
+            controls={resolution?.controls}
+            kpis={resolution?.kpis}
+            hallazgo={resolution?.hallazgo}
+            seoTags={resolution?.seoTags}
+            reasoning={resolution?.reasoning}
+            timings={resolution?.timings}
+            guideSuggestions={resolution?.guideSuggestions}
+          />
         </div>
       )}
 
