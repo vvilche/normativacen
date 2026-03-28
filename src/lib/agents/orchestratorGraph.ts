@@ -206,8 +206,8 @@ async function qualityAuditorNode(state: AgentState): Promise<Partial<AgentState
 
   const feedback = await callGemini(QUALITY_AUDITOR_PROMPT, auditorInput, state.contextText);
   
-  // Check for REJECTION logic
-  if (feedback.includes('[RECHAZADO]') && currentRevision < 2) {
+  // Check for REJECTION logic (Limit to 1 revision to prevent timeouts on Netlify)
+  if (feedback.includes('[RECHAZADO]') && currentRevision < 1) {
     console.log("❌ Auditoría FALLIDA. Solicitando re-elaboración al especialista...");
     return {
       messages: [new AIMessage(feedback)],

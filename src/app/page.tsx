@@ -76,6 +76,22 @@ export default function Home() {
         })
       });
       
+      if (!response.ok) {
+        let errorData;
+        try {
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            errorData = await response.json();
+          } else {
+            const text = await response.text();
+            errorData = { error: response.status === 504 ? "TIMEOUT: El proceso de la IA superó el límite de tiempo de Netlify." : "ERROR DE SERVIDOR", details: text.substring(0, 100) };
+          }
+        } catch {
+          errorData = { error: "FALLO FATAL", details: "No se pudo leer la respuesta del servidor." };
+        }
+        throw new Error(errorData.error || "Fallo en la sincronización del Orquestador");
+      }
+      
       const data = await response.json();
       
       if (response.ok) {
@@ -123,12 +139,11 @@ export default function Home() {
     } catch (error: any) {
       console.error("Error en procesamiento IA:", error);
       const errorMessage = error.message || "Error desconocido en el Orquestador";
-      const technicalDetails = error.stack?.substring(0, 100) || ""; // Basic stack trace hint
       
       setResolutionData({
         id: "INFRA-ERROR",
-        verdict: `ERROR TÉCNICO: ${errorMessage}`,
-        reasoning: `Se detectó un fallo crítico en el nodo de inferencia. ${errorMessage.includes('GOOGLE_API_KEY') ? 'FALTA CONFIGURACIÓN: Revisa las variables de entorno.' : `Detalle: ${errorMessage}`}`,
+        verdict: `ERROR CRÍTICO: ${errorMessage}`,
+        reasoning: `Se detectó un fallo en la infraestructura del Orquestador.\n\n[DETALLE TÉCNICO]: ${errorMessage}\n\n[ACCIÓN]: Si es un TIMEOUT, intenta con una consulta más simple o revisa las variables de entorno en Netlify.`,
         protocol: "System-Diagnostic",
         controls: [],
         kpis: { 

@@ -156,6 +156,7 @@ export function DashboardView({
                     kpis={resolution?.kpis}
                     hallazgo={resolution?.hallazgo}
                     seoTags={resolution?.seoTags}
+                    reasoning={resolution?.reasoning}
                 />
             </div>
 

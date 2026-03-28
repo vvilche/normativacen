@@ -34,6 +34,7 @@ interface ResolutionProps {
   kpis?: any;
   hallazgo?: string;
   seoTags?: string[];
+  reasoning?: string;
 }
 
 export function ResolutionCard({ 
@@ -45,7 +46,8 @@ export function ResolutionCard({
   kpis = { score: "94.2%", risk: "LOW", protocol: "v1.4", latency: "45ms" },
   hallazgo,
   seoTags = [],
-  acciones = []
+  acciones = [],
+  reasoning
 }: ResolutionProps) {
   
   return (
