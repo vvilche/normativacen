@@ -70,6 +70,12 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
+    if (!process.env.GOOGLE_API_KEY) {
+      return NextResponse.json({
+        error: 'Infraestructura incompleta (GOOGLE_API_KEY faltante).',
+        details: 'Configura GOOGLE_API_KEY en Netlify y reintenta. Usa /api/test-infra para validar.',
+      }, { status: 500 });
+    }
     resetConnectionStatus();
     const body = await req.json();
     const { messages, userProfile, fastMode = false, backgroundAudit = false } = body;

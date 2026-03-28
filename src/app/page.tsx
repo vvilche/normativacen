@@ -38,6 +38,7 @@ export default function Home() {
   const [fastMode, setFastMode] = useState(true);
   const [isAuditing, setIsAuditing] = useState(false);
   const [auditError, setAuditError] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const isTokenInCookie = document.cookie.includes('auth_token');
@@ -138,6 +139,7 @@ export default function Home() {
     setProcessingStatus("processing");
     setIsAuditing(false);
     setAuditError(null);
+    setErrorMessage(null);
     
     try {
       const response = await fetch("/api/chat", {
@@ -168,18 +170,14 @@ export default function Home() {
       
       const data = await response.json();
       
-      if (response.ok) {
-        setResolutionData(buildResolutionFromResponse(data));
-        if (fastMode) {
-          runBackgroundAudit(executionQuery);
-        }
-      } else {
-        throw new Error(data.error);
+      setResolutionData(buildResolutionFromResponse(data));
+      if (fastMode) {
+        runBackgroundAudit(executionQuery);
       }
     } catch (error: any) {
       console.error("Error en procesamiento IA:", error);
       const errorMessage = error.message || "Error desconocido en el Orquestador";
-      
+      setErrorMessage(errorMessage);
       setResolutionData({
         id: "INFRA-ERROR",
         verdict: `ERROR CRÍTICO: ${errorMessage}`,
@@ -390,6 +388,11 @@ export default function Home() {
         setActiveTab={setActiveTab}
     >
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            {errorMessage && (
+              <div className="bg-red-500/10 border border-red-500/30 text-red-200 text-[11px] font-black uppercase tracking-[0.3em] px-4 py-3 rounded-xl">
+                {errorMessage}
+              </div>
+            )}
             {activeTab === "Biblioteca" ? (
                 <div className="space-y-10 animate-in fade-in duration-500">
                     <div className="flex justify-between items-center border-b border-white/5 pb-6">
