@@ -4,11 +4,11 @@ import { getCourseBySlug } from "@/lib/courses";
 export const dynamic = "force-dynamic";
 
 interface CoursePageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export default async function CoursePage({ params }: CoursePageProps) {
-  const { slug } = params;
+  const { slug } = await params;
   const course = await getCourseBySlug(slug);
   if (!course) notFound();
 
