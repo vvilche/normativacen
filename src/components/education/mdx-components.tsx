@@ -14,9 +14,12 @@ const QuizCTA = ({ quizId, label = "Resolver quiz", description }: QuizCTAProps)
       <h4 className="text-lg font-black text-white">{label}</h4>
       {description && <p className="text-sm text-white/70">{description}</p>}
     </div>
-    <button type="button" data-quiz-id={quizId} className="btn-primary w-full md:w-auto">
+    <Link
+      href={`/dashboard?quiz=${quizId}`}
+      className="btn-primary w-full md:w-auto text-center"
+    >
       Quiz {quizId}
-    </button>
+    </Link>
   </div>
 );
 
@@ -40,9 +43,9 @@ const Callout = ({ title, tone = "info", children }: CalloutProps) => (
 );
 
 const ResourceLink = ({ href, children }: { href: string; children: ReactNode }) => (
-  <Link href={href} className="resource-link" target="_blank">
+  <a href={href} className="resource-link" target="_blank" rel="noreferrer" download>
     {children}
-  </Link>
+  </a>
 );
 
 const KeyMetric = ({ label, value }: { label: string; value: string }) => (
