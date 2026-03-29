@@ -437,6 +437,12 @@ export function DashboardView({
                 >
                   {educationOpen ? "Ocultar" : "Ver"}
                 </button>
+                <Link
+                  href="/educacion"
+                  className="text-[10px] font-black uppercase tracking-[0.3em] text-primary"
+                >
+                  Biblioteca
+                </Link>
               </div>
               {educationOpen && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

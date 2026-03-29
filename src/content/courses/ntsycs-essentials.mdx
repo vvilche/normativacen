@@ -1,0 +1,70 @@
+---
+title: "NTSyCS Essentials"
+slug: "ntsycs-essentials"
+summary: "Comprende los mínimos de la Norma Técnica de Seguridad y Calidad de Servicio para preparar auditorías y detectar brechas antes de que se transformen en multas."
+duration: "6 min"
+quizId: "guide-quiz-01"
+mode: "guide"
+level: "fundamentos"
+publishDate: "2026-04-01"
+heroHighlight: "Domina los umbrales de latencia, reportabilidad y respaldo exigidos por el CEN."
+tags:
+  - "NTSyCS"
+  - "Fundamentos"
+  - "Telemetría"
+resources:
+  - title: "Checklist mínimo NTSyCS"
+    href: "/education/checklists/ntsycs-basico.pdf"
+  - title: "Plantilla de bitácora SITR"
+    href: "/education/templates/bitacora-sitr.docx"
+---
+
+<Callout title="Por qué importa" tone="info">
+  Mantener la trazabilidad de telemetría y respaldos bajo 15 minutos evita observaciones directas del CEN y multas asociadas.
+</Callout>
+
+## Objetivos de aprendizaje
+
+- Identificar los ítems críticos de la norma (telemetría, respaldos, redundancia de enlaces).
+- Traducir los umbrales NTSyCS a verificaciones diarias dentro del SOC.
+- Preparar los anexos que solicita una auditoría in situ.
+
+## Revisión express de la norma
+
+### 1. Telemetría en tiempo real
+
+<Checklist>
+  <ChecklistItem>Latencia promedio menor a **200 ms** para puntos SITR y PMU.</ChecklistItem>
+  <ChecklistItem>Disponibilidad mínima de **99,5 % mensual**.</ChecklistItem>
+  <ChecklistItem>Sincronización horaria GNSS con deriva menor a **1 μs**.</ChecklistItem>
+</Checklist>
+
+<KeyMetric label="SITR" value="≤ 200 ms" />
+<KeyMetric label="Disponibilidad" value="> 99,5 %" />
+
+### 2. Respaldos y bitácoras
+
+- Respaldos automáticos cada 24 h con almacenamiento redundante.
+- Bitácora SITR listada por evento (alarma, fallo, corte de comunicación).
+- Procedimiento documentado para restaurar un punto de datos crítico.
+
+<Callout title="Tip de auditoría" tone="success">
+  Ten disponible el script o comando para descargar respaldos en vivo; reduce el tiempo de inspección en más de 30 %.
+</Callout>
+
+### 3. Anexos que debes tener listos
+
+<Checklist>
+  <ChecklistItem>Anexo 4.1: Configuración de puntos y protocolo.</ChecklistItem>
+  <ChecklistItem>Anexo 4.2: Evidencias de redundancia y failover.</ChecklistItem>
+  <ChecklistItem>Plan de pruebas post-mantenimiento.</ChecklistItem>
+</Checklist>
+
+## Recursos rápidos
+
+<ResourceLink href="/education/checklists/ntsycs-basico.pdf">Descargar checklist básico</ResourceLink>
+<ResourceLink href="/education/templates/bitacora-sitr.docx">Bitácora SITR editable</ResourceLink>
+
+## Evalúa tu comprensión
+
+<QuizCTA quizId="guide-quiz-01" description="5 preguntas de selección múltiple. Recomendado para equipos que inician el proceso de modernización." />

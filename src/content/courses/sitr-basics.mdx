@@ -1,0 +1,49 @@
+---
+title: "SITR Operativo"
+slug: "sitr-operativo"
+summary: "Playbook para validar enlaces, redundancia y reportes SITR antes de un cambio mayor o auditoría extraordinaria."
+duration: "9 min"
+quizId: "guide-quiz-02"
+mode: "guide"
+level: "fundamentos"
+publishDate: "2026-04-03"
+heroHighlight: "Estandariza tu plan de respuesta SITR y evita caídas superiores a 5 minutos."
+tags:
+  - "SITR"
+  - "Operación"
+resources:
+  - title: "Guía rápida prueba de enlaces"
+    href: "/education/guides/prueba-enlaces.pdf"
+---
+
+## Checklist de diagnóstico inicial
+
+<Checklist>
+  <ChecklistItem>Revisión de KPIs (latencia promedio, jitter, paquetes perdidos).</ChecklistItem>
+  <ChecklistItem>Validar sincronización GNSS en RTU principal y respaldo.</ChecklistItem>
+  <ChecklistItem>Verificar failover de comunicaciones (fibra ↔ microondas).</ChecklistItem>
+</Checklist>
+
+<Callout title="Dato" tone="info">
+  Si el jitter supera 20 ms durante más de 5 minutos, agenda mantenimiento preventivo.
+</Callout>
+
+## Procedimiento de failover controlado
+
+1. Notificar al SOC y registrar ticket.
+2. Forzar failover en horario de baja demanda (ventana < 5 min).
+3. Medir latencia post failover y comparar con baseline.
+4. Documentar en bitácora SITR.
+
+## Matriz de riesgos
+
+<KeyMetric label="Latencia base" value="140 ms" />
+<KeyMetric label="Tiempo máximo de corte" value="5 min" />
+
+## Recursos
+
+<ResourceLink href="/education/guides/prueba-enlaces.pdf">Descargar guía de prueba de enlaces</ResourceLink>
+
+## Quiz
+
+<QuizCTA quizId="guide-quiz-02" description="10 preguntas situacionales con foco en procedimientos." />
