@@ -108,8 +108,6 @@ export function DashboardView({
     : {
         title: "Diagnóstico operativo NormativaCEN",
         subtitle: "Orquesta agentes técnicos para resolver incidentes urgentes y documentar evidencias en minutos.",
-        primaryCTA: "Ejecutar auditoría",
-        secondaryCTA: "Reportar incidente",
       };
 
   const statusToProgress: Record<string, number> = {
@@ -118,16 +116,13 @@ export function DashboardView({
     pendiente: 25,
   };
 
-  const heroMetrics = stats
+  const heroMetrics = clientMode === "guide" && stats
     ? [
         { label: "Score Global", value: `${stats.globalScore}%` },
         { label: "Activos", value: `${stats.totalAssets}` },
         { label: "Riesgos Críticos", value: `${stats.criticalRisks}` },
       ]
-    : [
-        { label: "Score Global", value: "--" },
-        { label: "Activos", value: "--" },
-      ];
+    : [];
 
   const canExecute = query.trim().length > 0;
 
@@ -195,28 +190,32 @@ export function DashboardView({
               <p className="text-base md:text-lg max-w-2xl opacity-80">
                 {heroCopy.subtitle}
               </p>
-              <div className="flex flex-wrap gap-3 hero-actions">
-                <button
-                  className="primary"
-                  onClick={() => onExecute(prompts[0])}
-                >
-                  {heroCopy.primaryCTA}
-                </button>
-                <button
-                  className="secondary"
-                  onClick={() => onExecute(prompts[1] || prompts[0])}
-                >
-                  {heroCopy.secondaryCTA}
-                </button>
-              </div>
-              <div className="hero-metrics">
-                {heroMetrics.map((metric) => (
-                  <div key={metric.label} className="metric-chip">
-                    <span>{metric.label}</span>
-                    <strong>{metric.value}</strong>
-                  </div>
-                ))}
-              </div>
+              {clientMode === "guide" && (
+                <div className="flex flex-wrap gap-3 hero-actions">
+                  <button
+                    className="primary"
+                    onClick={() => onExecute(prompts[0])}
+                  >
+                    {heroCopy.primaryCTA}
+                  </button>
+                  <button
+                    className="secondary"
+                    onClick={() => onExecute(prompts[1] || prompts[0])}
+                  >
+                    {heroCopy.secondaryCTA}
+                  </button>
+                </div>
+              )}
+              {clientMode === "guide" && (
+                <div className="hero-metrics">
+                  {heroMetrics.map((metric) => (
+                    <div key={metric.label} className="metric-chip">
+                      <span>{metric.label}</span>
+                      <strong>{metric.value}</strong>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             <div className={`rounded-2xl p-6 ${isGuide ? "bg-white border border-[rgba(13,30,37,0.12)] text-slate-900" : "bg-white/10 border border-white/20"}`}>
               <h5 className="text-sm font-bold uppercase tracking-[0.4em] mb-4 opacity-80">
