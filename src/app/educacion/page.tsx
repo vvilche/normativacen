@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Link from "next/link";
 import { getAllCoursesMeta } from "@/lib/courses";
 import { getAllQuizzes } from "@/lib/quizzes";
 
