@@ -9,7 +9,7 @@ import {
   CheckCircle2,
   Copy,
   Radio,
-  Timeline,
+  History,
 } from "lucide-react";
 
 const prompts = [
@@ -379,7 +379,7 @@ const ModernizationPage = () => {
           {timeline.map((step) => (
             <div key={step.label} className="glass-card rounded-[32px] border border-white/10 p-6 space-y-2">
               <div className="flex items-center gap-3">
-                <Timeline className="w-5 h-5 text-gold" />
+                <History className="w-5 h-5 text-gold" />
                 <p className="text-[10px] uppercase tracking-[0.3em] text-white/60">{step.metric}</p>
               </div>
               <h4 className="text-lg font-black uppercase">{step.label}</h4>
