@@ -524,6 +524,13 @@ body.theme-expert .topbar-panel {
   cursor: not-allowed;
 }
 
+.module-link {
+  color: #f8fafc;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+}
+
 .education-shell {
   max-width: 1100px;
   margin: 0 auto;

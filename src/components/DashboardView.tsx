@@ -51,6 +51,7 @@ interface ModuleDefinition {
   quizId: string;
   duration: string;
   topic: string;
+  slug?: string;
 }
 
 const moduleBlueprints: Record<"guide" | "expert", ModuleDefinition[]> = {
@@ -63,6 +64,7 @@ const moduleBlueprints: Record<"guide" | "expert", ModuleDefinition[]> = {
       quizId: "guide-quiz-01",
       duration: "6 min",
       topic: "NTSyCS",
+      slug: "ntsycs-essentials",
     },
     {
       id: "guide-operations",
@@ -72,6 +74,7 @@ const moduleBlueprints: Record<"guide" | "expert", ModuleDefinition[]> = {
       quizId: "guide-quiz-02",
       duration: "8 min",
       topic: "SITR",
+      slug: "sitr-operativo",
     },
     {
       id: "guide-annexes",
@@ -81,6 +84,7 @@ const moduleBlueprints: Record<"guide" | "expert", ModuleDefinition[]> = {
       quizId: "guide-quiz-03",
       duration: "10 min",
       topic: "EDAC",
+      slug: "edac-awareness",
     },
   ],
   expert: [
@@ -92,6 +96,7 @@ const moduleBlueprints: Record<"guide" | "expert", ModuleDefinition[]> = {
       quizId: "expert-quiz-01",
       duration: "5 min",
       topic: "SITR",
+      slug: "plan-respuesta-sitr",
     },
     {
       id: "expert-ffr",
@@ -469,7 +474,13 @@ export function DashboardView({
                               ? "En curso"
                               : "Pendiente"}
                         </span>
-                        <span>Ver módulo</span>
+                        {module.slug ? (
+                          <Link href={`/educacion/${module.slug}`} className="module-link">
+                            Ver curso
+                          </Link>
+                        ) : (
+                          <span className="opacity-60">Pronto</span>
+                        )}
                       </div>
                       <button
                         type="button"
