@@ -15,7 +15,7 @@ export interface XapiStatement {
   context?: Record<string, any>;
 }
 
-const XAPI_ENDPOINT = process.env.NEXT_PUBLIC_XAPI_ENDPOINT;
+const XAPI_ENDPOINT = process.env.NEXT_PUBLIC_XAPI_ENDPOINT || "/api/xapi";
 const XAPI_AUTH = process.env.NEXT_PUBLIC_XAPI_AUTH;
 
 export async function sendXapiStatement(statement: XapiStatement): Promise<boolean> {
