@@ -36,17 +36,21 @@ export default async function QuizPage({ params }: QuizPageProps) {
       </section>
 
       <section className="quiz-body">
+        <h2 className="course-heading">Cómo tomar este quiz</h2>
         <ol className="quiz-steps">
           <li>
-            Abre el dashboard en modo guía y ejecuta la consulta relacionada con este quiz.
+            Ingresa al dashboard, abre el panel “Centro educativo” y selecciona el módulo asociado.
           </li>
           <li>
-            Completa las preguntas en menos de {quiz.estimatedTime} para registrar progreso.
+            Presiona “Registrar quiz xAPI” una vez que hayas respondido todas las preguntas. El statement se enviará con el ID <strong>{quiz.id}</strong> y quedará en el mini LRS (Mongo).
           </li>
           <li>
-            El botón “Registrar quiz xAPI” en el panel educativo enviará el statement con el ID {quiz.id}.
+            Si necesitas repetirlo, vuelve al mismo módulo y ejecuta nuevamente el quiz; el badge se actualiza automáticamente cuando todos los módulos del modo estén en “Completado”.
           </li>
         </ol>
+        <p className="course-paragraph">
+          Recuerda que el contenido y los recursos de apoyo viven en la vista de cursos. Usa esta página solo como referencia rápida del identificador y las instrucciones de registro.
+        </p>
         <div className="flex flex-wrap gap-3">
           <Link href="/" className="btn-secondary">
             Ir al dashboard
