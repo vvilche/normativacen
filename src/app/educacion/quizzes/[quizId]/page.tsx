@@ -1,9 +1,14 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getQuizById } from "@/lib/quizzes";
+import { getAllQuizzes, getQuizById } from "@/lib/quizzes";
 
 interface QuizPageProps {
   params: Promise<{ quizId: string }>;
+}
+
+export async function generateStaticParams() {
+  const quizzes = await getAllQuizzes();
+  return quizzes.map((quiz) => ({ quizId: quiz.id }));
 }
 
 export default async function QuizPage({ params }: QuizPageProps) {
