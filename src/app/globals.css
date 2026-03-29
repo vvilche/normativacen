@@ -328,6 +328,24 @@ body.theme-expert .topbar-panel {
   border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
+.chip {
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  background: rgba(255, 255, 255, 0.05);
+  color: inherit;
+}
+
+.theme-guide .chip,
+[data-mode="guide"] .chip {
+  border-color: rgba(13, 30, 37, 0.12);
+  background: rgba(13, 30, 37, 0.05);
+  color: #0d1e25;
+}
+
 .hero-section .hero-pill {
   display: inline-flex;
   align-items: center;

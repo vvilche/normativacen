@@ -174,46 +174,44 @@ export function DashboardView({
           animate={{ opacity: 1, y: 0 }}
           className="space-y-8"
         >
-          {isGuide && (
-            <section className="hero-section" data-mode={clientMode}>
-              <div className="space-y-4">
-                <div className="flex flex-wrap gap-2 items-center">
-                  <span className="hero-pill">
-                    Modo Guía
-                  </span>
-                  <span className="hero-pill" style={{ borderStyle: "dashed" }}>
-                    {processingStatus === "idle" ? "Listo para ejecutar" : "Procesando"}
-                  </span>
-                </div>
-                <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
-                  {heroCopy.title}
-                </h2>
-                <p className="text-base md:text-lg max-w-2xl opacity-80">
-                  {heroCopy.subtitle}
-                </p>
-                <div className="flex flex-wrap gap-3 hero-actions">
-                  <button
-                    className="primary"
-                    onClick={() => onExecute(prompts[0])}
-                  >
-                    {heroCopy.primaryCTA}
-                  </button>
-                  <button
-                    className="secondary"
-                    onClick={() => onExecute(prompts[1] || prompts[0])}
-                  >
-                    {heroCopy.secondaryCTA}
-                  </button>
-                </div>
-                <div className="hero-metrics">
-                  {heroMetrics.map((metric) => (
-                    <div key={metric.label} className="metric-chip">
-                      <span>{metric.label}</span>
-                      <strong>{metric.value}</strong>
-                    </div>
-                  ))}
-                </div>
+          <section className="hero-section" data-mode={clientMode}>
+            <div className="space-y-4">
+              <div className="flex flex-wrap gap-2 items-center">
+                <span className="hero-pill">
+                  {clientMode === "guide" ? "Modo Guía" : "Modo Operativo"}
+                </span>
+                <span className="hero-pill" style={{ borderStyle: "dashed" }}>
+                  {processingStatus === "idle" ? "Listo para ejecutar" : "Procesando"}
+                </span>
               </div>
+              <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
+                {heroCopy.title}
+              </h2>
+              <p className="text-base md:text-lg max-w-2xl opacity-80">
+                {heroCopy.subtitle}
+              </p>
+              {clientMode === "guide" && (
+                <>
+                  <div className="flex flex-wrap gap-3 hero-actions">
+                    <button className="primary" onClick={() => onExecute(prompts[0])}>
+                      {heroCopy.primaryCTA}
+                    </button>
+                    <button className="secondary" onClick={() => onExecute(prompts[1] || prompts[0])}>
+                      {heroCopy.secondaryCTA}
+                    </button>
+                  </div>
+                  <div className="hero-metrics">
+                    {heroMetrics.map((metric) => (
+                      <div key={metric.label} className="metric-chip">
+                        <span>{metric.label}</span>
+                        <strong>{metric.value}</strong>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+            {clientMode === "guide" ? (
               <div className="rounded-2xl p-6 bg-white border border-[rgba(13,30,37,0.12)] text-slate-900">
                 <h5 className="text-sm font-bold uppercase tracking-[0.4em] mb-4 opacity-80">
                   Consultas sugeridas
@@ -228,7 +226,7 @@ export function DashboardView({
                       <span className="flex-1">“{item}”</span>
                       <button
                         type="button"
-                        className="text-[10px] font-black uppercase tracking-[0.3em] px-2 py-1 rounded-lg border border-current flex items-center gap-1"
+                        className="text-[10px] font-black uppercase tracking-[0.3em] px-2 py-1 rounded-lg border border-current flex.items-center gap-1"
                         onClick={(event) => {
                           event.stopPropagation();
                           handleCopyPrompt(item, idx);
@@ -240,8 +238,26 @@ export function DashboardView({
                   ))}
                 </ul>
               </div>
-            </section>
-          )}
+            ) : (
+              <div className="glass-card rounded-2xl p-6 border border-white/10">
+                <h5 className="text-sm font-bold uppercase tracking-[0.4em] text-white/70 mb-3">
+                  Consultas sugeridas
+                </h5>
+                <div className="flex flex-wrap gap-2">
+                  {prompts.map((item) => (
+                    <button
+                      key={item}
+                      type="button"
+                      className="chip"
+                      onClick={() => handlePromptInsert(item)}
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
 
           {showEducationPanel && (
             <div className="bg-white/5 rounded-2xl p-4 border border-white/10" data-mode={clientMode}>
