@@ -149,10 +149,11 @@ export function DashboardView({
       ]
     : [];
 
-  const handleCopyPrompt = async (text: string, idx: number) => {
+  const handleCopyPrompt = async (text: string, idx: number, mode: "guide" | "expert") => {
+    const promptKey = mode === "guide" ? idx : idx + 10;
     try {
       await navigator.clipboard.writeText(text);
-      setCopiedPromptIndex(idx);
+      setCopiedPromptIndex(promptKey);
     } catch {
       setCopiedPromptIndex(null);
     }
@@ -190,73 +191,67 @@ export function DashboardView({
               <p className="text-base md:text-lg max-w-2xl opacity-80">
                 {heroCopy.subtitle}
               </p>
-              {clientMode === "guide" && (
-                <>
-                  <div className="flex flex-wrap gap-3 hero-actions">
-                    <button className="primary" onClick={() => onExecute(prompts[0])}>
-                      {heroCopy.primaryCTA}
-                    </button>
-                    <button className="secondary" onClick={() => onExecute(prompts[1] || prompts[0])}>
-                      {heroCopy.secondaryCTA}
-                    </button>
-                  </div>
-                  <div className="hero-metrics">
-                    {heroMetrics.map((metric) => (
-                      <div key={metric.label} className="metric-chip">
-                        <span>{metric.label}</span>
-                        <strong>{metric.value}</strong>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-            {clientMode === "guide" ? (
-              <div className="rounded-2xl p-6 bg-white border border-[rgba(13,30,37,0.12)] text-slate-900">
-                <h5 className="text-sm font-bold uppercase tracking-[0.4em] mb-4 opacity-80">
+            {clientMode === "guide" && (
+              <>
+                <div className="flex flex-wrap gap-3 hero-actions">
+                  <button className="primary" onClick={() => onExecute(prompts[0])}>
+                    {heroCopy.primaryCTA}
+                  </button>
+                  <button className="secondary" onClick={() => onExecute(prompts[1] || prompts[0])}>
+                    {heroCopy.secondaryCTA}
+                  </button>
+                </div>
+                <div className="hero-metrics">
+                  {heroMetrics.map((metric) => (
+                    <div key={metric.label} className="metric-chip">
+                      <span>{metric.label}</span>
+                      <strong>{metric.value}</strong>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+            <div className="prompt-panel" data-mode={clientMode}>
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <h5 className="text-sm font-bold uppercase tracking-[0.4em] opacity-80">
                   Consultas sugeridas
                 </h5>
-                <ul className="space-y-3 text-sm">
-                  {prompts.map((item, idx) => (
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">
+                  Toca para insertar
+                </span>
+              </div>
+              <ul className="prompt-list">
+                {prompts.map((item, idx) => {
+                  const promptKey = clientMode === "guide" ? idx : idx + 10;
+                  const isCopied = copiedPromptIndex === promptKey;
+                  return (
                     <li
                       key={idx}
-                      className="rounded-lg p-3 bg-[rgba(13,30,37,0.04)] border border-[rgba(13,30,37,0.08)] cursor-pointer flex items-center gap-2 justify-between"
+                      className="prompt-item"
                       onClick={() => handlePromptInsert(item)}
                     >
                       <span className="flex-1">“{item}”</span>
                       <button
                         type="button"
-                        className="text-[10px] font-black uppercase tracking-[0.3em] px-2 py-1 rounded-lg border border-current flex.items-center gap-1"
+                        className="copy-trigger"
                         onClick={(event) => {
                           event.stopPropagation();
-                          handleCopyPrompt(item, idx);
+                          handleCopyPrompt(item, idx, clientMode);
                         }}
                       >
-                        {copiedPromptIndex === idx ? "Copiado" : <Copy className="w-3.5 h-3.5" />}
+                        {isCopied ? "Copiado" : <Copy className="w-3.5 h-3.5" />}
                       </button>
                     </li>
-                  ))}
-                </ul>
-              </div>
-            ) : (
-              <div className="glass-card rounded-2xl p-6 border border-white/10">
-                <h5 className="text-sm font-bold uppercase tracking-[0.4em] text-white/70 mb-3">
-                  Consultas sugeridas
-                </h5>
-                <div className="flex flex-wrap gap-2">
-                  {prompts.map((item) => (
-                    <button
-                      key={item}
-                      type="button"
-                      className="chip"
-                      onClick={() => handlePromptInsert(item)}
-                    >
-                      {item}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+                  );
+                })}
+              </ul>
+              {!isGuide && (
+                <p className="prompt-hint">
+                  Usa los chips para completar el comando o copia el texto si necesitas pegarlo en otra herramienta.
+                </p>
+              )}
+            </div>
           </section>
 
           {showEducationPanel && (
@@ -340,9 +335,9 @@ export function DashboardView({
                 </div>
               </div>
             </div>
-            <div className="flex flex-wrap gap-4 text-[10px] uppercase tracking-[0.3em] font-black">
-              <div className="flex items-center gap-2">
-                <span>Modo Rápido</span>
+          <div className="flex flex-wrap gap-4 text-[10px] uppercase tracking-[0.3em] font-black">
+            <div className="flex items-center gap-2">
+              <span>Modo Rápido</span>
                 <button
                   type="button"
                   onClick={() => setFastMode(!fastMode)}
@@ -377,26 +372,6 @@ export function DashboardView({
                 : "Obtendrás diagnósticos técnicos con checklists, riesgos y tiempos de ejecución."}
             </p>
           </div>
-
-          {!isGuide && (
-            <div className="bg-white/5 rounded-2xl p-4 border border-white/10" data-mode={clientMode}>
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/70 mb-3">
-                Consultas sugeridas
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {prompts.map((item, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    className="px-3 py-1.5 rounded-full border border-white/20 text-xs font-semibold text-white/80"
-                    onClick={() => handlePromptInsert(item)}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </motion.div>
       )}
 

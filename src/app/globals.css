@@ -293,6 +293,37 @@ body.theme-expert .topbar-panel {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.master-hero {
+  border-radius: 2rem;
+  padding: clamp(1.75rem, 3vw, 3rem);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(135deg, rgba(4, 9, 18, 0.95), rgba(18, 25, 51, 0.9));
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+}
+
+.master-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(234, 179, 8, 0.15), transparent 55%);
+  pointer-events: none;
+}
+
+.master-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.master-hero[data-mode="guide"] {
+  background: linear-gradient(120deg, #fefefe, #f3f8ff);
+  color: #0d1e25;
+  border-color: rgba(13, 30, 37, 0.08);
+  box-shadow: 0 25px 60px rgba(13, 30, 37, 0.12);
+}
+
 .hero-actions button {
   padding: 0.85rem 1.5rem;
   border-radius: 0.9rem;
@@ -346,7 +377,7 @@ body.theme-expert .topbar-panel {
   color: #0d1e25;
 }
 
-.hero-section .hero-pill {
+.hero-pill {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -359,13 +390,13 @@ body.theme-expert .topbar-panel {
   border: 1px solid currentColor;
 }
 
-.hero-section .hero-metrics {
+.hero-metrics {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
 }
 
-.hero-section .hero-metrics .metric-chip {
+.hero-metrics .metric-chip {
   border-radius: 1rem;
   padding: 0.75rem 1rem;
   min-width: 130px;
@@ -373,12 +404,13 @@ body.theme-expert .topbar-panel {
   background: rgba(0, 0, 0, 0.12);
 }
 
-.hero-section[data-mode="guide"] .hero-metrics .metric-chip {
+.hero-section[data-mode="guide"] .hero-metrics .metric-chip,
+.master-hero[data-mode="guide"] .hero-metrics .metric-chip {
   border-color: rgba(13, 30, 37, 0.12);
   background: rgba(255, 255, 255, 0.9);
 }
 
-.hero-section .hero-metrics .metric-chip span {
+.hero-metrics .metric-chip span {
   display: block;
   font-size: 0.65rem;
   letter-spacing: 0.25em;
@@ -386,9 +418,83 @@ body.theme-expert .topbar-panel {
   opacity: 0.7;
 }
 
-.hero-section .hero-metrics .metric-chip strong {
+.hero-metrics .metric-chip strong {
   font-size: 1.5rem;
   font-weight: 800;
+}
+
+.prompt-panel {
+  border-radius: 1.5rem;
+  padding: 1.4rem 1.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(8, 12, 23, 0.7);
+  backdrop-filter: blur(18px);
+  color: #f8fafc;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+.prompt-panel[data-mode="guide"] {
+  background: #ffffff;
+  border-color: rgba(13, 30, 37, 0.12);
+  color: #0d1e25;
+  box-shadow: 0 30px 65px rgba(13, 30, 37, 0.08);
+}
+
+.prompt-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompt-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.prompt-panel[data-mode="guide"] .prompt-item {
+  border-color: rgba(13, 30, 37, 0.08);
+  background: rgba(13, 30, 37, 0.04);
+}
+
+.prompt-item:hover {
+  border-color: rgba(234, 179, 8, 0.5);
+  transform: translateY(-2px);
+}
+
+.copy-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  background: transparent;
+  cursor: pointer;
+}
+
+.prompt-panel[data-mode="guide"] .copy-trigger {
+  border-color: rgba(13, 30, 37, 0.3);
+}
+
+.prompt-hint {
+  margin-top: 1rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  opacity: 0.6;
 }
 
 .learning-grid {
@@ -642,6 +748,24 @@ h3, .h3 { font-family: var(--font-heading); font-size: 1.125rem; font-weight: 70
   @apply bg-primary text-white font-black py-2 px-4 rounded-lg hover:shadow-[0_0_20px_rgba(45,108,223,0.3)] transition-all active:scale-[0.98] uppercase tracking-widest text-[9px];
 }
 
+.btn-secondary {
+  @apply font-black py-2 px-5 rounded-lg uppercase tracking-[0.35em] text-[9px] transition-colors;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #f8fafc;
+}
+
+.theme-guide .btn-secondary,
+.master-hero[data-mode="guide"] .btn-secondary {
+  border-color: rgba(13, 30, 37, 0.2);
+  color: #0d1e25;
+}
+
+.btn-secondary:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
 /* Utilidades de Densidad */
 .compact-grid {
   display: grid;
@@ -650,6 +774,24 @@ h3, .h3 { font-family: var(--font-heading); font-size: 1.125rem; font-weight: 70
 
 .status-badge {
   @apply px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter border;
+}
+
+.status-completado {
+  background: rgba(16, 185, 129, 0.15);
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.status-progreso {
+  background: rgba(234, 179, 8, 0.15);
+  color: #92400e;
+  border: 1px solid rgba(234, 179, 8, 0.35);
+}
+
+.status-pendiente {
+  background: rgba(148, 163, 184, 0.2);
+  color: #334155;
+  border: 1px solid rgba(148, 163, 184, 0.45);
 }
 
 /* Industrial Patterns */
