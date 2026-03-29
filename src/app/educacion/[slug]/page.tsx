@@ -1,10 +1,7 @@
 import { notFound } from "next/navigation";
-import { getAllCourseSlugs, getCourseBySlug } from "@/lib/courses";
+import { getCourseBySlug } from "@/lib/courses";
 
-export async function generateStaticParams() {
-  const slugs = await getAllCourseSlugs();
-  return slugs.map((slug) => ({ slug }));
-}
+export const dynamic = "force-dynamic";
 
 interface CoursePageProps {
   params: { slug: string };
