@@ -1,5 +1,6 @@
-import { LayoutDashboard, FileText, Book, BarChart3, Settings, Library, LogOut, X } from "lucide-react";
+import { LayoutDashboard, FileText, Book, BarChart3, Settings, Library, GraduationCap, LogOut, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 interface SidebarItemProps {
   icon: any;
@@ -7,24 +8,35 @@ interface SidebarItemProps {
   active?: boolean;
   onClick?: () => void;
   danger?: boolean;
+  href?: string;
 }
 
-const SidebarItem = ({ icon: Icon, label, active, onClick, danger }: SidebarItemProps) => (
-  <button 
-    onClick={onClick}
-    className={cn(
-      "flex items-center gap-2 w-full px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.25em] border transition",
-      active 
-        ? "bg-[rgba(234,179,8,0.12)] border-gold/30 text-gold"
-        : danger 
-          ? "text-red-500/60 border-transparent hover:border-red-500/20"
-          : "border-transparent text-slate-500 hover:border-slate-400/30"
-    )}
-  >
-    <Icon className="w-3.5 h-3.5" />
-    <span className="truncate">{label}</span>
-  </button>
-);
+const SidebarItem = ({ icon: Icon, label, active, onClick, danger, href }: SidebarItemProps) => {
+  const className = cn(
+    "flex items-center gap-2 w-full px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.25em] border transition",
+    active
+      ? "bg-[rgba(234,179,8,0.12)] border-gold/30 text-gold"
+      : danger
+        ? "text-red-500/60 border-transparent hover:border-red-500/20"
+        : "border-transparent text-slate-500 hover:border-slate-400/30"
+  );
+
+  if (href) {
+    return (
+      <Link href={href} className={className}>
+        <Icon className="w-3.5 h-3.5" />
+        <span className="truncate">{label}</span>
+      </Link>
+    );
+  }
+
+  return (
+    <button onClick={onClick} className={className}>
+      <Icon className="w-3.5 h-3.5" />
+      <span className="truncate">{label}</span>
+    </button>
+  );
+};
 
 interface SidebarProps {
   activeTab?: string;
@@ -47,8 +59,9 @@ export function Sidebar({ activeTab = "Dashboard", setActiveTab, isDesktop = tru
     { icon: FileText, label: "Resoluciones" },
     { icon: Book, label: "Normas" },
     { icon: BarChart3, label: "Reportes" },
-    { icon: Settings, label: "Infotécnica" }, // Using Settings for now, or BarChart3
+    { icon: Settings, label: "Infotécnica" },
     { icon: Library, label: "Biblioteca" },
+    { icon: GraduationCap, label: "Educación", href: "/educacion" },
   ];
 
   return (
@@ -88,10 +101,15 @@ export function Sidebar({ activeTab = "Dashboard", setActiveTab, isDesktop = tru
             icon={item.icon}
             label={item.label}
             active={activeTab === item.label}
+            href={item.href}
             onClick={() => {
-              setActiveTab?.(item.label);
-              if (!isDesktop) {
-                onClose?.();
+              if (item.href) {
+                if (!isDesktop) onClose?.();
+              } else {
+                setActiveTab?.(item.label);
+                if (!isDesktop) {
+                  onClose?.();
+                }
               }
             }}
           />

@@ -1,0 +1,72 @@
+---
+title: "EDAC Awareness"
+slug: "edac-awareness"
+summary: "Reconoce los escenarios más comunes de incumplimiento EDAC y prepara respuestas antes de que se conviertan en sanciones."
+duration: "8 min"
+quizId: "guide-quiz-03"
+mode: "guide"
+level: "fundamentos"
+publishDate: "2026-04-04"
+heroHighlight: "Identifica rápidamente los síntomas de degradación EDAC y documenta las acciones correctivas."
+tags:
+  - "EDAC"
+  - "Fundamentos"
+resources:
+  - title: "Matriz de incidentes EDAC"
+    href: "/education/guides/matriz-edac.pdf"
+  - title: "Formato de reporte SEC"
+    href: "/education/templates/reporte-sec-edac.docx"
+---
+
+<Callout title="Contexto" tone="warn">
+  El Coordinador sanciona cualquier indisponibilidad EDAC superior a 30 minutos o degradación reiterada de la información del sistema.
+</Callout>
+
+## Escenarios críticos
+
+### 1. Descalibración de sensores
+- Lecturas inconsistentes entre EDAC y SCADA.
+- Falta de ajuste después de mantenimientos programados.
+
+### 2. Sustitución sin homologación
+- Componentes reemplazados sin validación del fabricante.
+- Firmware desactualizado que rompe compatibilidad con protocolos.
+
+### 3. Pérdida de evidencia
+- Respaldos EDAC con más de 24 h.
+- Bitácoras incompletas o sin firmas digitales.
+
+<Checklist>
+  <ChecklistItem>Confirmar redundancia en sitio y en nube.</ChecklistItem>
+  <ChecklistItem>Registrar cada intervención con fecha/hora y responsable.</ChecklistItem>
+  <ChecklistItem>Validar integridad de respaldos (hash) semanalmente.</ChecklistItem>
+</Checklist>
+
+## Indicadores de alerta
+
+<KeyMetric label="Indisponibilidad máxima" value="30 min" />
+<KeyMetric label="Respaldos" value="≤ 24 h" />
+<KeyMetric label="Verificación" value="Semanal" />
+
+## Plan de contención
+
+1. Detecta la falla y estima impacto (puntos, clientes, multas).
+2. Ejecuta playbook de fallback EDAC (telemetría degradada pero funcional).
+3. Notifica al CEN y registra ticket SEC si aplica.
+4. Documenta evidencia (logs, capturas, respaldos) y súbela a tu repositorio.
+
+<Callout title="Tip" tone="success">
+  Tener un repositorio centralizado (`public/education/`) reduce el tiempo de respuesta al auditor en un 40 %.
+</Callout>
+
+## Recursos
+
+<ResourceLink href="/education/guides/matriz-edac.pdf">Descargar matriz de incidentes</ResourceLink>
+<ResourceLink href="/education/templates/reporte-sec-edac.docx">Formato reporte SEC</ResourceLink>
+
+## Quiz
+
+<QuizCTA
+  quizId="guide-quiz-03"
+  description="8 preguntas donde cada escenario requiere elegir la acción correcta según EDAC."
+  label="Quiz EDAC" />

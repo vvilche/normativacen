@@ -1,4 +1,5 @@
 import { Bell, Mail, LogOut, Menu } from "lucide-react";
+import Link from "next/link";
 
 interface TopBarProps {
   user?: {
@@ -41,14 +42,20 @@ export function TopBar({ user, clientMode = "expert", onToggleSidebar, isDesktop
           <span>{company}</span>
         </div>
       </div>
-      <div className="flex items-center gap-5 flex-wrap justify-end">
-        <div className="hidden md:flex items-center gap-3 border border-white/10 rounded-xl px-3 py-1 text-[10px] font-black uppercase tracking-[0.3em]">
-          <span>{clientMode === "guide" ? "Modo guía" : "Modo operativo"}</span>
-          <span className="text-white/60">Activo: {activeAsset}</span>
-        </div>
-        <div className="flex items-center gap-1">
-            <button className="p-1.5 rounded-xl border border-transparent hover:border-slate-300/40 transition-colors relative">
-                <Mail className="w-4 h-4" />
+        <div className="flex items-center gap-5 flex-wrap justify-end">
+          <div className="hidden md:flex items-center gap-3 border border-white/10 rounded-xl px-3 py-1 text-[10px] font-black uppercase tracking-[0.3em]">
+            <span>{clientMode === "guide" ? "Modo guía" : "Modo operativo"}</span>
+            <span className="text-white/60">Activo: {activeAsset}</span>
+          </div>
+          <Link
+            href="/educacion"
+            className="hidden md:inline-flex px-4 py-1 rounded-xl border border-white/15 text-[10px] font-black uppercase tracking-[0.3em] text-white/70 hover:text-white hover:bg-white/5"
+          >
+            Educación
+          </Link>
+          <div className="flex items-center gap-1">
+              <button className="p-1.5 rounded-xl border border-transparent hover:border-slate-300/40 transition-colors relative">
+                  <Mail className="w-4 h-4" />
                 <span className="absolute top-1.5 right-1.5 w-1 h-1 bg-gold rounded-full" />
             </button>
             <button className="p-1.5 rounded-xl border border-transparent hover:border-slate-300/40 transition-colors relative">

@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Zap, ChevronRight, ShieldCheck, Database, FileText } from "lucide-react";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { LeadGenModal } from "@/components/LeadGenModal";
 import { DashboardView } from "@/components/DashboardView";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -263,7 +264,11 @@ export default function Home() {
             <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
+                className="flex items-center gap-3"
             >
+                <Link href="/educacion" className="px-5 py-2 rounded-xl border border-white/10 text-white/60 text-[10px] font-black uppercase tracking-[0.2em] hover:text-white hover:bg-white/5 transition-all backdrop-blur-md">
+                    Educación
+                </Link>
                 <a href="/login" className="px-5 py-2 rounded-xl bg-white/5 border border-white/10 text-white/60 text-[10px] font-black uppercase tracking-[0.2em] hover:text-white hover:bg-white/10 transition-all backdrop-blur-md">
                     Acceso Cliente
                 </a>

@@ -1,0 +1,67 @@
+---
+title: "Plan de Respuesta SITR Avanzado"
+slug: "plan-respuesta-sitr"
+summary: "Simula incidentes de alta criticidad y aplica el plan de respuesta SITR para restablecer telemetría en menos de cinco minutos."
+duration: "12 min"
+quizId: "expert-quiz-01"
+mode: "expert"
+level: "operacion"
+publishDate: "2026-04-04"
+heroHighlight: "Coordina SOC, mantenimiento y comunicaciones para recuperar la redundancia SITR sin perder trazabilidad."
+tags:
+  - "SITR"
+  - "Operación"
+  - "Incidentes"
+resources:
+  - title: "Runbook respuesta SITR"
+    href: "/education/runbooks/sitr-response.pdf"
+  - title: "Checklist post-incidente"
+    href: "/education/checklists/post-incidente-sitr.xlsx"
+---
+
+## Escenario base
+
+- Latencia supera 450 ms en enlace principal.
+- Nodo redundante no toma control automático.
+- Se aproxima ventana de auditoría SEC.
+
+<Callout title="Objetivo" tone="info">
+  Restablecer la telemetría primaria en < 5 min y documentar todo el proceso para cargarlo al LRS.
+</Callout>
+
+## Fases del plan
+
+### 1. Contención inmediata
+<Checklist>
+  <ChecklistItem>Escalar al SOC y declarar incidente SITR nivel 2.</ChecklistItem>
+  <ChecklistItem>Forzar failover manual y medir latencia post failover.</ChecklistItem>
+  <ChecklistItem>Activar logging extendido para registrar cada comando.</ChecklistItem>
+</Checklist>
+
+### 2. Diagnóstico profundo
+- Revisar logs GNSS para descartar drift.
+- Validar integridad de la fibra y equipos activos.
+- Comparar latencia contra baseline histórico.
+
+### 3. Restauración
+<KeyMetric label="Latencia objetivo" value="≤ 180 ms" />
+<KeyMetric label="Tiempo de corte" value="< 5 min" />
+
+- Ejecutar script de reconfiguración SITR.
+- Reintegrar nodo primario y probar switchover automático.
+- Actualizar bitácora SITR y checklist post-incidente.
+
+### 4. Comunicación y cierre
+- Enviar informe al CEN/SEC con timestamp de cada evento.
+- Registrar statement xAPI (quiz + incidente) para dejar evidencia.
+- Programar mantenimiento preventivo si se detectaron causas estructurales.
+
+<ResourceLink href="/education/runbooks/sitr-response.pdf">Descargar runbook</ResourceLink>
+<ResourceLink href="/education/checklists/post-incidente-sitr.xlsx">Checklist post-incidente</ResourceLink>
+
+## Evaluación
+
+<QuizCTA
+  quizId="expert-quiz-01"
+  description="12 preguntas con escenarios de alta presión. Ideal para líderes de guardia."
+  label="Quiz Plan de Respuesta" />
