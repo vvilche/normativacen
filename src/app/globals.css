@@ -75,11 +75,7 @@ body {
   border: 0;
 }
 
-body.theme-guide {
-  background: #f4faff;
-  color: #0d1e25;
-}
-
+body.theme-guide,
 body.theme-expert {
   background: #050810;
   color: #e2e2e5;
@@ -149,12 +145,7 @@ body.theme-expert .sidebar-panel nav a:hover {
   background: rgba(255, 255, 255, 0.08);
 }
 
-.search-panel[data-mode="guide"] {
-  background: #ffffff;
-  border-color: rgba(13, 30, 37, 0.1);
-  box-shadow: 0 20px 45px rgba(13, 30, 37, 0.08);
-}
-
+.search-panel[data-mode="guide"],
 .search-panel[data-mode="expert"] {
   background: rgba(9, 13, 26, 0.65);
   border-color: rgba(255, 255, 255, 0.08);
@@ -187,11 +178,7 @@ body.theme-expert .topbar-panel {
   font-family: 'Inter', sans-serif;
 }
 
-.theme-guide {
-  background: #f4faff;
-  color: #0d1e25;
-}
-
+.theme-guide,
 .theme-expert {
   background: #050810;
   color: #e2e2e5;
@@ -281,12 +268,7 @@ body.theme-expert .topbar-panel {
   overflow: hidden;
 }
 
-.hero-section[data-mode="guide"] {
-  background: linear-gradient(120deg, #f0f6ff, #dbe8ff);
-  color: #0d1e25;
-  border: 1px solid rgba(13, 30, 37, 0.08);
-}
-
+.hero-section[data-mode="guide"],
 .hero-section[data-mode="expert"] {
   background: linear-gradient(135deg, #040912, #121933);
   color: #ffffff;
@@ -318,10 +300,10 @@ body.theme-expert .topbar-panel {
 }
 
 .master-hero[data-mode="guide"] {
-  background: linear-gradient(120deg, #fefefe, #f3f8ff);
-  color: #0d1e25;
-  border-color: rgba(13, 30, 37, 0.08);
-  box-shadow: 0 25px 60px rgba(13, 30, 37, 0.12);
+  background: linear-gradient(135deg, #040912, #121933);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
 }
 
 .hero-actions button {
@@ -335,24 +317,14 @@ body.theme-expert .topbar-panel {
   letter-spacing: 0.25em;
 }
 
-.hero-section[data-mode="guide"] .hero-actions button.primary {
-  background: #1a237e;
-  color: #ffffff;
-  box-shadow: 0 18px 45px rgba(7, 24, 84, 0.25);
-}
-
-.hero-section[data-mode="guide"] .hero-actions button.secondary {
-  background: rgba(13, 30, 37, 0.08);
-  color: #0d1e25;
-  border: 1px solid rgba(13, 30, 37, 0.12);
-}
-
+.hero-section[data-mode="guide"] .hero-actions button.primary,
 .hero-section[data-mode="expert"] .hero-actions button.primary {
   background: #eab308;
   color: #050810;
   box-shadow: 0 18px 45px rgba(234, 179, 8, 0.35);
 }
 
+.hero-section[data-mode="guide"] .hero-actions button.secondary,
 .hero-section[data-mode="expert"] .hero-actions button.secondary {
   background: rgba(255, 255, 255, 0.08);
   color: #ffffff;
@@ -372,9 +344,9 @@ body.theme-expert .topbar-panel {
 
 .theme-guide .chip,
 [data-mode="guide"] .chip {
-  border-color: rgba(13, 30, 37, 0.12);
-  background: rgba(13, 30, 37, 0.05);
-  color: #0d1e25;
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: inherit;
 }
 
 .hero-pill {
@@ -406,8 +378,8 @@ body.theme-expert .topbar-panel {
 
 .hero-section[data-mode="guide"] .hero-metrics .metric-chip,
 .master-hero[data-mode="guide"] .hero-metrics .metric-chip {
-  border-color: rgba(13, 30, 37, 0.12);
-  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.12);
 }
 
 .hero-metrics .metric-chip span {
@@ -434,10 +406,10 @@ body.theme-expert .topbar-panel {
 }
 
 .prompt-panel[data-mode="guide"] {
-  background: #ffffff;
-  border-color: rgba(13, 30, 37, 0.12);
-  color: #0d1e25;
-  box-shadow: 0 30px 65px rgba(13, 30, 37, 0.08);
+  background: rgba(13, 17, 32, 0.85);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+  box-shadow: 0 30px 65px rgba(0, 0, 0, 0.4);
 }
 
 .prompt-list {
@@ -462,8 +434,8 @@ body.theme-expert .topbar-panel {
 }
 
 .prompt-panel[data-mode="guide"] .prompt-item {
-  border-color: rgba(13, 30, 37, 0.08);
-  background: rgba(13, 30, 37, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .prompt-item:hover {
@@ -486,7 +458,7 @@ body.theme-expert .topbar-panel {
 }
 
 .prompt-panel[data-mode="guide"] .copy-trigger {
-  border-color: rgba(13, 30, 37, 0.3);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .prompt-hint {
@@ -507,17 +479,16 @@ body.theme-expert .topbar-panel {
 .learning-card {
   border-radius: 1rem;
   padding: 1.25rem;
-  border: 1px solid rgba(13, 30, 37, 0.08);
-  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 18, 32, 0.85);
+  color: #e2e2e5;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-.learning-card[data-mode="expert"] {
-  background: rgba(15, 18, 32, 0.85);
-  border-color: rgba(255, 255, 255, 0.08);
-  color: #e2e2e5;
+.learning-card[data-mode="guide"] {
+  background: rgba(11, 15, 28, 0.85);
 }
 
 .module-progress {
@@ -562,10 +533,10 @@ body.theme-expert .topbar-panel {
 }
 
 .dashboard-header[data-mode="guide"] {
-  background: #ffffff;
-  color: #0d1e25;
-  border-color: rgba(13, 30, 37, 0.08);
-  box-shadow: 0 20px 40px rgba(13, 30, 37, 0.1);
+  background: rgba(8, 12, 23, 0.75);
+  color: #e2e2e5;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: none;
 }
 
 .resolution-header {
@@ -582,9 +553,9 @@ body.theme-expert .topbar-panel {
 }
 
 .resolution-header[data-mode="guide"] {
-  background: #ffffff;
-  border-color: rgba(13, 30, 37, 0.1);
-  color: #0d1e25;
+  background: rgba(5, 8, 16, 0.7);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #e2e2e5;
 }
 
 .resolution-actions {
@@ -610,8 +581,8 @@ body.theme-expert .topbar-panel {
 
 .resolution-header[data-mode="guide"] .resolution-actions button,
 .resolution-header[data-mode="guide"] .resolution-actions a {
-  border-color: rgba(13, 30, 37, 0.2);
-  color: #0d1e25;
+  border-color: rgba(255, 255, 255, 0.15);
+  color: inherit;
 }
 
 .resolution-kpis {
@@ -629,9 +600,9 @@ body.theme-expert .topbar-panel {
 }
 
 .resolution-kpis[data-mode="guide"] .kpi-card {
-  background: #f9fbff;
-  border-color: rgba(13, 30, 37, 0.1);
-  color: #0d1e25;
+  background: rgba(8, 12, 23, 0.8);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #e2e2e5;
 }
 
 .resolution-kpis .kpi-card span {
@@ -757,8 +728,8 @@ h3, .h3 { font-family: var(--font-heading); font-size: 1.125rem; font-weight: 70
 
 .theme-guide .btn-secondary,
 .master-hero[data-mode="guide"] .btn-secondary {
-  border-color: rgba(13, 30, 37, 0.2);
-  color: #0d1e25;
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #f8fafc;
 }
 
 .btn-secondary:hover {
