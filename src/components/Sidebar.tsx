@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, Book, BarChart3, Settings, Library, LogOut } from "lucide-react";
+import { LayoutDashboard, FileText, Book, BarChart3, Settings, Library, LogOut, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SidebarItemProps {
@@ -29,9 +29,13 @@ const SidebarItem = ({ icon: Icon, label, active, onClick, danger }: SidebarItem
 interface SidebarProps {
   activeTab?: string;
   setActiveTab?: (tab: string) => void;
+  isDesktop?: boolean;
+  isOpen?: boolean;
+  onClose?: () => void;
+  clientMode?: "guide" | "expert";
 }
 
-export function Sidebar({ activeTab = "Dashboard", setActiveTab }: SidebarProps) {
+export function Sidebar({ activeTab = "Dashboard", setActiveTab, isDesktop = true, isOpen = true, onClose, clientMode = "expert" }: SidebarProps) {
   const handleLogout = () => {
     localStorage.removeItem('isRegistered');
     localStorage.removeItem('userProfile');
@@ -48,12 +52,33 @@ export function Sidebar({ activeTab = "Dashboard", setActiveTab }: SidebarProps)
   ];
 
   return (
-    <aside className="sidebar-panel">
-      <div>
-        <div className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center mb-3 font-black">
-          N
+    <aside
+      className={cn(
+        "sidebar-panel transition-transform duration-300",
+        isDesktop ? "translate-x-0" : isOpen ? "translate-x-0" : "-translate-x-full"
+      )}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <div className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center mb-3 font-black">
+            N
+          </div>
+          <p className="text-xs uppercase tracking-[0.3em] opacity-70">NormativaCEN</p>
         </div>
-        <p className="text-xs uppercase tracking-[0.3em] opacity-70">NormativaCEN</p>
+        {!isDesktop && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 rounded-lg border border-white/10 text-white"
+            aria-label="Cerrar navegación"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
+      <div className="bg-white/5 border border-white/10 rounded-xl p-3 mb-4 text-[10px] font-black uppercase tracking-[0.3em] text-white/70">
+        {clientMode === "guide" ? "Modo guía" : "Modo operativo"}
       </div>
 
       <nav className="flex-1 flex flex-col gap-2">
@@ -63,7 +88,12 @@ export function Sidebar({ activeTab = "Dashboard", setActiveTab }: SidebarProps)
             icon={item.icon}
             label={item.label}
             active={activeTab === item.label}
-            onClick={() => setActiveTab?.(item.label)}
+            onClick={() => {
+              setActiveTab?.(item.label);
+              if (!isDesktop) {
+                onClose?.();
+              }
+            }}
           />
         ))}
       </nav>

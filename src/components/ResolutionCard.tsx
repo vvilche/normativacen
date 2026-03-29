@@ -40,6 +40,8 @@ interface ResolutionProps {
   reasoning?: string;
   timings?: Record<string, number>;
   guideSuggestions?: string[];
+  steps?: { id: number | string; agent: string; action: string; status: string }[];
+  clientMode?: "guide" | "expert";
 }
 
 export function ResolutionCard({ 
@@ -54,7 +56,9 @@ export function ResolutionCard({
   acciones = [],
   reasoning,
   timings,
-  guideSuggestions
+  guideSuggestions,
+  steps = [],
+  clientMode = "expert"
 }: ResolutionProps) {
   const [expanded, setExpanded] = useState(false);
   return (
@@ -62,32 +66,28 @@ export function ResolutionCard({
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-card rounded-xl p-6 border-white-[0.03] relative overflow-hidden group"
+        className="glass-card rounded-xl p-6 relative overflow-hidden group"
+        data-mode={clientMode}
       >
         {/* Compact Header */}
-        <div className="flex items-center justify-between mb-6 border-b border-white/5 pb-4">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6 border-b border-white/10 pb-4">
             <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded bg-gold/10 border border-gold/20 flex items-center justify-center text-gold shadow-gold">
                     <CheckCircle2 className="w-5 h-5" />
                 </div>
                 <div>
-                    <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-0.5">Technical Compliance Overview</h3>
-                    <p className="text-xs font-technical text-white/90">Agent: <span className="text-gold">NormativaCEN_Orchestrator_v2025</span> | ID: {id}</p>
-                    <p className="text-[9px] font-technical text-gold/70 uppercase tracking-widest">Tipo: {type}</p>
+                    <p className="text-xs font-black uppercase tracking-[0.3em] text-white/60">Informe técnico</p>
+                    <p className="text-sm font-technical text-white">
+                        Agente: <span className="text-gold">NormativaCEN Orchestrator</span> · ID: {id}
+                    </p>
+                    <p className="text-xs font-technical text-white/60">Tipo: {type}</p>
                 </div>
             </div>
             <div className="flex items-center gap-4">
                 <div className="text-right">
-                    <p className="text-[8px] text-gray-700 font-black uppercase tracking-widest mb-0.5">Controls Met</p>
-                    <p className="text-xs font-technical text-success">
-                        {controls.filter(c => c.status === "MET").length} / {controls.length}
-                    </p>
-                </div>
-                <div className="h-6 w-px bg-white/5" />
-                <div className="text-right">
-                    <p className="text-[8px] text-gray-700 font-black uppercase tracking-widest mb-0.5">Risk Level</p>
+                    <p className="text-xs font-black uppercase tracking-[0.25em] text-white/60">Nivel de riesgo</p>
                     <p className={cn(
-                        "text-xs font-technical",
+                        "text-sm font-technical",
                         kpis.risk === "LOW" ? "text-success" : kpis.risk === "MEDIUM" ? "text-warning" : "text-danger"
                     )}>
                         {kpis.risk}
@@ -98,7 +98,7 @@ export function ResolutionCard({
         
         <div className="flex flex-col md:flex-row gap-6">
           {/* Verdict Panel */}
-            <div className="flex-1 bg-white/5 border border-white/5 rounded-lg p-4 relative overflow-hidden group/verdict">
+            <div className="flex-1 bg-white/5 border border-white/10 rounded-lg p-4 relative overflow-hidden group/verdict">
             <div className="absolute top-0 right-0 p-2 opacity-20 group-hover/verdict:opacity-100 transition-opacity">
                 <div className={cn(
                     "w-8 h-8 rounded-full border flex items-center justify-center",
@@ -117,18 +117,18 @@ export function ResolutionCard({
                 </span>
             </div>
             
-            <p className="text-[13px] text-gray-300 leading-relaxed font-medium italic">
+            <p className="text-sm text-white/90 leading-relaxed font-medium">
                 {verdict}
             </p>
             {reasoning && (
               <div className="mt-4">
-                <div className={cn("markdown-output text-[11px] transition-all", expanded ? "" : "clamped") }>
+                <div className={cn("markdown-output text-sm transition-all text-white/80", expanded ? "" : "clamped") }>
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {reasoning}
                   </ReactMarkdown>
                 </div>
                 <button
-                  className="text-[10px] text-gold uppercase tracking-[0.3em] mt-3"
+                  className="text-xs text-gold uppercase tracking-[0.3em] mt-3"
                   onClick={() => setExpanded(!expanded)}
                 >
                   {expanded ? "Mostrar menos" : "Mostrar más"}
@@ -136,38 +136,38 @@ export function ResolutionCard({
               </div>
             )}
 
-            <div className="grid grid-cols-3 gap-4 mt-6 border-t border-white/5 pt-4">
+            <div className="grid grid-cols-3 gap-4 mt-6 border-t border-white/10 pt-4 text-sm">
                 <div>
-                    <span className="text-[8px] text-gray-700 font-black uppercase tracking-[0.2em] block mb-1">Protocol</span>
-                    <span className="text-[10px] font-technical text-white/60">{kpis.protocol}</span>
+                    <span className="text-xs font-black uppercase tracking-[0.2em] block mb-1 text-white/60">Protocolo</span>
+                    <span className="font-technical text-white">{kpis.protocol}</span>
                 </div>
                 <div>
-                    <span className="text-[8px] text-gray-700 font-black uppercase tracking-[0.2em] block mb-1">Latency</span>
-                    <span className="text-[10px] font-technical text-white/60">{kpis.latency}</span>
+                    <span className="text-xs font-black uppercase tracking-[0.2em] block mb-1 text-white/60">Latencia</span>
+                    <span className="font-technical text-white">{kpis.latency}</span>
                 </div>
                 <div>
-                    <span className="text-[8px] text-gray-700 font-black uppercase tracking-[0.2em] block mb-1">Compliance Score</span>
+                    <span className="text-xs font-black uppercase tracking-[0.2em] block mb-1 text-white/60">Score</span>
                     <span className={cn(
-                        "text-[10px] font-technical font-black",
+                        "font-technical font-black",
                         parseInt(kpis.score) > 90 ? "text-success" : "text-warning"
                     )}>{kpis.score}</span>
                 </div>
             </div>
             {timings && Object.keys(timings).length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4 text-[9px] text-white/50">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4 text-xs text-white/70">
                 {Object.entries(timings).map(([label, value]) => (
-                  <div key={label} className="bg-white/5 border border-white/5 rounded-lg p-2">
-                    <span className="block uppercase tracking-[0.2em] text-[8px] text-white/30">{label.replace(/_/g, " ")}</span>
-                    <span className="font-black text-white">{(value / 1000).toFixed(2)}s</span>
+                  <div key={label} className="bg-white/5 border border-white/10 rounded-lg p-3">
+                    <span className="block uppercase tracking-[0.2em] text-[11px] text-white/50">{label.replace(/_/g, " ")}</span>
+                    <span className="font-black text-white text-sm">{(value / 1000).toFixed(2)}s</span>
                   </div>
                 ))}
               </div>
             )}
 
             {guideSuggestions && guideSuggestions.length > 0 && (
-              <div className="mt-6 bg-white/5 border border-white/5 rounded-xl p-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 mb-2">Capacitación recomendada</p>
-                <ul className="space-y-1 text-sm text-white/70 list-disc list-inside">
+              <div className="mt-6 bg-white/5 border border-white/10 rounded-xl p-4">
+                <p className="text-xs font-black uppercase tracking-[0.3em] text-white/60 mb-2">Capacitación recomendada</p>
+                <ul className="space-y-1 text-sm text-white/80 list-disc list-inside">
                   {guideSuggestions.map((item, idx) => (
                     <li key={idx}>{item}</li>
                   ))}
@@ -176,7 +176,23 @@ export function ResolutionCard({
             )}
           </div>
 
-          {/* Controls removed per feedback */}
+          {steps && steps.length > 0 && (
+            <div className="mt-6 border-t border-white/10 pt-4">
+              <p className="text-xs font-black uppercase tracking-[0.3em] text-white/60 mb-3">Flujo de agentes</p>
+              <ol className="space-y-3">
+                {steps.map((step) => (
+                  <li key={step.id} className="flex items-center gap-3 text-sm text-white/80">
+                    <div className="w-2 h-2 rounded-full bg-gold" />
+                    <div className="flex-1">
+                      <p className="font-semibold">{step.agent}</p>
+                      <p className="text-white/60 text-sm">{step.action}</p>
+                    </div>
+                    <span className="text-xs uppercase tracking-[0.2em] text-white/60">{step.status}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
         </div>
 
         <div className="mt-8 border-t border-white/5 pt-6">

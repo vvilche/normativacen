@@ -414,6 +414,7 @@ export default function Home() {
         user={userProfile} 
         activeTab={activeTab} 
         setActiveTab={setActiveTab}
+        clientMode={clientMode}
     >
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
             {errorMessage && (

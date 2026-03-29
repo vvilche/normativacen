@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import {
   Sparkles,
-  ChevronRight,
   Activity,
   Search,
   Loader2,
@@ -130,6 +129,29 @@ export function DashboardView({
       ];
 
   const canExecute = query.trim().length > 0;
+
+  const formatDateLabel = (value?: string | null) => {
+    if (!value) return null;
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return parsed.toLocaleDateString("es-CL", { day: "numeric", month: "short", year: "numeric" });
+  };
+
+  const parseScoreTone = (score: any) => {
+    if (typeof score === "number") return score >= 90 ? "good" : "warn";
+    if (!score) return "warn";
+    const numeric = parseFloat(String(score).replace(/[^0-9.]/g, ""));
+    if (Number.isNaN(numeric)) return "warn";
+    return numeric >= 90 ? "good" : "warn";
+  };
+
+  const resolutionKpis = resolution
+    ? [
+        { label: "Score", value: resolution.kpis?.score ?? "--", tone: parseScoreTone(resolution.kpis?.score) },
+        { label: "Riesgo", value: resolution.kpis?.risk ?? "--", tone: /bajo/i.test(String(resolution.kpis?.risk || "")) ? "good" : "warn" },
+        { label: "Latencia", value: resolution.kpis?.latency ?? "--", tone: "neutral" },
+      ]
+    : [];
 
   const handleCopyPrompt = async (text: string, idx: number) => {
     try {
@@ -353,58 +375,53 @@ export function DashboardView({
 
       {/* Result State */}
       {processingStatus === "complete" && resolution && (
-        <div className="space-y-8 animate-in fade-in zoom-in-95 duration-700">
-          {/* Page Title & Actions */}
-          <div className="dashboard-header" data-mode={clientMode}>
-            <div className="flex flex-wrap items-center gap-3">
-              <h2 className="text-xs font-black uppercase tracking-[0.3em]">
-                Resolución generada
-              </h2>
-              <span className="hero-pill" style={{ borderStyle: "dashed" }}>
-                {clientMode === "guide" ? "Modo Guía" : "Modo Operativo"}
-              </span>
-              {stats && (
-                <span className="text-[10px] uppercase tracking-[0.2em] opacity-70">
-                  Score: {stats.globalScore}% · Activos: {stats.totalAssets}
-                </span>
-              )}
+        <div className="space-y-6 animate-in fade-in zoom-in-95 duration-700">
+          <div className="resolution-header" data-mode={clientMode}>
+            <div className="space-y-1">
+              <p className="text-xs font-black uppercase tracking-[0.3em] opacity-70">Diagnóstico operativo</p>
+              <h3 className="text-lg font-semibold">
+                {resolution.hallazgo || "Resultado generado por el orquestador"}
+              </h3>
+              <p className="text-sm opacity-70">
+                #{resolution.id || "SIN-ID"}
+                {formatDateLabel(resolution.date) ? ` · ${formatDateLabel(resolution.date)}` : ""}
+              </p>
             </div>
-            <div className="flex flex-wrap items-center gap-3 mt-3">
-              <button
-                onClick={onTestSystem}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-[0.25em] bg-accent/10 text-accent border border-accent/20"
-              >
-                <Activity className="w-3.5 h-3.5" /> Diagnóstico de Sistemas
-              </button>
+            <div className="resolution-actions">
+              <button onClick={onReset}>Nueva consulta</button>
               {resolution?.resolutionId && (
-                <Link
-                  href={`/documentacion/dossier?resolutionId=${resolution.resolutionId}`}
-                  target="_blank"
-                  className="flex items-center gap-2 text-[9px] text-accent font-black uppercase tracking-[0.3em] border border-accent/30 px-3 py-1 rounded-lg hover:bg-accent/10 transition-all"
-                >
-                  Dossier Técnico
-                  <ChevronRight className="w-3.5 h-3.5" />
+                <Link href={`/documentacion/dossier?resolutionId=${resolution.resolutionId}`} target="_blank">
+                  Dossier técnico
                 </Link>
               )}
-              <button
-                onClick={onReset}
-                className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.3em] text-gold"
-              >
-                Nueva consulta
-                <ChevronRight className="w-3.5 h-3.5" />
+              <button onClick={onTestSystem}>
+                <Activity className="w-4 h-4" /> Diagnóstico infra
               </button>
-              {isAuditing && (
-                <span className="flex items-center gap-2 text-[10px] text-accent font-black uppercase tracking-[0.25em]">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Auditoría en curso
-                </span>
-              )}
-              {auditError && (
-                <span className="text-[10px] text-red-500 uppercase tracking-[0.25em]">
-                  {auditError}
-                </span>
-              )}
             </div>
           </div>
+
+          {resolutionKpis.length > 0 && (
+            <div className="resolution-kpis" data-mode={clientMode}>
+              {resolutionKpis.map((kpi) => (
+                <div key={kpi.label} className={`kpi-card ${kpi.tone}`}>
+                  <span>{kpi.label}</span>
+                  <strong>{kpi.value}</strong>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {auditError && (
+            <div className="text-[11px] text-red-400 border border-red-500/30 rounded-xl px-4 py-3">
+              {auditError}
+            </div>
+          )}
+
+          {isAuditing && (
+            <div className="text-[11px] text-accent border border-accent/30 rounded-xl px-4 py-3 flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" /> Auditoría profunda en curso…
+            </div>
+          )}
 
           <ResolutionCard
             antecedentes={resolution?.antecedentes}
@@ -421,6 +438,8 @@ export function DashboardView({
             reasoning={resolution?.reasoning}
             timings={resolution?.timings}
             guideSuggestions={resolution?.guideSuggestions}
+            steps={resolution?.steps}
+            clientMode={clientMode}
           />
         </div>
       )}
