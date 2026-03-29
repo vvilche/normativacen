@@ -15,7 +15,7 @@ const QuizCTA = ({ quizId, label = "Resolver quiz", description }: QuizCTAProps)
       {description && <p className="text-sm text-white/70">{description}</p>}
     </div>
     <Link
-      href={`/dashboard?quiz=${quizId}`}
+      href={`/educacion/quizzes/${quizId}`}
       className="btn-primary w-full md:w-auto text-center"
     >
       Quiz {quizId}
