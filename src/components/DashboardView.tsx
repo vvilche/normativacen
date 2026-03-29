@@ -14,6 +14,7 @@ import { WhitePaperCard } from "./WhitePaperCard";
 import { HarnessMonitor } from "./HarnessMonitor";
 import { WhitePaper } from "@/lib/data/whitePapers";
 import Link from "next/link";
+import { sendXapiStatement } from "@/lib/xapi";
 
 interface DashboardStats {
   globalScore: number;
@@ -39,6 +40,79 @@ interface DashboardViewProps {
   clientMode: "guide" | "expert";
   setClientMode: (mode: "guide" | "expert") => void;
 }
+
+type ModuleStatus = "pendiente" | "progreso" | "completado";
+
+interface ModuleDefinition {
+  id: string;
+  title: string;
+  description: string;
+  status: ModuleStatus;
+  quizId: string;
+  duration: string;
+  topic: string;
+}
+
+const moduleBlueprints: Record<"guide" | "expert", ModuleDefinition[]> = {
+  guide: [
+    {
+      id: "guide-standards",
+      title: "Intro a Estándares CEN",
+      description: "Marco regulatorio fundamental del CEN.",
+      status: "progreso",
+      quizId: "guide-quiz-01",
+      duration: "6 min",
+      topic: "NTSyCS",
+    },
+    {
+      id: "guide-operations",
+      title: "Cumplimiento Operativo",
+      description: "Cómo reportar telemetría en tiempo real.",
+      status: "pendiente",
+      quizId: "guide-quiz-02",
+      duration: "8 min",
+      topic: "SITR",
+    },
+    {
+      id: "guide-annexes",
+      title: "Anexos Técnicos",
+      description: "Requisitos específicos de transmisión/distribución.",
+      status: "pendiente",
+      quizId: "guide-quiz-03",
+      duration: "10 min",
+      topic: "EDAC",
+    },
+  ],
+  expert: [
+    {
+      id: "expert-response",
+      title: "Plan de Respuesta SITR",
+      description: "Remediaciones para telemetría lenta.",
+      status: "progreso",
+      quizId: "expert-quiz-01",
+      duration: "5 min",
+      topic: "SITR",
+    },
+    {
+      id: "expert-ffr",
+      title: "FFR & PMU Upgrades",
+      description: "Parámetros críticos para evitar multas.",
+      status: "pendiente",
+      quizId: "expert-quiz-02",
+      duration: "7 min",
+      topic: "PMU",
+    },
+    {
+      id: "expert-pmus",
+      title: "Auditoría PMUS",
+      description: "Documentación previa y flujos SEC.",
+      status: "pendiente",
+      quizId: "expert-quiz-03",
+      duration: "9 min",
+      topic: "PMUS",
+    },
+  ],
+};
 
 export function DashboardView({ 
   resolution, 
@@ -84,20 +158,7 @@ export function DashboardView({
     "Plan inmediato para BESS 20MW con CIP-013 y FFR <200ms"
   ];
 
-  const guideModules = [
-    { title: "Intro a Estándares CEN", description: "Marco regulatorio fundamental del CEN.", status: "completado" },
-    { title: "Cumplimiento Operativo", description: "Cómo reportar telemetría en tiempo real.", status: "progreso" },
-    { title: "Anexos Técnicos", description: "Requisitos específicos de transmisión/distribución.", status: "pendiente" },
-  ];
-
-  const expertModules = [
-    { title: "Plan de Respuesta SITR", description: "Remediaciones para telemetría lenta.", status: "progreso" },
-    { title: "FFR & PMU Upgrades", description: "Parámetros críticos para evitar multas.", status: "pendiente" },
-    { title: "Auditoría PMUS", description: "Documentación previa y flujos SEC.", status: "completado" },
-  ];
-
   const prompts = clientMode === "guide" ? guidePrompts : expertPrompts;
-  const modules = clientMode === "guide" ? guideModules : expertModules;
   const heroCopy = clientMode === "guide"
     ? {
         title: "Diagnóstico asistido + playbooks",
@@ -110,10 +171,54 @@ export function DashboardView({
         subtitle: "Orquesta agentes técnicos para resolver incidentes urgentes y documentar evidencias en minutos.",
       };
 
-  const statusToProgress: Record<string, number> = {
+  const [moduleState, setModuleState] = useState<Record<"guide" | "expert", ModuleDefinition[]>>(() => ({
+    guide: moduleBlueprints.guide.map((module) => ({ ...module })),
+    expert: moduleBlueprints.expert.map((module) => ({ ...module })),
+  }));
+  const modules = moduleState[clientMode];
+
+  const [earnedBadges, setEarnedBadges] = useState<string[]>([]);
+  const [localUser, setLocalUser] = useState<{ name?: string; email?: string } | null>(null);
+  const [sendingModuleId, setSendingModuleId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const storedProfile = localStorage.getItem("userProfile");
+    if (storedProfile) {
+      try {
+        setLocalUser(JSON.parse(storedProfile));
+      } catch {
+        setLocalUser(null);
+      }
+    }
+  }, []);
+
+  const addBadge = (label: string) => {
+    setEarnedBadges((prev) => (prev.includes(label) ? prev : [...prev, label]));
+  };
+
+  useEffect(() => {
+    if (moduleState.guide.every((module) => module.status === "completado")) {
+      addBadge("Playbooks exploratorios completados");
+    }
+  }, [moduleState.guide]);
+
+  useEffect(() => {
+    if (moduleState.expert.every((module) => module.status === "completado")) {
+      addBadge("Playbooks operativos completados");
+    }
+  }, [moduleState.expert]);
+
+  const statusToProgress: Record<ModuleStatus, number> = {
     completado: 100,
     progreso: 55,
     pendiente: 25,
+  };
+
+  const statusLabels: Record<ModuleStatus, string> = {
+    completado: "Completado",
+    progreso: "En progreso",
+    pendiente: "Pendiente",
   };
 
   const heroMetrics = clientMode === "guide" && stats
@@ -123,6 +228,10 @@ export function DashboardView({
         { label: "Riesgos Críticos", value: `${stats.criticalRisks}` },
       ]
     : [];
+
+  const actorEmail = localUser?.email || "guest@normativacen.com";
+  const actorName = localUser?.name || "Invitado NormativaCEN";
+  const actorMbox = actorEmail.startsWith("mailto:") ? actorEmail : `mailto:${actorEmail}`;
 
   const canExecute = query.trim().length > 0;
 
@@ -161,6 +270,49 @@ export function DashboardView({
 
   const handlePromptInsert = (text: string) => {
     setQuery(text);
+  };
+
+  const handleModuleQuiz = async (module: ModuleDefinition, mode: "guide" | "expert") => {
+    if (module.status === "completado") return;
+    setSendingModuleId(module.id);
+    const success = await sendXapiStatement({
+      actor: {
+        name: actorName,
+        mbox: actorMbox,
+      },
+      verb: {
+        id: "http://adlnet.gov/expapi/verbs/completed",
+        display: { "es-ES": "completó" },
+      },
+      object: {
+        id: `https://normativacen.com/education/quizzes/${module.quizId}`,
+        definition: {
+          name: { "es-ES": module.title },
+          description: { "es-ES": module.description },
+          type: "https://adlnet.gov/expapi/activities/assessment",
+        },
+      },
+      result: {
+        completion: true,
+        duration: module.duration,
+      },
+      context: {
+        platform: "NormativaCEN Dashboard",
+        mode,
+        topic: module.topic,
+      },
+    });
+
+    if (success) {
+      setModuleState((previous) => {
+        const next = { ...previous } as Record<"guide" | "expert", ModuleDefinition[]>;
+        next[mode] = previous[mode].map((item) =>
+          item.id === module.id ? { ...item, status: "completado" } : item
+        );
+        return next;
+      });
+    }
+    setSendingModuleId(null);
   };
 
   return (
@@ -254,6 +406,21 @@ export function DashboardView({
             </div>
           </section>
 
+          {earnedBadges.length > 0 && (
+            <div className="badge-panel">
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/70">
+                Insignias obtenidas
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {earnedBadges.map((badge) => (
+                  <span key={badge} className="chip badge-chip">
+                    {badge}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           {showEducationPanel && (
             <div className="bg-white/5 rounded-2xl p-4 border border-white/10" data-mode={clientMode}>
               <div className="flex items-center justify-between mb-3">
@@ -274,13 +441,16 @@ export function DashboardView({
               {educationOpen && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {modules.map((module) => (
-                    <div key={module.title} className="learning-card" data-mode={clientMode}>
+                    <div key={module.id} className="learning-card" data-mode={clientMode}>
                       <div className="flex items-center justify-between">
                         <h4 className="text-lg font-bold">{module.title}</h4>
-                        <span className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-60">
-                          {module.status}
+                        <span className={`status-badge status-${module.status}`}>
+                          {statusLabels[module.status]}
                         </span>
                       </div>
+                      <p className="text-xs uppercase tracking-[0.3em] opacity-60">
+                        {module.topic} · {module.duration} · Quiz {module.quizId}
+                      </p>
                       <p className="text-sm opacity-80">{module.description}</p>
                       <div className="module-progress">
                         <span style={{ width: `${statusToProgress[module.status] ?? 40}%` }} />
@@ -295,6 +465,18 @@ export function DashboardView({
                         </span>
                         <span>Ver módulo</span>
                       </div>
+                      <button
+                        type="button"
+                        className="module-quiz-button"
+                        disabled={module.status === "completado" || sendingModuleId === module.id}
+                        onClick={() => handleModuleQuiz(module, clientMode)}
+                      >
+                        {module.status === "completado"
+                          ? "Quiz reportado"
+                          : sendingModuleId === module.id
+                            ? "Registrando..."
+                            : "Registrar quiz xAPI"}
+                      </button>
                     </div>
                   ))}
                 </div>

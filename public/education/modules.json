@@ -1,0 +1,26 @@
+[
+  {
+    "id": "guide-standards",
+    "title": "Intro a Estándares CEN",
+    "mode": "guide",
+    "duration": 6,
+    "topic": "NTSyCS",
+    "resource": "/education/quizzes/guide-quiz-01.pdf"
+  },
+  {
+    "id": "guide-operations",
+    "title": "Cumplimiento Operativo",
+    "mode": "guide",
+    "duration": 8,
+    "topic": "SITR",
+    "resource": "/education/quizzes/guide-quiz-02.pdf"
+  },
+  {
+    "id": "expert-response",
+    "title": "Plan de Respuesta SITR",
+    "mode": "expert",
+    "duration": 5,
+    "topic": "SITR",
+    "resource": "/education/quizzes/expert-quiz-01.pdf"
+  }
+]
