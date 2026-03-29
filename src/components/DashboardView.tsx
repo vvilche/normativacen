@@ -1,13 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Sparkles,
   ChevronRight,
   Activity,
   Search,
-  Loader2
+  Loader2,
+  Copy
 } from "lucide-react";
 import { ResolutionCard } from "./ResolutionCard";
 import { WhitePaperCard } from "./WhitePaperCard";
@@ -59,6 +60,18 @@ export function DashboardView({
 }: DashboardViewProps) {
 
   const isGuide = clientMode === "guide";
+  const [educationOpen, setEducationOpen] = useState(clientMode === "guide");
+  const [copiedPromptIndex, setCopiedPromptIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    setEducationOpen(clientMode === "guide");
+  }, [clientMode]);
+
+  useEffect(() => {
+    if (copiedPromptIndex === null) return;
+    const timer = setTimeout(() => setCopiedPromptIndex(null), 2000);
+    return () => clearTimeout(timer);
+  }, [copiedPromptIndex]);
   const guidePrompts = [
     "¿Qué es el SITR y qué debo reportar al CEN?",
     "Pasos básicos para actualizar el PMUS 2026",
@@ -87,16 +100,16 @@ export function DashboardView({
   const modules = clientMode === "guide" ? guideModules : expertModules;
   const heroCopy = clientMode === "guide"
     ? {
-        title: "Centro Educativo NormativaCEN",
-        subtitle: "Optimiza tu operación con rutas de aprendizaje y respuestas explicativas basadas en la normativa vigente.",
-        primaryCTA: "Iniciar Capacitación",
-        secondaryCTA: "Dudas Generales",
+        title: "Centro de respuesta + capacitación",
+        subtitle: "Activa diagnósticos asistidos y revisa microlecciones para preparar a tu equipo antes de auditar.",
+        primaryCTA: "Diagnosticar consulta",
+        secondaryCTA: "Acceder a guías",
       }
     : {
-        title: "Inteligencia Operativa Normativa",
-        subtitle: "Activa el orquestador multi-agente para diagnosticar incidentes y evitar multas en minutos.",
-        primaryCTA: "Auditar Instalaciones",
-        secondaryCTA: "Reportar Incidente",
+        title: "Diagnóstico operativo NormativaCEN",
+        subtitle: "Orquesta agentes técnicos para resolver incidentes urgentes y documentar evidencias en minutos.",
+        primaryCTA: "Ejecutar auditoría",
+        secondaryCTA: "Reportar incidente",
       };
 
   const statusToProgress: Record<string, number> = {
@@ -117,6 +130,19 @@ export function DashboardView({
       ];
 
   const canExecute = query.trim().length > 0;
+
+  const handleCopyPrompt = async (text: string, idx: number) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedPromptIndex(idx);
+    } catch {
+      setCopiedPromptIndex(null);
+    }
+  };
+
+  const handlePromptInsert = (text: string) => {
+    setQuery(text);
+  };
 
   return (
     <div className="w-full space-y-8 pb-20">
@@ -177,36 +203,70 @@ export function DashboardView({
                 {prompts.map((item, idx) => (
                   <li
                     key={idx}
-                    className={`rounded-lg p-3 ${isGuide ? "bg-[rgba(13,30,37,0.04)] border border-[rgba(13,30,37,0.08)]" : "bg-white/10 border border-white/15"}`}
+                    className={`rounded-lg p-3 ${isGuide ? "bg-[rgba(13,30,37,0.04)] border border-[rgba(13,30,37,0.08)]" : "bg-white/10 border border-white/15"} cursor-pointer flex items-center gap-2 justify-between`}
+                    onClick={() => handlePromptInsert(item)}
                   >
-                    “{item}”
+                    <span className="flex-1">“{item}”</span>
+                    <button
+                      type="button"
+                      className="text-[10px] font-black uppercase tracking-[0.3em] px-2 py-1 rounded-lg border border-current flex items-center gap-1"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleCopyPrompt(item, idx);
+                      }}
+                    >
+                      {copiedPromptIndex === idx ? "Copiado" : <Copy className="w-3.5 h-3.5" />}
+                    </button>
                   </li>
                 ))}
               </ul>
             </div>
           </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {modules.map((module) => (
-              <div key={module.title} className="learning-card" data-mode={clientMode}>
-                <div className="flex items-center justify-between">
-                  <h4 className="text-lg font-bold">{module.title}</h4>
-                  <span className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-60">
-                    {module.status}
-                  </span>
-                </div>
-                <p className="text-sm opacity-80">{module.description}</p>
-                <div className="module-progress">
-                  <span style={{ width: `${statusToProgress[module.status] ?? 40}%` }} />
-                </div>
-                <div className="module-footer">
-                  <span>
-                    {module.status === "completado" ? "Listo" : module.status === "progreso" ? "En curso" : "Pendiente"}
-                  </span>
-                  <span>Ver módulo</span>
-                </div>
+          <div className="bg-white/5 rounded-2xl p-4 border border-white/10" data-mode={clientMode}>
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-70">
+                  Centro educativo NormativaCEN
+                </p>
+                <h4 className="text-lg font-bold">Playbooks sugeridos</h4>
               </div>
-            ))}
+              <button
+                type="button"
+                className="text-[10px] font-black uppercase tracking-[0.3em] border px-3 py-1 rounded-full"
+                onClick={() => setEducationOpen(!educationOpen)}
+              >
+                {educationOpen ? "Ocultar" : "Ver"}
+              </button>
+            </div>
+            {educationOpen && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {modules.map((module) => (
+                  <div key={module.title} className="learning-card" data-mode={clientMode}>
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-lg font-bold">{module.title}</h4>
+                      <span className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-60">
+                        {module.status}
+                      </span>
+                    </div>
+                    <p className="text-sm opacity-80">{module.description}</p>
+                    <div className="module-progress">
+                      <span style={{ width: `${statusToProgress[module.status] ?? 40}%` }} />
+                    </div>
+                    <div className="module-footer">
+                      <span>
+                        {module.status === "completado"
+                          ? "Listo"
+                          : module.status === "progreso"
+                            ? "En curso"
+                            : "Pendiente"}
+                      </span>
+                      <span>Ver módulo</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="search-panel space-y-4" data-mode={clientMode}>
@@ -214,8 +274,8 @@ export function DashboardView({
               <label htmlFor="dashboard-query" className="sr-only">
                 Describe tu incidente o consulta normativa
               </label>
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-                <div className="flex items-center gap-3">
+              <div className="flex flex-col gap-3 w-full lg:flex-row lg:items-center">
+                <div className="flex items-center gap-3 flex-1">
                   <div className="p-3 rounded-xl bg-white/5 text-slate-400">
                     <Search className="w-5 h-5" />
                   </div>
@@ -237,7 +297,7 @@ export function DashboardView({
                     disabled={!canExecute}
                     aria-disabled={!canExecute}
                   >
-                    Ejecutar
+                    Ejecutar ↵
                   </button>
                 </div>
               </div>
