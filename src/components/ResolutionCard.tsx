@@ -42,6 +42,7 @@ interface ResolutionProps {
   guideSuggestions?: string[];
   steps?: { id: number | string; agent: string; action: string; status: string }[];
   clientMode?: "guide" | "expert";
+  showSteps?: boolean;
 }
 
 export function ResolutionCard({ 
@@ -58,7 +59,8 @@ export function ResolutionCard({
   timings,
   guideSuggestions,
   steps = [],
-  clientMode = "expert"
+  clientMode = "expert",
+  showSteps = false
 }: ResolutionProps) {
   const [expanded, setExpanded] = useState(false);
   return (
@@ -176,7 +178,7 @@ export function ResolutionCard({
             )}
           </div>
 
-          {steps && steps.length > 0 && (
+          {showSteps && steps && steps.length > 0 && (
             <div className="mt-6 border-t border-white/10 pt-4">
               <p className="text-xs font-black uppercase tracking-[0.3em] text-white/60 mb-3">Flujo de agentes</p>
               <ol className="space-y-3">

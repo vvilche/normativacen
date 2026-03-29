@@ -59,12 +59,13 @@ export function DashboardView({
 }: DashboardViewProps) {
 
   const isGuide = clientMode === "guide";
-  const [educationOpen, setEducationOpen] = useState(clientMode === "guide");
+  const showEducationPanel = isGuide;
+  const [educationOpen, setEducationOpen] = useState(showEducationPanel);
   const [copiedPromptIndex, setCopiedPromptIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    setEducationOpen(clientMode === "guide");
-  }, [clientMode]);
+    setEducationOpen(showEducationPanel);
+  }, [showEducationPanel]);
 
   useEffect(() => {
     if (copiedPromptIndex === null) return;
@@ -99,10 +100,10 @@ export function DashboardView({
   const modules = clientMode === "guide" ? guideModules : expertModules;
   const heroCopy = clientMode === "guide"
     ? {
-        title: "Centro de respuesta + capacitación",
-        subtitle: "Activa diagnósticos asistidos y revisa microlecciones para preparar a tu equipo antes de auditar.",
+        title: "Diagnóstico asistido + playbooks",
+        subtitle: "Prioriza la operación y complementa con microlecciones rápidas antes de enfrentarte a auditorías.",
         primaryCTA: "Diagnosticar consulta",
-        secondaryCTA: "Acceder a guías",
+        secondaryCTA: "Abrir playbooks",
       }
     : {
         title: "Diagnóstico operativo NormativaCEN",
@@ -245,51 +246,53 @@ export function DashboardView({
             </div>
           </section>
 
-          <div className="bg-white/5 rounded-2xl p-4 border border-white/10" data-mode={clientMode}>
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-70">
-                  Centro educativo NormativaCEN
-                </p>
-                <h4 className="text-lg font-bold">Playbooks sugeridos</h4>
+          {showEducationPanel && (
+            <div className="bg-white/5 rounded-2xl p-4 border border-white/10" data-mode={clientMode}>
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-70">
+                    Centro educativo NormativaCEN
+                  </p>
+                  <h4 className="text-lg font-bold">Playbooks sugeridos</h4>
+                </div>
+                <button
+                  type="button"
+                  className="text-[10px] font-black uppercase tracking-[0.3em] border px-3 py-1 rounded-full"
+                  onClick={() => setEducationOpen(!educationOpen)}
+                >
+                  {educationOpen ? "Ocultar" : "Ver"}
+                </button>
               </div>
-              <button
-                type="button"
-                className="text-[10px] font-black uppercase tracking-[0.3em] border px-3 py-1 rounded-full"
-                onClick={() => setEducationOpen(!educationOpen)}
-              >
-                {educationOpen ? "Ocultar" : "Ver"}
-              </button>
+              {educationOpen && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {modules.map((module) => (
+                    <div key={module.title} className="learning-card" data-mode={clientMode}>
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-lg font-bold">{module.title}</h4>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-60">
+                          {module.status}
+                        </span>
+                      </div>
+                      <p className="text-sm opacity-80">{module.description}</p>
+                      <div className="module-progress">
+                        <span style={{ width: `${statusToProgress[module.status] ?? 40}%` }} />
+                      </div>
+                      <div className="module-footer">
+                        <span>
+                          {module.status === "completado"
+                            ? "Listo"
+                            : module.status === "progreso"
+                              ? "En curso"
+                              : "Pendiente"}
+                        </span>
+                        <span>Ver módulo</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-            {educationOpen && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {modules.map((module) => (
-                  <div key={module.title} className="learning-card" data-mode={clientMode}>
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-lg font-bold">{module.title}</h4>
-                      <span className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-60">
-                        {module.status}
-                      </span>
-                    </div>
-                    <p className="text-sm opacity-80">{module.description}</p>
-                    <div className="module-progress">
-                      <span style={{ width: `${statusToProgress[module.status] ?? 40}%` }} />
-                    </div>
-                    <div className="module-footer">
-                      <span>
-                        {module.status === "completado"
-                          ? "Listo"
-                          : module.status === "progreso"
-                            ? "En curso"
-                            : "Pendiente"}
-                      </span>
-                      <span>Ver módulo</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          )}
 
           <div className="search-panel space-y-4" data-mode={clientMode}>
             <div className="relative flex flex-col gap-3">
@@ -440,6 +443,7 @@ export function DashboardView({
             guideSuggestions={resolution?.guideSuggestions}
             steps={resolution?.steps}
             clientMode={clientMode}
+            showSteps={clientMode === "guide"}
           />
         </div>
       )}
