@@ -39,7 +39,7 @@ export default function Home() {
   const [isAuditing, setIsAuditing] = useState(false);
   const [auditError, setAuditError] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [clientMode, setClientMode] = useState<'guide' | 'expert'>('guide');
+  const [clientMode, setClientMode] = useState<'guide' | 'expert'>('expert');
 
   useEffect(() => {
     const isTokenInCookie = document.cookie.includes('auth_token');
