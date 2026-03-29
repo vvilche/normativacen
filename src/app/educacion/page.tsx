@@ -62,11 +62,11 @@ export default async function EducationPage() {
             Microlecciones de menos de 10 minutos alineadas con la matriz NormativaCEN. Todo el material vive aquí; los quizzes y badges se registran desde el dashboard.
           </p>
           <div className="hero-actions">
-            <Link href="/" className="btn-primary">
-              Ir al dashboard
+            <Link href="#levels" className="btn-primary">
+              Ver cursos destacados
             </Link>
-            <Link href="/documentacion" className="btn-secondary">
-              Revisar dossiers
+            <Link href="#quizzes" className="btn-secondary">
+              Ver quizzes
             </Link>
           </div>
         </div>
@@ -102,7 +102,7 @@ export default async function EducationPage() {
         ))}
       </section>
 
-      <section className="levels-grid">
+      <section className="levels-grid" id="levels">
         {coursesByLevel.map((level) => (
           <div key={level.key} className="level-card">
             <div>
@@ -129,7 +129,7 @@ export default async function EducationPage() {
         ))}
       </section>
 
-      <section className="course-grid">
+      <section className="course-grid" id="courses">
         {courses.map((course) => (
           <Link key={course.slug} href={`/educacion/${course.slug}`} className="course-card" data-mode={course.mode}>
             <div className="flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.3em] text-white/60">
@@ -153,7 +153,7 @@ export default async function EducationPage() {
         </section>
 
       {quizzes.length > 0 && (
-        <section className="quiz-index">
+        <section className="quiz-index" id="quizzes">
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="text-[10px] uppercase tracking-[0.3em] text-white/60">Evaluaciones</p>
