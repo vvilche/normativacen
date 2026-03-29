@@ -600,6 +600,29 @@ body.theme-expert .topbar-panel {
   transform: translateY(-4px);
 }
 
+.quiz-index {
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 1.5rem;
+  background: rgba(8, 12, 23, 0.7);
+}
+
+.quiz-card {
+  border-radius: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 1rem 1.25rem;
+  background: rgba(5, 8, 16, 0.85);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.quiz-card:hover {
+  border-color: rgba(234, 179, 8, 0.4);
+  transform: translateY(-3px);
+}
+
 .course-shell {
   max-width: 1200px;
   margin: 0 auto;

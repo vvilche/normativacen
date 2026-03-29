@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getAllCoursesMeta } from "@/lib/courses";
+import { getAllQuizzes } from "@/lib/quizzes";
 
 export const metadata = {
   title: "Educación NormativaCEN",
@@ -7,7 +8,7 @@ export const metadata = {
 };
 
 export default async function EducationPage() {
-  const courses = await getAllCoursesMeta();
+  const [courses, quizzes] = await Promise.all([getAllCoursesMeta(), getAllQuizzes()]);
 
   return (
     <div className="education-shell">
@@ -53,6 +54,29 @@ export default async function EducationPage() {
           </Link>
         ))}
       </section>
+
+      {quizzes.length > 0 && (
+        <section className="quiz-index">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.3em] text-white/60">Evaluaciones</p>
+              <h2 className="text-2xl font-bold text-white">Quizzes disponibles</h2>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {quizzes.map((quiz) => (
+              <Link key={quiz.id} href={`/educacion/quizzes/${quiz.id}`} className="quiz-card">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase tracking-[0.3em] text-white/60">{quiz.id}</span>
+                  <span className="text-white/60 text-xs">{quiz.estimatedTime}</span>
+                </div>
+                <h3 className="text-lg font-bold text-white mt-2">{quiz.title}</h3>
+                <p className="text-sm text-white/70">{quiz.description}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
