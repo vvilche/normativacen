@@ -174,23 +174,23 @@ export function DashboardView({
           animate={{ opacity: 1, y: 0 }}
           className="space-y-8"
         >
-          <section className="hero-section" data-mode={clientMode}>
-            <div className="space-y-4">
-              <div className="flex flex-wrap gap-2 items-center">
-                <span className="hero-pill">
-                  {clientMode === "guide" ? "Modo Guía" : "Modo Operativo"}
-                </span>
-                <span className="hero-pill" style={{ borderStyle: "dashed" }}>
-                  {processingStatus === "idle" ? "Listo para ejecutar" : "Procesando"}
-                </span>
-              </div>
-              <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
-                {heroCopy.title}
-              </h2>
-              <p className="text-base md:text-lg max-w-2xl opacity-80">
-                {heroCopy.subtitle}
-              </p>
-              {clientMode === "guide" && (
+          {isGuide && (
+            <section className="hero-section" data-mode={clientMode}>
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-2 items-center">
+                  <span className="hero-pill">
+                    Modo Guía
+                  </span>
+                  <span className="hero-pill" style={{ borderStyle: "dashed" }}>
+                    {processingStatus === "idle" ? "Listo para ejecutar" : "Procesando"}
+                  </span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
+                  {heroCopy.title}
+                </h2>
+                <p className="text-base md:text-lg max-w-2xl opacity-80">
+                  {heroCopy.subtitle}
+                </p>
                 <div className="flex flex-wrap gap-3 hero-actions">
                   <button
                     className="primary"
@@ -205,8 +205,6 @@ export function DashboardView({
                     {heroCopy.secondaryCTA}
                   </button>
                 </div>
-              )}
-              {clientMode === "guide" && (
                 <div className="hero-metrics">
                   {heroMetrics.map((metric) => (
                     <div key={metric.label} className="metric-chip">
@@ -215,35 +213,35 @@ export function DashboardView({
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
-            <div className={`rounded-2xl p-6 ${isGuide ? "bg-white border border-[rgba(13,30,37,0.12)] text-slate-900" : "bg-white/10 border border-white/20"}`}>
-              <h5 className="text-sm font-bold uppercase tracking-[0.4em] mb-4 opacity-80">
-                Consultas sugeridas
-              </h5>
-              <ul className="space-y-3 text-sm">
-                {prompts.map((item, idx) => (
-                  <li
-                    key={idx}
-                    className={`rounded-lg p-3 ${isGuide ? "bg-[rgba(13,30,37,0.04)] border border-[rgba(13,30,37,0.08)]" : "bg-white/10 border border-white/15"} cursor-pointer flex items-center gap-2 justify-between`}
-                    onClick={() => handlePromptInsert(item)}
-                  >
-                    <span className="flex-1">“{item}”</span>
-                    <button
-                      type="button"
-                      className="text-[10px] font-black uppercase tracking-[0.3em] px-2 py-1 rounded-lg border border-current flex items-center gap-1"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleCopyPrompt(item, idx);
-                      }}
+              </div>
+              <div className="rounded-2xl p-6 bg-white border border-[rgba(13,30,37,0.12)] text-slate-900">
+                <h5 className="text-sm font-bold uppercase tracking-[0.4em] mb-4 opacity-80">
+                  Consultas sugeridas
+                </h5>
+                <ul className="space-y-3 text-sm">
+                  {prompts.map((item, idx) => (
+                    <li
+                      key={idx}
+                      className="rounded-lg p-3 bg-[rgba(13,30,37,0.04)] border border-[rgba(13,30,37,0.08)] cursor-pointer flex items-center gap-2 justify-between"
+                      onClick={() => handlePromptInsert(item)}
                     >
-                      {copiedPromptIndex === idx ? "Copiado" : <Copy className="w-3.5 h-3.5" />}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
+                      <span className="flex-1">“{item}”</span>
+                      <button
+                        type="button"
+                        className="text-[10px] font-black uppercase tracking-[0.3em] px-2 py-1 rounded-lg border border-current flex items-center gap-1"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleCopyPrompt(item, idx);
+                        }}
+                      >
+                        {copiedPromptIndex === idx ? "Copiado" : <Copy className="w-3.5 h-3.5" />}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </section>
+          )}
 
           {showEducationPanel && (
             <div className="bg-white/5 rounded-2xl p-4 border border-white/10" data-mode={clientMode}>
@@ -298,11 +296,11 @@ export function DashboardView({
               <label htmlFor="dashboard-query" className="sr-only">
                 Describe tu incidente o consulta normativa
               </label>
-                <div className="flex flex-col gap-3 w-full lg:flex-row lg:items-center">
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="p-3 rounded-xl bg-white/5 text-slate-400">
-                      <Search className="w-5 h-5" />
-                    </div>
+              <div className="flex flex-col gap-3 w-full lg:flex-row lg:items-center">
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="p-3 rounded-xl bg-white/5 text-slate-400">
+                    <Search className="w-5 h-5" />
+                  </div>
                   <input
                     type="text"
                     id="dashboard-query"
@@ -363,6 +361,26 @@ export function DashboardView({
                 : "Obtendrás diagnósticos técnicos con checklists, riesgos y tiempos de ejecución."}
             </p>
           </div>
+
+          {!isGuide && (
+            <div className="bg-white/5 rounded-2xl p-4 border border-white/10" data-mode={clientMode}>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/70 mb-3">
+                Consultas sugeridas
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {prompts.map((item, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    className="px-3 py-1.5 rounded-full border border-white/20 text-xs font-semibold text-white/80"
+                    onClick={() => handlePromptInsert(item)}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </motion.div>
       )}
 
