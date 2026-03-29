@@ -299,11 +299,11 @@ export function DashboardView({
               <label htmlFor="dashboard-query" className="sr-only">
                 Describe tu incidente o consulta normativa
               </label>
-              <div className="flex flex-col gap-3 w-full lg:flex-row lg:items-center">
-                <div className="flex items-center gap-3 flex-1">
-                  <div className="p-3 rounded-xl bg-white/5 text-slate-400">
-                    <Search className="w-5 h-5" />
-                  </div>
+                <div className="flex flex-col gap-3 w-full lg:flex-row lg:items-center">
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="p-3 rounded-xl bg-white/5 text-slate-400">
+                      <Search className="w-5 h-5" />
+                    </div>
                   <input
                     type="text"
                     id="dashboard-query"
