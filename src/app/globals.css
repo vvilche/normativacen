@@ -531,6 +531,47 @@ body.theme-expert .topbar-panel {
   letter-spacing: 0.25em;
 }
 
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.hero-actions button {
+  padding: 0.85rem 1.5rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  font-size: 0.65rem;
+  font-weight: 800;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+@media (max-width: 640px) {
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero-actions button {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .resolution-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .resolution-actions button,
+  .resolution-actions a {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+}
+
 .education-shell {
   max-width: 1100px;
   margin: 0 auto;

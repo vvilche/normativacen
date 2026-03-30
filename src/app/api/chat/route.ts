@@ -96,6 +96,7 @@ function deriveMetricsFromContent(content: string, agentType: string): { metrics
  */
 
 // Force dynamic execution for API routes
+export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
 function appendGuideBlock(content: string, agentType: string) {

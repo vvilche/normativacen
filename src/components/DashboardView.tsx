@@ -317,6 +317,10 @@ export function DashboardView({
         <div className="space-y-6 animate-in fade-in zoom-in-95 duration-700">
           <div className="resolution-header" data-mode={clientMode}>
             <div className="space-y-1">
+              <div className="bg-white/5 p-3 rounded-lg mb-4 border-l-2 border-primary/50">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-50 mb-1">Tu consulta</p>
+                <p className="text-sm italic text-white/90">&quot;{resolution?.originalQuery || query}&quot;</p>
+              </div>
               <p className="text-xs font-black uppercase tracking-[0.3em] opacity-70">Diagnóstico operativo</p>
               <h3 className="text-lg font-semibold">
                 {resolution.hallazgo || "Resultado generado por el orquestador"}
