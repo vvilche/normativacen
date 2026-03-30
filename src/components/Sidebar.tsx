@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, Book, BarChart3, Settings, Library, GraduationCap, LogOut, X } from "lucide-react";
+import { LayoutDashboard, FileText, Settings, LogOut, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -57,11 +57,6 @@ export function Sidebar({ activeTab = "Dashboard", setActiveTab, isDesktop = tru
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard" },
     { icon: FileText, label: "Resoluciones" },
-    { icon: Book, label: "Normas" },
-    { icon: BarChart3, label: "Reportes" },
-    { icon: Settings, label: "Infotécnica" },
-    { icon: Library, label: "Biblioteca" },
-    { icon: GraduationCap, label: "Educación", href: "/educacion" },
   ];
 
   return (

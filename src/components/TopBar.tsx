@@ -1,5 +1,4 @@
 import { Bell, Mail, LogOut, Menu } from "lucide-react";
-import Link from "next/link";
 
 interface TopBarProps {
   user?: {
@@ -47,12 +46,6 @@ export function TopBar({ user, clientMode = "expert", onToggleSidebar, isDesktop
             <span>{clientMode === "guide" ? "Modo guía" : "Modo operativo"}</span>
             <span className="text-white/60">Activo: {activeAsset}</span>
           </div>
-          <Link
-            href="/educacion"
-            className="hidden md:inline-flex px-4 py-1 rounded-xl border border-white/15 text-[10px] font-black uppercase tracking-[0.3em] text-white/70 hover:text-white hover:bg-white/5"
-          >
-            Educación
-          </Link>
           <div className="flex items-center gap-1">
               <button className="p-1.5 rounded-xl border border-transparent hover:border-slate-300/40 transition-colors relative">
                   <Mail className="w-4 h-4" />

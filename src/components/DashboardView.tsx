@@ -9,12 +9,11 @@ import {
   Loader2,
   Copy
 } from "lucide-react";
+import Link from "next/link";
 import { ResolutionCard } from "./ResolutionCard";
 import { WhitePaperCard } from "./WhitePaperCard";
 import { HarnessMonitor } from "./HarnessMonitor";
 import { WhitePaper } from "@/lib/data/whitePapers";
-import Link from "next/link";
-import { sendXapiStatement } from "@/lib/xapi";
 
 interface DashboardStats {
   globalScore: number;
@@ -41,83 +40,6 @@ interface DashboardViewProps {
   setClientMode: (mode: "guide" | "expert") => void;
 }
 
-type ModuleStatus = "pendiente" | "progreso" | "completado";
-
-interface ModuleDefinition {
-  id: string;
-  title: string;
-  description: string;
-  status: ModuleStatus;
-  quizId: string;
-  duration: string;
-  topic: string;
-  slug?: string;
-}
-
-const moduleBlueprints: Record<"guide" | "expert", ModuleDefinition[]> = {
-  guide: [
-    {
-      id: "guide-standards",
-      title: "Intro a Estándares CEN",
-      description: "Marco regulatorio fundamental del CEN.",
-      status: "progreso",
-      quizId: "guide-quiz-01",
-      duration: "6 min",
-      topic: "NTSyCS",
-      slug: "ntsycs-essentials",
-    },
-    {
-      id: "guide-operations",
-      title: "Cumplimiento Operativo",
-      description: "Cómo reportar telemetría en tiempo real.",
-      status: "pendiente",
-      quizId: "guide-quiz-02",
-      duration: "8 min",
-      topic: "SITR",
-      slug: "sitr-operativo",
-    },
-    {
-      id: "guide-annexes",
-      title: "Anexos Técnicos",
-      description: "Requisitos específicos de transmisión/distribución.",
-      status: "pendiente",
-      quizId: "guide-quiz-03",
-      duration: "10 min",
-      topic: "EDAC",
-      slug: "edac-awareness",
-    },
-  ],
-  expert: [
-    {
-      id: "expert-response",
-      title: "Plan de Respuesta SITR",
-      description: "Remediaciones para telemetría lenta.",
-      status: "progreso",
-      quizId: "expert-quiz-01",
-      duration: "5 min",
-      topic: "SITR",
-      slug: "plan-respuesta-sitr",
-    },
-    {
-      id: "expert-ffr",
-      title: "FFR & PMU Upgrades",
-      description: "Parámetros críticos para evitar multas.",
-      status: "pendiente",
-      quizId: "expert-quiz-02",
-      duration: "7 min",
-      topic: "PMU",
-    },
-    {
-      id: "expert-pmus",
-      title: "Auditoría PMUS",
-      description: "Documentación previa y flujos SEC.",
-      status: "pendiente",
-      quizId: "expert-quiz-03",
-      duration: "9 min",
-      topic: "PMUS",
-    },
-  ],
-};
 
 export function DashboardView({ 
   resolution, 
@@ -138,13 +60,7 @@ export function DashboardView({
 }: DashboardViewProps) {
 
   const isGuide = clientMode === "guide";
-  const showEducationPanel = isGuide;
-  const [educationOpen, setEducationOpen] = useState(showEducationPanel);
   const [copiedPromptIndex, setCopiedPromptIndex] = useState<number | null>(null);
-
-  useEffect(() => {
-    setEducationOpen(showEducationPanel);
-  }, [showEducationPanel]);
 
   useEffect(() => {
     if (copiedPromptIndex === null) return;
@@ -169,62 +85,12 @@ export function DashboardView({
         title: "Diagnóstico asistido + playbooks",
         subtitle: "Prioriza la operación y complementa con microlecciones rápidas antes de enfrentarte a auditorías.",
         primaryCTA: "Diagnosticar consulta",
-        secondaryCTA: "Abrir playbooks",
+        secondaryCTA: "Ver resoluciones",
       }
     : {
         title: "Diagnóstico operativo NormativaCEN",
         subtitle: "Orquesta agentes técnicos para resolver incidentes urgentes y documentar evidencias en minutos.",
       };
-
-  const [moduleState, setModuleState] = useState<Record<"guide" | "expert", ModuleDefinition[]>>(() => ({
-    guide: moduleBlueprints.guide.map((module) => ({ ...module })),
-    expert: moduleBlueprints.expert.map((module) => ({ ...module })),
-  }));
-  const modules = moduleState[clientMode];
-
-  const [earnedBadges, setEarnedBadges] = useState<string[]>([]);
-  const [localUser, setLocalUser] = useState<{ name?: string; email?: string } | null>(null);
-  const [sendingModuleId, setSendingModuleId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const storedProfile = localStorage.getItem("userProfile");
-    if (storedProfile) {
-      try {
-        setLocalUser(JSON.parse(storedProfile));
-      } catch {
-        setLocalUser(null);
-      }
-    }
-  }, []);
-
-  const addBadge = (label: string) => {
-    setEarnedBadges((prev) => (prev.includes(label) ? prev : [...prev, label]));
-  };
-
-  useEffect(() => {
-    if (moduleState.guide.every((module) => module.status === "completado")) {
-      addBadge("Playbooks exploratorios completados");
-    }
-  }, [moduleState.guide]);
-
-  useEffect(() => {
-    if (moduleState.expert.every((module) => module.status === "completado")) {
-      addBadge("Playbooks operativos completados");
-    }
-  }, [moduleState.expert]);
-
-  const statusToProgress: Record<ModuleStatus, number> = {
-    completado: 100,
-    progreso: 55,
-    pendiente: 25,
-  };
-
-  const statusLabels: Record<ModuleStatus, string> = {
-    completado: "Completado",
-    progreso: "En progreso",
-    pendiente: "Pendiente",
-  };
 
   const heroMetrics = clientMode === "guide" && stats
     ? [
@@ -233,10 +99,6 @@ export function DashboardView({
         { label: "Riesgos Críticos", value: `${stats.criticalRisks}` },
       ]
     : [];
-
-  const actorEmail = localUser?.email || "guest@normativacen.com";
-  const actorName = localUser?.name || "Invitado NormativaCEN";
-  const actorMbox = actorEmail.startsWith("mailto:") ? actorEmail : `mailto:${actorEmail}`;
 
   const canExecute = query.trim().length > 0;
 
@@ -275,49 +137,6 @@ export function DashboardView({
 
   const handlePromptInsert = (text: string) => {
     setQuery(text);
-  };
-
-  const handleModuleQuiz = async (module: ModuleDefinition, mode: "guide" | "expert") => {
-    if (module.status === "completado") return;
-    setSendingModuleId(module.id);
-    const success = await sendXapiStatement({
-      actor: {
-        name: actorName,
-        mbox: actorMbox,
-      },
-      verb: {
-        id: "http://adlnet.gov/expapi/verbs/completed",
-        display: { "es-ES": "completó" },
-      },
-      object: {
-        id: `https://normativacen.com/education/quizzes/${module.quizId}`,
-        definition: {
-          name: { "es-ES": module.title },
-          description: { "es-ES": module.description },
-          type: "https://adlnet.gov/expapi/activities/assessment",
-        },
-      },
-      result: {
-        completion: true,
-        duration: module.duration,
-      },
-      context: {
-        platform: "NormativaCEN Dashboard",
-        mode,
-        topic: module.topic,
-      },
-    });
-
-    if (success) {
-      setModuleState((previous) => {
-        const next = { ...previous } as Record<"guide" | "expert", ModuleDefinition[]>;
-        next[mode] = previous[mode].map((item) =>
-          item.id === module.id ? { ...item, status: "completado" } : item
-        );
-        return next;
-      });
-    }
-    setSendingModuleId(null);
   };
 
   return (
@@ -410,96 +229,6 @@ export function DashboardView({
               )}
             </div>
           </section>
-
-          {earnedBadges.length > 0 && (
-            <div className="badge-panel">
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/70">
-                Insignias obtenidas
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {earnedBadges.map((badge) => (
-                  <span key={badge} className="chip badge-chip">
-                    {badge}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {showEducationPanel && (
-            <div className="bg-white/5 rounded-2xl p-4 border border-white/10" data-mode={clientMode}>
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-70">
-                    Centro educativo NormativaCEN
-                  </p>
-                  <h4 className="text-lg font-bold">Playbooks sugeridos</h4>
-                </div>
-                <button
-                  type="button"
-                  className="text-[10px] font-black uppercase tracking-[0.3em] border px-3 py-1 rounded-full"
-                  onClick={() => setEducationOpen(!educationOpen)}
-                >
-                  {educationOpen ? "Ocultar" : "Ver"}
-                </button>
-                <Link
-                  href="/educacion"
-                  className="text-[10px] font-black uppercase tracking-[0.3em] text-primary"
-                >
-                  Biblioteca
-                </Link>
-              </div>
-              {educationOpen && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {modules.map((module) => (
-                    <div key={module.id} className="learning-card" data-mode={clientMode}>
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-lg font-bold">{module.title}</h4>
-                        <span className={`status-badge status-${module.status}`}>
-                          {statusLabels[module.status]}
-                        </span>
-                      </div>
-                      <p className="text-xs uppercase tracking-[0.3em] opacity-60">
-                        {module.topic} · {module.duration} · Quiz {module.quizId}
-                      </p>
-                      <p className="text-sm opacity-80">{module.description}</p>
-                      <div className="module-progress">
-                        <span style={{ width: `${statusToProgress[module.status] ?? 40}%` }} />
-                      </div>
-                      <div className="module-footer">
-                        <span>
-                          {module.status === "completado"
-                            ? "Listo"
-                            : module.status === "progreso"
-                              ? "En curso"
-                              : "Pendiente"}
-                        </span>
-                        {module.slug ? (
-                          <Link href={`/educacion/${module.slug}`} className="module-link">
-                            Ver curso
-                          </Link>
-                        ) : (
-                          <span className="opacity-60">Pronto</span>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        className="module-quiz-button"
-                        disabled={module.status === "completado" || sendingModuleId === module.id}
-                        onClick={() => handleModuleQuiz(module, clientMode)}
-                      >
-                        {module.status === "completado"
-                          ? "Quiz reportado"
-                          : sendingModuleId === module.id
-                            ? "Registrando..."
-                            : "Registrar quiz xAPI"}
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
 
           <div className="search-panel space-y-4" data-mode={clientMode}>
             <div className="relative flex flex-col gap-3">
