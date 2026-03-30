@@ -107,12 +107,6 @@ function appendGuideBlock(content: string, agentType: string) {
 
 export async function POST(req: Request) {
   try {
-    if (!process.env.GOOGLE_API_KEY) {
-      return NextResponse.json({
-        error: 'Infraestructura incompleta (GOOGLE_API_KEY faltante).',
-        details: 'Configura GOOGLE_API_KEY en Netlify y reintenta. Usa /api/test-infra para validar.',
-      }, { status: 500 });
-    }
     resetConnectionStatus();
     const body = await req.json();
     const { messages, userProfile, fastMode = false, backgroundAudit = false, clientMode = 'guide' } = body;
@@ -136,6 +130,38 @@ export async function POST(req: Request) {
     const userQuery = messages.filter((m: any) => m.role === 'user').pop()?.content || "";
     const normalizedQuery = userQuery.trim().toLowerCase();
     const queryHash = crypto.createHash('md5').update(normalizedQuery).digest('hex');
+
+    if (!process.env.GOOGLE_API_KEY) {
+      console.warn('⚠️ GOOGLE_API_KEY faltante. Enviando respuesta simulada.');
+      const simulatedAgent = 'procedimentalAgent';
+      const guideSuggestions = clientMode === 'guide' ? GUIDE_SUGGESTIONS.default : undefined;
+      const simulatedContent = userQuery
+        ? `Diagnóstico simulado para "${userQuery}". Revisa checklist básico, documenta evidencias y agenda seguimiento con el CEN.`
+        : 'Diagnóstico simulado. Revisa checklist básico, documenta evidencias y agenda seguimiento con el CEN.';
+      const metricsJson = deriveMetricsFromContent(simulatedContent, simulatedAgent);
+      const technicalReport = generateTechnicalReport(
+        { content: simulatedContent, metrics: metricsJson, hallazgo: 'Respuesta generada en modo demo', seoTags: ['demo', 'normativacen'] },
+        simulatedAgent,
+        userProfile || {}
+      );
+      const responsePayload: CachePayload = {
+        role: 'assistant',
+        content: simulatedContent,
+        sources: ['Simulación local'],
+        resolution: technicalReport,
+        hallazgo: 'Modo demostración activo (sin GOOGLE_API_KEY)',
+        seoTags: ['demo', 'normativacen'],
+        agentType: simulatedAgent,
+        isClosedLoop: true,
+        resolutionId: queryHash,
+        originalQuery: userQuery,
+        createdAt: new Date().toISOString(),
+        timings: {},
+        clientMode,
+        guideSuggestions,
+      };
+      return NextResponse.json(responsePayload);
+    }
 
     // 0. Verificar Caché (Repositorio de Resoluciones)
     let cacheCollection: Collection<Document> | null = null;
