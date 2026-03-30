@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { buildOrchestratorGraph } from '../../../lib/agents/orchestratorGraph';
 import { HumanMessage, AIMessage } from '@langchain/core/messages';
-import { generateTechnicalReport } from '../../../lib/reportingEngine';
+import { generateTechnicalReport, type ReportMetric } from '../../../lib/reportingEngine';
 import clientPromise, { resetConnectionStatus } from '../../../lib/rag/mongoClient';
 import crypto from 'crypto';
 import type { Collection, Document } from 'mongodb';
@@ -54,12 +54,12 @@ const GUIDE_SUGGESTIONS: Record<string, string[]> = {
   ]
 };
 
-function deriveMetricsFromContent(content: string, agentType: string) {
+function deriveMetricsFromContent(content: string, agentType: string): { metrics: ReportMetric[] } {
   const checklistItems = (content.match(/^[\s\t]*[-*]\s+/gm) || []).length;
   const phaseItems = (content.match(/fase\s+\d+/gi) || []).length;
   const riskMentions = (content.match(/riesg/gi) || []).length;
 
-  const metrics = [
+  const metrics: ReportMetric[] = [
     {
       label: "Checklist",
       value: checklistItems ? `${checklistItems} ítems` : "N/A",
