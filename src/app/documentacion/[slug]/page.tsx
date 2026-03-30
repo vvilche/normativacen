@@ -169,6 +169,11 @@ export default function DocumentacionPage() {
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#39;");
 
+  const textToHtml = (value: string) =>
+    escapeHtml(value)
+      .replace(/\n{2,}/g, match => '<br />'.repeat(Math.min(match.length, 3)))
+      .replace(/\n/g, "<br />");
+
   const handleExport = () => {
     if (typeof window === "undefined") return;
     const target = window.open("", "_blank", "width=900,height=700");
@@ -178,7 +183,7 @@ export default function DocumentacionPage() {
     const metricsHtml = heroMetrics
       .map(([label, value]) => `<div class="metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(String(value))}</strong></div>`)
       .join("");
-    const contentHtml = escapeHtml(cleanContent).replace(/\n/g, "<br />");
+    const contentHtml = textToHtml(cleanContent);
     const planHtml = actionPlan.length
       ? `<ul>${actionPlan.map((item) => `<li><strong>${escapeHtml(item.id || "")}</strong> ${escapeHtml(item.task || "")}</li>`).join("")}</ul>`
       : "<p>No se detectaron acciones pendientes.</p>";

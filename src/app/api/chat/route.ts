@@ -129,7 +129,8 @@ export async function POST(req: Request) {
 
     const userQuery = messages.filter((m: any) => m.role === 'user').pop()?.content || "";
     const normalizedQuery = userQuery.trim().toLowerCase();
-    const queryHash = crypto.createHash('md5').update(normalizedQuery).digest('hex');
+    const emailKey = typeof userProfile?.email === 'string' ? userProfile.email.toLowerCase() : 'anon';
+    const queryHash = crypto.createHash('md5').update(`${emailKey}|${normalizedQuery}`).digest('hex');
 
     if (!process.env.GOOGLE_API_KEY) {
       console.warn('⚠️ GOOGLE_API_KEY faltante. Enviando respuesta simulada.');
