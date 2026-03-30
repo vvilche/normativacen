@@ -161,6 +161,60 @@ export default function DocumentacionPage() {
     navigator.clipboard?.writeText(text).catch(() => undefined);
   };
 
+  const escapeHtml = (value: string) =>
+    value
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+
+  const handleExport = () => {
+    if (typeof window === "undefined") return;
+    const target = window.open("", "_blank", "width=900,height=700");
+    if (!target) return;
+
+    const chipsHtml = heroChips.map((chip) => `<span class="chip">${escapeHtml(chip)}</span>`).join(" ");
+    const metricsHtml = heroMetrics
+      .map(([label, value]) => `<div class="metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(String(value))}</strong></div>`)
+      .join("");
+    const contentHtml = escapeHtml(cleanContent).replace(/\n/g, "<br />");
+    const planHtml = actionPlan.length
+      ? `<ul>${actionPlan.map((item) => `<li><strong>${escapeHtml(item.id || "")}</strong> ${escapeHtml(item.task || "")}</li>`).join("")}</ul>`
+      : "<p>No se detectaron acciones pendientes.</p>";
+
+    target.document.write(`<!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charSet="utf-8" />
+        <title>${escapeHtml(docTitle)} - Dossier</title>
+        <style>
+          body { font-family: 'Segoe UI', Arial, sans-serif; padding: 2rem; color: #111; }
+          h1 { font-size: 28px; margin-bottom: 0.2rem; }
+          h2 { margin-top: 1.5rem; }
+          .chips span { display: inline-block; border: 1px solid #ccc; border-radius: 999px; padding: 0.2rem 0.8rem; margin-right: 0.4rem; font-size: 12px; text-transform: uppercase; letter-spacing: 0.2em; }
+          .metrics { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; }
+          .metric { border: 1px solid #ddd; border-radius: 0.8rem; padding: 0.8rem 1rem; min-width: 140px; }
+          .metric span { display:block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; color: #666; }
+          .metric strong { font-size: 18px; }
+          ul { padding-left: 1.2rem; }
+        </style>
+      </head>
+      <body>
+        <h1>${escapeHtml(docTitle)}</h1>
+        <p>${escapeHtml(highlight || "Dossier técnico generado por NormativaCEN.")}</p>
+        <div class="chips">${chipsHtml}</div>
+        <div class="metrics">${metricsHtml}</div>
+        <h2>Contenido</h2>
+        <div>${contentHtml}</div>
+        <h2>Plan de acción</h2>
+        ${planHtml}
+        <script>window.onload = function(){ window.print(); window.close(); };</script>
+      </body>
+      </html>`);
+    target.document.close();
+  };
+
   return (
     <div className={`min-h-screen ${isGuide ? "theme-guide" : "theme-expert"}`}>
       <div className="max-w-6xl mx-auto p-6 md:p-10 space-y-10" data-mode={clientMode}>
@@ -180,8 +234,12 @@ export default function DocumentacionPage() {
               {highlight || "Optimiza tu operación con acceso directo a los procedimientos y anexos CEN."}
             </p>
             <div className="flex flex-wrap gap-3">
-              <button className="btn-primary">Ejecutar auditoría</button>
-              <button className="btn-secondary">Exportar dossier</button>
+              <button className="btn-secondary" onClick={() => window.open("/dashboard", "_self")}>
+                Volver al dashboard
+              </button>
+              <button className="btn-primary" onClick={handleExport}>
+                Exportar dossier
+              </button>
             </div>
             {heroMetrics.length > 0 && (
               <div className="hero-metrics">
